@@ -79,3 +79,10 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 .race.pr { border-color: var(--gold); }
 .raceres { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
 .big2 { font-family: var(--f-display); font-weight: 700; font-size: 30px; line-height: 1; }
+/* Mon profil */
+.profhead { gap: 14px; }
+.profhead h2 { font-size: 24px; }
+.besttimes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 8px; }
+.besttimes li { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
+.besttimes strong { font-family: var(--f-display); font-size: 26px; line-height: 1; }
+.stack.narrow > div { max-width: 760px; }

@@ -1,4 +1,5 @@
 document.addEventListener('click', (ev) => {
+  if (S.ui.crestMenu && !ev.target.closest('.crestwrap')) { S.ui.crestMenu = false; render(); }
   const el = ev.target.closest('[data-act]');
   if (!el) return;
   const act = el.dataset.act;
@@ -61,7 +62,9 @@ document.addEventListener('click', (ev) => {
     case 'wxsearch': { const q = (document.getElementById('wx-city') || {}).value || ''; if (q.trim()) searchCity(q.trim(), false); break; }
     case 'wxrsearch': { const q = (document.getElementById('wx-rcity') || {}).value || ''; if (q.trim()) searchCity(q.trim(), true); break; }
     case 'pickcrest': { const inp = document.getElementById('file-crest'); if (inp) inp.click(); break; }
-    case 'crestreset': S.crest = ''; S.msg.crest = ''; saveStore(); render(); break;
+    case 'crestreset': S.crest = ''; S.msg.crest = ''; S.ui.crestMenu = false; saveStore(); toast('Logo du club remis'); render(); break;
+    case 'crestmenu': S.ui.crestMenu = !S.ui.crestMenu; S.msg.crest = ''; render(); break;
+    case 'crestclose': S.ui.crestMenu = false; render(); break;
     case 'pickjson': { const inp = document.getElementById('file-json'); if (inp) inp.click(); break; }
     case 'useplan': usePlan(el.dataset.replace || null); break;
     case 'impcancel': S.imp = { stage: 'idle' }; render(); break;

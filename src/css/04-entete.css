@@ -71,3 +71,27 @@
 /* rond du bandeau avec le logo du club, sur le dégradé de la palette */
 .crest.club { background: linear-gradient(135deg, var(--band-a), var(--band-b)); display: flex; align-items: center; justify-content: center; }
 .crest.club img { width: 62%; height: auto; object-fit: contain; }
+/* rond du bandeau cliquable */
+.crestwrap { position: relative; flex: none; }
+button.crest { padding: 0; cursor: pointer; position: relative; display: block; }
+button.crest:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.crestedit { position: absolute; right: 8%; bottom: 8%; width: 34px; height: 34px; border-radius: 50%; background: #fff; color: #0B2236; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, .25); opacity: 0; transition: opacity .15s; }
+.crestedit svg { width: 16px; height: 16px; }
+button.crest:hover .crestedit, button.crest:focus-visible .crestedit, button.crest[aria-expanded="true"] .crestedit { opacity: 1; }
+@media (hover: none) { .crestedit { opacity: 1; width: 26px; height: 26px; right: 4%; bottom: 4%; } .crestedit svg { width: 13px; height: 13px; } }
+.crestmenu { position: absolute; left: 0; top: calc(100% + 8px); z-index: 30; min-width: 230px; display: flex; flex-direction: column; padding: 6px; border-radius: 14px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow), 0 12px 30px rgba(0, 0, 0, .25); border: 1px solid var(--line); }
+.crestmenu button { display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 12px; border: 0; border-radius: 10px; background: none; text-align: left; font-weight: 600; }
+.crestmenu button:hover { background: var(--surface-2); }
+.crestmenu button svg { width: 16px; height: 16px; }
+.crestmenu .errtxt { padding: 6px 12px; }
+/* profil en haut à droite */
+.avatar { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: #fff; color: var(--band-a); font-weight: 800; font-size: 12px; flex: none; }
+.avatar svg { width: 16px; height: 16px; }
+.profpill { padding-left: 6px; }
+.profpill[aria-current="page"] { background: rgba(255, 255, 255, .3); }
+.avatar.big { width: 64px; height: 64px; font-size: 24px; background: linear-gradient(135deg, var(--band-a), var(--band-b)); color: #fff; }
+.avatar.big svg { width: 32px; height: 32px; }
+@media (max-width: 520px) {
+  .tools .pill[data-act="theme"] span, .profpill > span:not(.avatar) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .tools .pill[data-act="theme"], .profpill { padding: 0 8px; }
+}

@@ -5,7 +5,7 @@ await p.route(/open-meteo\.com/,r=>r.abort());
 await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-course-a-pied.html');
 await p.setInputFiles('#file-xlsx',root+'/test/donnees/plan-test.xlsx');await p.click('[data-act=useplan]');await p.waitForSelector('.week');
 await p.evaluate(()=>{setTrack('2026-10-07',{done:true,note:'MA-NOTE'});S.ui.accent='braise';saveStore();render();});
-await p.click('[data-act=tab][data-view=data]');
+await p.click('.profpill');
 await p.screenshot({path:root+'/shots/v27-donnees.png',clip:{x:0,y:480,width:1280,height:520}});
 const [d1]=await Promise.all([p.waitForEvent('download'),(async()=>{await p.evaluate(()=>document.querySelectorAll('details.raw').forEach(d=>d.open=true));await p.click('[data-act=htmlcopy]');})()]);await d1.saveAs(root+'/shots/r-copie.html');
 const [d2]=await Promise.all([p.waitForEvent('download'),(async()=>{await p.evaluate(()=>document.querySelectorAll('details.raw').forEach(d=>d.open=true));await p.click('[data-act=htmlcoach]');})()]);await d2.saveAs(root+'/shots/r-coach.html');
@@ -18,7 +18,7 @@ for(const [nom,f] of [['copie .html','r-copie.html'],['sauvegarde .json','r-save
  await q.addInitScript(()=>{window.__TODAY__='2026-10-11'});await q.goto('file://'+root+'/dist/appli-course-a-pied.html');
  // écran vide : accès à la restauration ?
  const btn=await q.$('[data-act=pickjson]');
- if(!btn){await q.click('[data-act=tab][data-view=data]').catch(()=>{});}
+ if(!btn){await q.click('.profpill').catch(()=>{});}
  await q.setInputFiles('#file-json',root+'/shots/'+f);await q.waitForTimeout(400);
  const ok=await q.$('.week');let note='-',acc='-';
  if(ok){acc=await q.evaluate(()=>S.ui.accent);note=await q.evaluate(()=>(track('2026-10-07')||{}).note||'');}
@@ -26,6 +26,6 @@ for(const [nom,f] of [['copie .html','r-copie.html'],['sauvegarde .json','r-save
  await c.close();}
 // fichier invalide
 const c=await b.newContext();const q=await c.newPage();await q.goto('file://'+root+'/dist/appli-course-a-pied.html');
-await q.click('[data-act=tab][data-view=data]');await q.setInputFiles('#file-json',root+'/dist/appli-course-a-pied.html');await q.waitForTimeout(300);
+await q.click('.profpill');await q.setInputFiles('#file-json',root+'/dist/appli-course-a-pied.html');await q.waitForTimeout(300);
 console.log('copie vierge →',(await q.textContent('[role=status]').catch(()=>'?')).slice(0,70));
 console.log(errs.length?errs:'pas d\'erreur');await b.close();})();

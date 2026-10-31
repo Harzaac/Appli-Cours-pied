@@ -13,7 +13,7 @@ await p.reload();await p.waitForSelector('.week');console.log('après rechargeme
 await p.evaluate(()=>{S.remindUntil='';render();});console.log('rappel remis à zéro →',await has());
 const [d]=await Promise.all([p.waitForEvent('download'),p.click('.remind [data-act=download]')]);
 console.log('copie depuis la bannière:',d.suggestedFilename(),'| bannière ensuite →',await has());
-await p.click('[data-act=tab][data-view=data]');await p.click('details.raw summary');await p.click('[data-act=copyinfo]');
+await p.click('.profpill');await p.click('details.raw summary');await p.click('[data-act=copyinfo]');
 await p.screenshot({path:root+'/shots/v22-donnees.png',fullPage:true});
 const m=await ctx.newPage();await m.setViewportSize({width:400,height:800});m.on('pageerror',e=>errs.push(e.message));
 await m.addInitScript(()=>{window.__TODAY__='2026-10-20'});await m.goto('file://'+root+'/dist/appli-course-a-pied.html');await m.waitForSelector('.week');

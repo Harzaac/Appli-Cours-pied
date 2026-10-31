@@ -29,11 +29,11 @@ log('  chrono course:',await p.evaluate(()=>S.races[0].result));await p.click('[
 // progression
 await p.click('.tabs [data-view=bilan]');log('4 mes courses:',(await p.textContent('.races')).replace(/\s+/g,' ').trim().slice(0,200));
 // profil
-await p.click('.tabs [data-view=data]');await p.fill('#pf-name','Adrien');await p.press('#pf-name','Tab');await p.waitForTimeout(80);
-log('5 résumé:',(await p.textContent('h2:text-is("Mon profil") >> xpath=../..')).match(/Adrien[^.]*/)[0].slice(0,140));
+await p.click('.profpill');await p.fill('#pf-name','Adrien');await p.press('#pf-name','Tab');await p.waitForTimeout(80);
+log('5 profil:',(await p.textContent('.profilecard')).replace(/\s+/g,' ').trim().slice(0,160),'| pastille:',(await p.textContent('.profpill')).trim());
 const [dl]=await Promise.all([p.waitForEvent('download'),p.click('[data-act=download]')]);const f=root+'/shots/'+dl.suggestedFilename();await dl.saveAs(f);
 log('  export:',dl.suggestedFilename(),'| contient',Object.keys(JSON.parse(fs.readFileSync(f,'utf8'))).filter(k=>['plans','races','logs','profile','tracking'].includes(k)).join(','));
 const c2=await b.newContext();const q=await c2.newPage();q.on('pageerror',e=>errs.push('q:'+e.message));await q.route(/open-meteo\.com|fonts\.g/,r=>r.abort());await q.addInitScript(()=>{window.__TODAY__='2026-10-31'});
-await q.goto('file://'+root+'/dist/appli-course-a-pied.html');await q.waitForSelector('.week');await q.click('.hero [data-view=data]');await q.setInputFiles('#file-json',f);await q.waitForTimeout(300);
+await q.goto('file://'+root+'/dist/appli-course-a-pied.html');await q.waitForSelector('.week');await q.click('.profpill');await q.setInputFiles('#file-json',f);await q.waitForTimeout(300);
 log('6 import sur appareil vierge: plans',await q.evaluate(()=>S.plans.length),'| courses',await q.evaluate(()=>S.races.length),'| prénom',await q.evaluate(()=>S.profile.name));
 log(errs.length?errs:'pas d\'erreur');await b.close();})().catch(e=>{console.log('ÉCHEC',e.message.split('\n')[0]);process.exit(1)});

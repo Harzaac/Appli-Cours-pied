@@ -12,5 +12,5 @@ await p.reload();await p.waitForSelector('.week');console.log('après rechargeme
 await p.click('[data-act=open][data-date="2026-10-31"] >> nth=0');await p.click('[data-act=lognew]');await p.fill('#log-dur','30');await p.click('[data-act=logsave]');console.log('sortie :',await toast());
 await p.click('[data-act=close]');
 await p.click('.tabs [data-view=data]');await p.click('details[data-pref=wx] summary');await p.fill('#wx-hot','27');await p.click('[data-act=commit]');console.log('météo :',await toast(),'| seuil',await p.evaluate(()=>wxCfg().hot));
-console.log('bouton restaurer sur l\'écran vide:',!!(await p.$('.hero [data-view=data]')));
+console.log('bouton profil en haut:',!!(await p.$('.profpill')));
 console.log(errs.length?errs:'pas d\'erreur');await b.close();})().catch(e=>{console.log('ÉCHEC',e.message.split('\n')[0]);process.exit(1)});

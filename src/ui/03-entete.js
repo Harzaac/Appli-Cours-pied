@@ -1,8 +1,11 @@
 /* ============================================================
    Écrans
    ============================================================ */
+// Le rond du bandeau : un clic ouvre un petit menu pour changer l'image (comme une photo de profil).
 function crestHTML() {
-  return `<div class="crest${S.crest ? '' : ' club'}">${S.crest ? `<img src="${S.crest}" alt="Image du bandeau">` : `<img src="${CLUB_LOGO}" alt="${CLUB_NAME}">`}</div>`;
+  const img = S.crest ? `<img src="${S.crest}" alt="">` : `<img src="${CLUB_LOGO}" alt="">`;
+  const menu = S.ui.crestMenu ? `<div class="crestmenu" role="menu"><button role="menuitem" data-act="pickcrest">${ICON.up}Choisir une photo</button>${S.crest ? `<button role="menuitem" data-act="crestreset">Remettre le logo du club</button>` : ''}<button role="menuitem" data-act="crestclose">Annuler</button>${S.msg.crest ? `<p class="errtxt" role="alert">${esc(S.msg.crest)}</p>` : ''}</div>` : '';
+  return `<div class="crestwrap"><input type="file" id="file-crest" accept="image/*" class="sr"><button class="crest${S.crest ? '' : ' club'}" data-act="crestmenu" aria-haspopup="menu" aria-expanded="${!!S.ui.crestMenu}" aria-label="Changer l'image du bandeau (actuellement : ${S.crest ? 'ta photo' : esc(CLUB_NAME)})">${img}<span class="crestedit" aria-hidden="true">${ICON.edit}</span></button>${menu}</div>`;
 }
 function headerHTML() {
   const plan = S.plan;
@@ -43,6 +46,7 @@ function headerHTML() {
         <div class="tools">
           <button class="pill" data-act="tab" data-view="vma" aria-label="Mon niveau">${ICON.gauge}<span class="num">VMA ${fmtVma(S.settings.vma)} · ${fmtPace(c.marathon)}/km</span></button>
           <button class="pill" data-act="theme" aria-label="${dark ? 'Passer au thème clair' : 'Passer au thème sombre'}">${dark ? ICON.sun : ICON.moon}<span>${dark ? 'Clair' : 'Sombre'}</span></button>
+          ${profilePill()}
         </div></div>
       <div class="hero"><div class="herol">${crestHTML()}<div class="count"><span class="big num${chrono ? ' chrono' : ''}">${big}</span><span class="lbl">${lbl}</span></div></div>${next}</div>
     </div></div>
@@ -52,6 +56,7 @@ function headerHTML() {
 }
 
 // Onglets : « Mes plans » dépend du Calendrier ; Paramètres se réduit à une roue dentée sur petit écran.
+function profilePill() { return `<button class="pill profpill" data-act="tab" data-view="profile" aria-label="Mon profil"${S.ui.view === 'profile' ? ' aria-current="page"' : ''}>${avatarHTML()}<span>${esc(S.profile.name || 'Mon profil')}</span></button>`; }
 function tabsHTML(withPlan) {
   const list = [['plan', 'Calendrier'], ['vma', 'VMA']].concat(withPlan ? [['race', 'Course']] : [], [['bilan', 'Progression'], ['data', 'Paramètres']]);
   const cur = S.ui.view === 'plans' ? 'plan' : S.ui.view;
@@ -97,5 +102,5 @@ function nextSession() {
   return null;
 }
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.8</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à exporter ton profil (bouton en haut à droite).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.9</p></div></footer>`;
 }

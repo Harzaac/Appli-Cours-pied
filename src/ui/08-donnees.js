@@ -49,23 +49,9 @@ function backupText() {
 }
 function dataView() {
   const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done || S.tracking[k].skipped || S.tracking[k].note || S.tracking[k].feel).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
-  return `<div class="stack">
+  return `<div class="stack narrow">
+    <div>
 
-    <div class="grid2">
-    <section class="card stack"><div><h2>Mon profil</h2><p class="sub">Tout ce qui te concerne : réglages, plans, suivi, sorties et courses. Exporte-le pour le garder ou le passer sur un autre appareil ; importe-le pour tout retrouver.</p></div>
-      <div class="fields"><div class="field"><label for="pf-name">Prénom</label><input type="text" id="pf-name" value="${esc(S.profile.name || '')}" placeholder="ex. Adrien" autocomplete="off"></div>
-        <div class="field"><label for="pf-club">Club</label><input type="text" id="pf-club" value="${esc(S.profile.club || CLUB_NAME)}" autocomplete="off"></div></div>
-      <p class="sub">${profileSummary()}</p>
-      <div class="row"><button class="btn primary" data-act="download">${ICON.down}Exporter mon profil</button><input type="file" id="file-json" accept=".html,.htm,.json,text/html,application/json" class="sr"><button class="btn" data-act="pickjson">${ICON.up}Importer un profil</button></div>
-      <p class="sub">L'import remplace les données de cet appareil par celles du profil (un profil exporté ou une copie de l'appli).</p>
-      ${S.msg.backup ? `<p class="sub" role="status">${esc(S.msg.backup)}</p>` : ''}
-      ${S.msg.restore ? `<p class="${S.msg.restoreErr ? 'errtxt' : 'sub'}" role="status">${esc(S.msg.restore)}</p>` : ''}
-      <details class="raw"><summary>Copie de l'appli avec mes données</summary><div class="stack" style="gap:10px;margin-top:10px">
-        <div class="row nowrap"><button class="btn grow" data-act="htmlcopy">${ICON.down}<span>Enregistrer une copie avec mes données</span></button><button class="iconbtn" data-act="copyinfo" aria-label="À quoi sert cette copie ?" aria-expanded="${!!S.ui.copyInfo}">ⓘ</button></div>
-        ${S.ui.copyInfo ? `<div class="fitinfo" role="note"><span>Un nouveau fichier de l'appli qui contient déjà ton plan, tes réglages et ton suivi. Remplace l'ancien fichier par celui-ci, ou envoie-le sur ton téléphone : il s'ouvre directement, sans rien restaurer.</span></div>` : ''}
-        ${S.plans.length ? `<div><button class="btn small" data-act="htmlcoach">Version plan seul (pour le coach)</button><p class="sub" style="margin-top:6px">Sans ton suivi ni tes notes : à envoyer à Pierre.</p></div>` : ''}</div></details>
-      <details class="raw"><summary>Comment ça marche ?</summary><ul class="howto"><li>Tes données (suivi, notes, réglages) restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.</li><li>« Exporter mon profil » crée un petit fichier avec tout ce qui te concerne. Garde-le : c'est ta sauvegarde.</li><li>Pour changer d'appareil ou passer à une nouvelle version de l'appli, ouvre le nouveau fichier et utilise « Importer un profil ».</li></ul></details>
-    </section>
     <section class="card stack"><div><h2>Préférences</h2><p class="sub">Réglages rangés par thème : ouvre celui qui t'intéresse.</p></div>
       <details class="raw pref"${S.ui.pref === 'wx' ? ' open' : ''} data-pref="wx"><summary>Météo</summary><div class="stack prefbody"><p class="sub">Prévisions affichées sur les jours du plan (service Open-Meteo, sans compte). Les jours d'entraînement utilisent ta ville d'entraînement ; le jour de la course utilise la ville de la course. Seule la position de la ville est envoyée. Il faut une connexion internet : sans réseau, la dernière météo reçue reste affichée.</p>
 
@@ -83,9 +69,7 @@ function dataView() {
       <details class="raw pref"${S.ui.pref === 'look' ? ' open' : ''} data-pref="look"><summary>Apparence</summary><div class="stack prefbody"><p class="sub">Choisis la couleur du bandeau et des boutons. Les couleurs des types de séance ne changent pas. Le mode clair ou sombre se règle avec le bouton en haut de page.</p>
 
       <div class="swatches" role="group" aria-label="Couleur de l'appli">${ACCENTS.map((a) => `<button class="swatch" data-act="accent" data-id="${a.id}" aria-pressed="${S.ui.accent === a.id}"><span class="dot" style="background:linear-gradient(135deg,${a.a},${a.b})"></span>${a.name}</button>`).join('')}</div>
-      <div><h3 style="font-size:15px;margin-bottom:4px">Image du bandeau</h3><p class="sub">Le logo du club est affiché par défaut. Tu peux mettre ta propre photo : elle reste sur cet appareil et fait partie de la sauvegarde.</p></div>
-      <div class="row"><input type="file" id="file-crest" accept="image/*" class="sr"><button class="btn" data-act="pickcrest">Choisir une photo</button>${S.crest ? '<button class="btn" data-act="crestreset">Revenir au dessin</button>' : ''}</div>
-      ${S.msg.crest ? `<p class="errtxt" role="alert">${esc(S.msg.crest)}</p>` : ''}</div></details>
+      <p class="sub">Pour changer l'image du rond du bandeau (logo du club ou ta photo), clique simplement dessus.</p></div></details>
       <details class="raw pref"${S.ui.pref === 'wipe' ? ' open' : ''} data-pref="wipe"><summary>Effacer mes données</summary><div class="stack prefbody"><p class="sub">Supprime les plans, les réglages, le suivi et les sorties de cet appareil. Pense à télécharger une sauvegarde avant.</p>
 
       <div class="row">${S.ui.confirmWipe ? '<button class="btn danger" data-act="wipe">Oui, tout effacer</button><button class="btn" data-act="wipecancel">Annuler</button>' : '<button class="btn danger" data-act="wipe">Effacer mes données</button>'}</div></div></details>
@@ -129,4 +113,46 @@ function profileSummary() {
 function profileFileName() {
   const slug = (S.profile.name || 'coureur').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'coureur';
   return 'profil-' + slug + '-' + TODAY + '.json';
+}
+
+/* ----- Mon profil (ouvert depuis l'avatar, en haut à droite) ----- */
+function initials() {
+  const n = (S.profile.name || '').trim();
+  return n ? n.split(/\s+/).map((x) => x.charAt(0)).join('').slice(0, 2).toUpperCase() : '';
+}
+function avatarHTML(cls) { const t = initials(); return `<span class="avatar ${cls || ''}" aria-hidden="true">${t ? esc(t) : ICON.user}</span>`; }
+function bestTimes() {
+  const all = S.plans.filter((e) => e.plan.raceDate && track(e.plan.raceDate).result).map((e) => ({ km: MARATHON_KM, sec: track(e.plan.raceDate).result, date: e.plan.raceDate, name: planName(e) }))
+    .concat(S.races.filter((r) => r.result).map((r) => ({ km: r.km, sec: r.result, date: r.date, name: r.name })));
+  const out = {};
+  all.forEach((x) => { const k = raceKmLabel(x.km); if (!out[k] || x.sec < out[k].sec) out[k] = x; });
+  return Object.keys(out).map((k) => Object.assign({ label: k }, out[k])).sort((a, b) => a.km - b.km);
+}
+function profileView() {
+  const best = bestTimes();
+  const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
+  return `<div class="stack">
+    <section class="card stack profilecard"><div class="row profhead">${avatarHTML('big')}<div class="stack" style="gap:2px"><h2>${esc(S.profile.name || 'Mon profil')}</h2><span class="sub">${esc(S.profile.club || CLUB_NAME)}</span></div>
+        <button class="btn small" data-act="tab" data-view="plan" style="margin-left:auto">${ICON.left}Retour</button></div>
+      <div class="fields"><div class="field"><label for="pf-name">Prénom</label><input type="text" id="pf-name" value="${esc(S.profile.name || '')}" placeholder="ex. Adrien" autocomplete="off"></div>
+        <div class="field"><label for="pf-club">Club</label><input type="text" id="pf-club" value="${esc(S.profile.club || CLUB_NAME)}" autocomplete="off"></div></div>
+      <div class="kpis">
+        <div class="kpi"><span class="v num">${fmtVma((S.settings || S.profile).vma)}</span><span class="l">VMA (km/h) · <button class="linkbtn" data-act="tab" data-view="vma">modifier</button></span></div>
+        <div class="kpi"><span class="v num">${nTr}</span><span class="l">séances faites et sorties notées</span></div>
+        <div class="kpi"><span class="v num">${S.plans.length}</span><span class="l">plan${S.plans.length > 1 ? 's' : ''} · ${S.races.length} course${S.races.length > 1 ? 's' : ''} sans plan</span></div>
+      </div>
+      ${best.length ? `<div class="stack" style="gap:6px"><strong>Mes meilleurs chronos</strong><ul class="besttimes">${best.map((x) => `<li><span>${esc(x.label)}</span><strong class="num">${esc(fmtHMS(x.sec))}</strong><span class="sub">${esc(x.name)} · ${esc(frDate(x.date))}</span></li>`).join('')}</ul></div>` : '<p class="sub">Tes meilleurs chronos s\'afficheront ici dès que tu auras saisi un résultat de course.</p>'}
+    </section>
+    <section class="card stack"><div><h2>Sauvegarde du profil</h2><p class="sub">Tout ce qui te concerne : réglages, plans, suivi, sorties et courses. Exporte-le pour le garder ou le passer sur un autre appareil ; importe-le pour tout retrouver.</p></div>
+      <div class="row"><button class="btn primary" data-act="download">${ICON.down}Exporter mon profil</button><input type="file" id="file-json" accept=".html,.htm,.json,text/html,application/json" class="sr"><button class="btn" data-act="pickjson">${ICON.up}Importer un profil</button></div>
+      <p class="sub">L'import remplace les données de cet appareil par celles du profil (un profil exporté ou une copie de l'appli).</p>
+      ${S.msg.backup ? `<p class="sub" role="status">${esc(S.msg.backup)}</p>` : ''}
+      ${S.msg.restore ? `<p class="${S.msg.restoreErr ? 'errtxt' : 'sub'}" role="status">${esc(S.msg.restore)}</p>` : ''}
+      <details class="raw"><summary>Copie de l'appli avec mes données</summary><div class="stack" style="gap:10px;margin-top:10px">
+        <div class="row nowrap"><button class="btn grow" data-act="htmlcopy">${ICON.down}<span>Enregistrer une copie avec mes données</span></button><button class="iconbtn" data-act="copyinfo" aria-label="À quoi sert cette copie ?" aria-expanded="${!!S.ui.copyInfo}">ⓘ</button></div>
+        ${S.ui.copyInfo ? `<div class="fitinfo" role="note"><span>Un nouveau fichier de l'appli qui contient déjà ton plan, tes réglages et ton suivi. Remplace l'ancien fichier par celui-ci, ou envoie-le sur ton téléphone : il s'ouvre directement, sans rien restaurer.</span></div>` : ''}
+        ${S.plans.length ? `<div><button class="btn small" data-act="htmlcoach">Version plan seul (pour le coach)</button><p class="sub" style="margin-top:6px">Sans ton suivi ni tes notes : à envoyer à Pierre.</p></div>` : ''}</div></details>
+      <details class="raw"><summary>Comment ça marche ?</summary><ul class="howto"><li>Tes données (suivi, notes, réglages) restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.</li><li>« Exporter mon profil » crée un petit fichier avec tout ce qui te concerne. Garde-le : c'est ta sauvegarde.</li><li>Pour changer d'appareil ou passer à une nouvelle version de l'appli, ouvre le nouveau fichier et utilise « Importer un profil ».</li></ul></details>
+    </section>
+  </div>`;
 }

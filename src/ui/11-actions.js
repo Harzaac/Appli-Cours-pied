@@ -214,7 +214,7 @@ function loadCrest(file) {
       const side = Math.min(img.width, img.height);
       c.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
       S.crest = c.toDataURL('image/jpeg', 0.85);
-      S.msg.crest = ''; saveStore(); render();
+      S.msg.crest = ''; S.ui.crestMenu = false; saveStore(); toast('Image du bandeau changée'); render();
     } catch (e) { fail(); }
     URL.revokeObjectURL(url);
   };

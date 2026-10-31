@@ -75,13 +75,16 @@
 /* couleurs d'accent : bandeau, boutons, liens et fond très légèrement teinté ; les couleurs de séance restent identiques */
 :root[data-accent="foret"]:not([data-theme="dark"]) { --bg: #F1F7F1; --surface-2: #E5F0E5; --line: #CFE0CF; --focus: #1D6A3A; --band-a: #1D6A3A; --band-b: #45841F; --accent: #1D6A3A; }
 :root[data-accent="braise"]:not([data-theme="dark"]) { --bg: #FBF4EE; --surface-2: #F5E9DE; --line: #E6D3C2; --focus: #C2490A; --band-a: #C2490A; --band-b: #A32A1B; --accent: #B03A06; }
-:root[data-accent="graphite"]:not([data-theme="dark"]) { --bg: #F3F4F6; --surface-2: #E7E9EC; --line: #D5D9DE; --focus: #26313C; --band-a: #26313C; --band-b: #4A5A68; --accent: #26313C; }
 @media (prefers-color-scheme: dark) { :root[data-accent="foret"]:not([data-theme="light"]) { --bg: #09160E; --surface: #0F2417; --surface-2: #153222; --line: #254434; --focus: #8FDB9A; --band-a: #1B5E36; --band-b: #3F7A1C; --accent: #8FDB9A; --ink: #E7F4EA; --muted: #9DB8A5; } }
 :root[data-accent="foret"][data-theme="dark"] { --bg: #09160E; --surface: #0F2417; --surface-2: #153222; --line: #254434; --focus: #8FDB9A; --band-a: #1B5E36; --band-b: #3F7A1C; --accent: #8FDB9A; --ink: #E7F4EA; --muted: #9DB8A5; }
 @media (prefers-color-scheme: dark) { :root[data-accent="braise"]:not([data-theme="light"]) { --bg: #1A0F09; --surface: #26160D; --surface-2: #33201A; --line: #4A3024; --focus: #FFB27A; --band-a: #A8420C; --band-b: #8A2417; --accent: #FFB27A; --ink: #F6ECE4; --muted: #BBA392; } }
 :root[data-accent="braise"][data-theme="dark"] { --bg: #1A0F09; --surface: #26160D; --surface-2: #33201A; --line: #4A3024; --focus: #FFB27A; --band-a: #A8420C; --band-b: #8A2417; --accent: #FFB27A; --ink: #F6ECE4; --muted: #BBA392; }
-@media (prefers-color-scheme: dark) { :root[data-accent="graphite"]:not([data-theme="light"]) { --bg: #0D1013; --surface: #171B20; --surface-2: #1F252B; --line: #2E363E; --focus: #A9C4DA; --band-a: #2B3640; --band-b: #46555F; --accent: #A9C4DA; --ink: #E8ECEF; --muted: #9AA6B0; } }
-:root[data-accent="graphite"][data-theme="dark"] { --bg: #0D1013; --surface: #171B20; --surface-2: #1F252B; --line: #2E363E; --focus: #A9C4DA; --band-a: #2B3640; --band-b: #46555F; --accent: #A9C4DA; --ink: #E8ECEF; --muted: #9AA6B0; }
+:root[data-accent="aurore"]:not([data-theme="dark"]) { --bg: #F6F3FB; --surface-2: #ECE6F7; --line: #DCD3EE; --focus: #5B3CC4; --band-a: #5B3CC4; --band-b: #B8336A; --accent: #5B3CC4; }
+:root[data-accent="lagon"]:not([data-theme="dark"]) { --bg: #EFF8F8; --surface-2: #E0F1F1; --line: #C8E4E4; --focus: #0B6E8A; --band-a: #0B6E8A; --band-b: #0B8068; --accent: #0B6E8A; }
+@media (prefers-color-scheme: dark) { :root[data-accent="aurore"]:not([data-theme="light"]) { --bg: #140D1F; --surface: #1E1530; --surface-2: #2A1F42; --line: #3A2D57; --focus: #C9B6FF; --band-a: #4A2FA0; --band-b: #96285A; --accent: #C9B6FF; --ink: #F1ECFA; --muted: #B3A6CC; } }
+:root[data-accent="aurore"][data-theme="dark"] { --bg: #140D1F; --surface: #1E1530; --surface-2: #2A1F42; --line: #3A2D57; --focus: #C9B6FF; --band-a: #4A2FA0; --band-b: #96285A; --accent: #C9B6FF; --ink: #F1ECFA; --muted: #B3A6CC; }
+@media (prefers-color-scheme: dark) { :root[data-accent="lagon"]:not([data-theme="light"]) { --bg: #071A1D; --surface: #0C2629; --surface-2: #12343A; --line: #1F4A50; --focus: #7FD8E6; --band-a: #0A5E75; --band-b: #0B6E5A; --accent: #7FD8E6; --ink: #E5F6F7; --muted: #93B9BD; } }
+:root[data-accent="lagon"][data-theme="dark"] { --bg: #071A1D; --surface: #0C2629; --surface-2: #12343A; --line: #1F4A50; --focus: #7FD8E6; --band-a: #0A5E75; --band-b: #0B6E5A; --accent: #7FD8E6; --ink: #E5F6F7; --muted: #93B9BD; }
 
 /* Base : boîte, typographie, utilitaires, mise en page générale */
 * { box-sizing: border-box; }
@@ -263,6 +266,30 @@ input[type="date"] { font: inherit; border: 1px solid var(--line); background: v
 /* rond du bandeau avec le logo du club, sur le dégradé de la palette */
 .crest.club { background: linear-gradient(135deg, var(--band-a), var(--band-b)); display: flex; align-items: center; justify-content: center; }
 .crest.club img { width: 62%; height: auto; object-fit: contain; }
+/* rond du bandeau cliquable */
+.crestwrap { position: relative; flex: none; }
+button.crest { padding: 0; cursor: pointer; position: relative; display: block; }
+button.crest:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.crestedit { position: absolute; right: 8%; bottom: 8%; width: 34px; height: 34px; border-radius: 50%; background: #fff; color: #0B2236; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, .25); opacity: 0; transition: opacity .15s; }
+.crestedit svg { width: 16px; height: 16px; }
+button.crest:hover .crestedit, button.crest:focus-visible .crestedit, button.crest[aria-expanded="true"] .crestedit { opacity: 1; }
+@media (hover: none) { .crestedit { opacity: 1; width: 26px; height: 26px; right: 4%; bottom: 4%; } .crestedit svg { width: 13px; height: 13px; } }
+.crestmenu { position: absolute; left: 0; top: calc(100% + 8px); z-index: 30; min-width: 230px; display: flex; flex-direction: column; padding: 6px; border-radius: 14px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow), 0 12px 30px rgba(0, 0, 0, .25); border: 1px solid var(--line); }
+.crestmenu button { display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 12px; border: 0; border-radius: 10px; background: none; text-align: left; font-weight: 600; }
+.crestmenu button:hover { background: var(--surface-2); }
+.crestmenu button svg { width: 16px; height: 16px; }
+.crestmenu .errtxt { padding: 6px 12px; }
+/* profil en haut à droite */
+.avatar { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: #fff; color: var(--band-a); font-weight: 800; font-size: 12px; flex: none; }
+.avatar svg { width: 16px; height: 16px; }
+.profpill { padding-left: 6px; }
+.profpill[aria-current="page"] { background: rgba(255, 255, 255, .3); }
+.avatar.big { width: 64px; height: 64px; font-size: 24px; background: linear-gradient(135deg, var(--band-a), var(--band-b)); color: #fff; }
+.avatar.big svg { width: 32px; height: 32px; }
+@media (max-width: 520px) {
+  .tools .pill[data-act="theme"] span, .profpill > span:not(.avatar) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .tools .pill[data-act="theme"], .profpill { padding: 0 8px; }
+}
 
 /* Calendrier : semaine, cartes de jour, mois, bandeaux au-dessus du calendrier */
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
@@ -495,6 +522,13 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 .race.pr { border-color: var(--gold); }
 .raceres { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
 .big2 { font-family: var(--f-display); font-weight: 700; font-size: 30px; line-height: 1; }
+/* Mon profil */
+.profhead { gap: 14px; }
+.profhead h2 { font-size: 24px; }
+.besttimes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 8px; }
+.besttimes li { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
+.besttimes strong { font-family: var(--f-display); font-size: 26px; line-height: 1; }
+.stack.narrow > div { max-width: 760px; }
 
 /* Impression (plan de course, écran de course) */
 @media print {
@@ -1493,7 +1527,7 @@ if (typeof module !== 'undefined') module.exports = { fitEncode, workoutFromDay,
    Appli course à pied — interface
    ============================================================ */
 const KEY = 'appli-marathon-v1';
-const ACCENTS = [{ id: 'ocean', name: 'Océan', a: '#1457C4', b: '#0B8467' }, { id: 'foret', name: 'Forêt', a: '#1D6A3A', b: '#45841F' }, { id: 'braise', name: 'Braise', a: '#C2490A', b: '#A32A1B' }, { id: 'graphite', name: 'Graphite', a: '#26313C', b: '#4A5A68' }];
+const ACCENTS = [{ id: 'ocean', name: 'Océan', a: '#1457C4', b: '#0B8467' }, { id: 'foret', name: 'Forêt', a: '#1D6A3A', b: '#45841F' }, { id: 'braise', name: 'Braise', a: '#C2490A', b: '#A32A1B' }, { id: 'aurore', name: 'Aurore', a: '#5B3CC4', b: '#B8336A' }, { id: 'lagon', name: 'Lagon', a: '#0B6E8A', b: '#0B8068' }];
 const $app = document.getElementById('app');
 // Copie du fichier tel qu'il est avant que l'appli ne s'affiche : sert à fabriquer « une copie avec mes données ».
 const SRC_HTML = '<!doctype html>\n' + document.documentElement.outerHTML;
@@ -1507,6 +1541,8 @@ const ICON = {
   sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>',
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
   gauge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18a8 8 0 1 1 16 0M12 18l4-6"/></svg>',
 };
@@ -1832,8 +1868,11 @@ function effectiveDark() {
 /* ============================================================
    Écrans
    ============================================================ */
+// Le rond du bandeau : un clic ouvre un petit menu pour changer l'image (comme une photo de profil).
 function crestHTML() {
-  return `<div class="crest${S.crest ? '' : ' club'}">${S.crest ? `<img src="${S.crest}" alt="Image du bandeau">` : `<img src="${CLUB_LOGO}" alt="${CLUB_NAME}">`}</div>`;
+  const img = S.crest ? `<img src="${S.crest}" alt="">` : `<img src="${CLUB_LOGO}" alt="">`;
+  const menu = S.ui.crestMenu ? `<div class="crestmenu" role="menu"><button role="menuitem" data-act="pickcrest">${ICON.up}Choisir une photo</button>${S.crest ? `<button role="menuitem" data-act="crestreset">Remettre le logo du club</button>` : ''}<button role="menuitem" data-act="crestclose">Annuler</button>${S.msg.crest ? `<p class="errtxt" role="alert">${esc(S.msg.crest)}</p>` : ''}</div>` : '';
+  return `<div class="crestwrap"><input type="file" id="file-crest" accept="image/*" class="sr"><button class="crest${S.crest ? '' : ' club'}" data-act="crestmenu" aria-haspopup="menu" aria-expanded="${!!S.ui.crestMenu}" aria-label="Changer l'image du bandeau (actuellement : ${S.crest ? 'ta photo' : esc(CLUB_NAME)})">${img}<span class="crestedit" aria-hidden="true">${ICON.edit}</span></button>${menu}</div>`;
 }
 function headerHTML() {
   const plan = S.plan;
@@ -1874,6 +1913,7 @@ function headerHTML() {
         <div class="tools">
           <button class="pill" data-act="tab" data-view="vma" aria-label="Mon niveau">${ICON.gauge}<span class="num">VMA ${fmtVma(S.settings.vma)} · ${fmtPace(c.marathon)}/km</span></button>
           <button class="pill" data-act="theme" aria-label="${dark ? 'Passer au thème clair' : 'Passer au thème sombre'}">${dark ? ICON.sun : ICON.moon}<span>${dark ? 'Clair' : 'Sombre'}</span></button>
+          ${profilePill()}
         </div></div>
       <div class="hero"><div class="herol">${crestHTML()}<div class="count"><span class="big num${chrono ? ' chrono' : ''}">${big}</span><span class="lbl">${lbl}</span></div></div>${next}</div>
     </div></div>
@@ -1883,6 +1923,7 @@ function headerHTML() {
 }
 
 // Onglets : « Mes plans » dépend du Calendrier ; Paramètres se réduit à une roue dentée sur petit écran.
+function profilePill() { return `<button class="pill profpill" data-act="tab" data-view="profile" aria-label="Mon profil"${S.ui.view === 'profile' ? ' aria-current="page"' : ''}>${avatarHTML()}<span>${esc(S.profile.name || 'Mon profil')}</span></button>`; }
 function tabsHTML(withPlan) {
   const list = [['plan', 'Calendrier'], ['vma', 'VMA']].concat(withPlan ? [['race', 'Course']] : [], [['bilan', 'Progression'], ['data', 'Paramètres']]);
   const cur = S.ui.view === 'plans' ? 'plan' : S.ui.view;
@@ -1928,7 +1969,7 @@ function nextSession() {
   return null;
 }
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.8</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à exporter ton profil (bouton en haut à droite).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.9</p></div></footer>`;
 }
 
 /* ----- Plan : semaine ----- */
@@ -2659,23 +2700,9 @@ function backupText() {
 }
 function dataView() {
   const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done || S.tracking[k].skipped || S.tracking[k].note || S.tracking[k].feel).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
-  return `<div class="stack">
+  return `<div class="stack narrow">
+    <div>
 
-    <div class="grid2">
-    <section class="card stack"><div><h2>Mon profil</h2><p class="sub">Tout ce qui te concerne : réglages, plans, suivi, sorties et courses. Exporte-le pour le garder ou le passer sur un autre appareil ; importe-le pour tout retrouver.</p></div>
-      <div class="fields"><div class="field"><label for="pf-name">Prénom</label><input type="text" id="pf-name" value="${esc(S.profile.name || '')}" placeholder="ex. Adrien" autocomplete="off"></div>
-        <div class="field"><label for="pf-club">Club</label><input type="text" id="pf-club" value="${esc(S.profile.club || CLUB_NAME)}" autocomplete="off"></div></div>
-      <p class="sub">${profileSummary()}</p>
-      <div class="row"><button class="btn primary" data-act="download">${ICON.down}Exporter mon profil</button><input type="file" id="file-json" accept=".html,.htm,.json,text/html,application/json" class="sr"><button class="btn" data-act="pickjson">${ICON.up}Importer un profil</button></div>
-      <p class="sub">L'import remplace les données de cet appareil par celles du profil (un profil exporté ou une copie de l'appli).</p>
-      ${S.msg.backup ? `<p class="sub" role="status">${esc(S.msg.backup)}</p>` : ''}
-      ${S.msg.restore ? `<p class="${S.msg.restoreErr ? 'errtxt' : 'sub'}" role="status">${esc(S.msg.restore)}</p>` : ''}
-      <details class="raw"><summary>Copie de l'appli avec mes données</summary><div class="stack" style="gap:10px;margin-top:10px">
-        <div class="row nowrap"><button class="btn grow" data-act="htmlcopy">${ICON.down}<span>Enregistrer une copie avec mes données</span></button><button class="iconbtn" data-act="copyinfo" aria-label="À quoi sert cette copie ?" aria-expanded="${!!S.ui.copyInfo}">ⓘ</button></div>
-        ${S.ui.copyInfo ? `<div class="fitinfo" role="note"><span>Un nouveau fichier de l'appli qui contient déjà ton plan, tes réglages et ton suivi. Remplace l'ancien fichier par celui-ci, ou envoie-le sur ton téléphone : il s'ouvre directement, sans rien restaurer.</span></div>` : ''}
-        ${S.plans.length ? `<div><button class="btn small" data-act="htmlcoach">Version plan seul (pour le coach)</button><p class="sub" style="margin-top:6px">Sans ton suivi ni tes notes : à envoyer à Pierre.</p></div>` : ''}</div></details>
-      <details class="raw"><summary>Comment ça marche ?</summary><ul class="howto"><li>Tes données (suivi, notes, réglages) restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.</li><li>« Exporter mon profil » crée un petit fichier avec tout ce qui te concerne. Garde-le : c'est ta sauvegarde.</li><li>Pour changer d'appareil ou passer à une nouvelle version de l'appli, ouvre le nouveau fichier et utilise « Importer un profil ».</li></ul></details>
-    </section>
     <section class="card stack"><div><h2>Préférences</h2><p class="sub">Réglages rangés par thème : ouvre celui qui t'intéresse.</p></div>
       <details class="raw pref"${S.ui.pref === 'wx' ? ' open' : ''} data-pref="wx"><summary>Météo</summary><div class="stack prefbody"><p class="sub">Prévisions affichées sur les jours du plan (service Open-Meteo, sans compte). Les jours d'entraînement utilisent ta ville d'entraînement ; le jour de la course utilise la ville de la course. Seule la position de la ville est envoyée. Il faut une connexion internet : sans réseau, la dernière météo reçue reste affichée.</p>
 
@@ -2693,9 +2720,7 @@ function dataView() {
       <details class="raw pref"${S.ui.pref === 'look' ? ' open' : ''} data-pref="look"><summary>Apparence</summary><div class="stack prefbody"><p class="sub">Choisis la couleur du bandeau et des boutons. Les couleurs des types de séance ne changent pas. Le mode clair ou sombre se règle avec le bouton en haut de page.</p>
 
       <div class="swatches" role="group" aria-label="Couleur de l'appli">${ACCENTS.map((a) => `<button class="swatch" data-act="accent" data-id="${a.id}" aria-pressed="${S.ui.accent === a.id}"><span class="dot" style="background:linear-gradient(135deg,${a.a},${a.b})"></span>${a.name}</button>`).join('')}</div>
-      <div><h3 style="font-size:15px;margin-bottom:4px">Image du bandeau</h3><p class="sub">Le logo du club est affiché par défaut. Tu peux mettre ta propre photo : elle reste sur cet appareil et fait partie de la sauvegarde.</p></div>
-      <div class="row"><input type="file" id="file-crest" accept="image/*" class="sr"><button class="btn" data-act="pickcrest">Choisir une photo</button>${S.crest ? '<button class="btn" data-act="crestreset">Revenir au dessin</button>' : ''}</div>
-      ${S.msg.crest ? `<p class="errtxt" role="alert">${esc(S.msg.crest)}</p>` : ''}</div></details>
+      <p class="sub">Pour changer l'image du rond du bandeau (logo du club ou ta photo), clique simplement dessus.</p></div></details>
       <details class="raw pref"${S.ui.pref === 'wipe' ? ' open' : ''} data-pref="wipe"><summary>Effacer mes données</summary><div class="stack prefbody"><p class="sub">Supprime les plans, les réglages, le suivi et les sorties de cet appareil. Pense à télécharger une sauvegarde avant.</p>
 
       <div class="row">${S.ui.confirmWipe ? '<button class="btn danger" data-act="wipe">Oui, tout effacer</button><button class="btn" data-act="wipecancel">Annuler</button>' : '<button class="btn danger" data-act="wipe">Effacer mes données</button>'}</div></div></details>
@@ -2739,6 +2764,48 @@ function profileSummary() {
 function profileFileName() {
   const slug = (S.profile.name || 'coureur').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'coureur';
   return 'profil-' + slug + '-' + TODAY + '.json';
+}
+
+/* ----- Mon profil (ouvert depuis l'avatar, en haut à droite) ----- */
+function initials() {
+  const n = (S.profile.name || '').trim();
+  return n ? n.split(/\s+/).map((x) => x.charAt(0)).join('').slice(0, 2).toUpperCase() : '';
+}
+function avatarHTML(cls) { const t = initials(); return `<span class="avatar ${cls || ''}" aria-hidden="true">${t ? esc(t) : ICON.user}</span>`; }
+function bestTimes() {
+  const all = S.plans.filter((e) => e.plan.raceDate && track(e.plan.raceDate).result).map((e) => ({ km: MARATHON_KM, sec: track(e.plan.raceDate).result, date: e.plan.raceDate, name: planName(e) }))
+    .concat(S.races.filter((r) => r.result).map((r) => ({ km: r.km, sec: r.result, date: r.date, name: r.name })));
+  const out = {};
+  all.forEach((x) => { const k = raceKmLabel(x.km); if (!out[k] || x.sec < out[k].sec) out[k] = x; });
+  return Object.keys(out).map((k) => Object.assign({ label: k }, out[k])).sort((a, b) => a.km - b.km);
+}
+function profileView() {
+  const best = bestTimes();
+  const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
+  return `<div class="stack">
+    <section class="card stack profilecard"><div class="row profhead">${avatarHTML('big')}<div class="stack" style="gap:2px"><h2>${esc(S.profile.name || 'Mon profil')}</h2><span class="sub">${esc(S.profile.club || CLUB_NAME)}</span></div>
+        <button class="btn small" data-act="tab" data-view="plan" style="margin-left:auto">${ICON.left}Retour</button></div>
+      <div class="fields"><div class="field"><label for="pf-name">Prénom</label><input type="text" id="pf-name" value="${esc(S.profile.name || '')}" placeholder="ex. Adrien" autocomplete="off"></div>
+        <div class="field"><label for="pf-club">Club</label><input type="text" id="pf-club" value="${esc(S.profile.club || CLUB_NAME)}" autocomplete="off"></div></div>
+      <div class="kpis">
+        <div class="kpi"><span class="v num">${fmtVma((S.settings || S.profile).vma)}</span><span class="l">VMA (km/h) · <button class="linkbtn" data-act="tab" data-view="vma">modifier</button></span></div>
+        <div class="kpi"><span class="v num">${nTr}</span><span class="l">séances faites et sorties notées</span></div>
+        <div class="kpi"><span class="v num">${S.plans.length}</span><span class="l">plan${S.plans.length > 1 ? 's' : ''} · ${S.races.length} course${S.races.length > 1 ? 's' : ''} sans plan</span></div>
+      </div>
+      ${best.length ? `<div class="stack" style="gap:6px"><strong>Mes meilleurs chronos</strong><ul class="besttimes">${best.map((x) => `<li><span>${esc(x.label)}</span><strong class="num">${esc(fmtHMS(x.sec))}</strong><span class="sub">${esc(x.name)} · ${esc(frDate(x.date))}</span></li>`).join('')}</ul></div>` : '<p class="sub">Tes meilleurs chronos s\'afficheront ici dès que tu auras saisi un résultat de course.</p>'}
+    </section>
+    <section class="card stack"><div><h2>Sauvegarde du profil</h2><p class="sub">Tout ce qui te concerne : réglages, plans, suivi, sorties et courses. Exporte-le pour le garder ou le passer sur un autre appareil ; importe-le pour tout retrouver.</p></div>
+      <div class="row"><button class="btn primary" data-act="download">${ICON.down}Exporter mon profil</button><input type="file" id="file-json" accept=".html,.htm,.json,text/html,application/json" class="sr"><button class="btn" data-act="pickjson">${ICON.up}Importer un profil</button></div>
+      <p class="sub">L'import remplace les données de cet appareil par celles du profil (un profil exporté ou une copie de l'appli).</p>
+      ${S.msg.backup ? `<p class="sub" role="status">${esc(S.msg.backup)}</p>` : ''}
+      ${S.msg.restore ? `<p class="${S.msg.restoreErr ? 'errtxt' : 'sub'}" role="status">${esc(S.msg.restore)}</p>` : ''}
+      <details class="raw"><summary>Copie de l'appli avec mes données</summary><div class="stack" style="gap:10px;margin-top:10px">
+        <div class="row nowrap"><button class="btn grow" data-act="htmlcopy">${ICON.down}<span>Enregistrer une copie avec mes données</span></button><button class="iconbtn" data-act="copyinfo" aria-label="À quoi sert cette copie ?" aria-expanded="${!!S.ui.copyInfo}">ⓘ</button></div>
+        ${S.ui.copyInfo ? `<div class="fitinfo" role="note"><span>Un nouveau fichier de l'appli qui contient déjà ton plan, tes réglages et ton suivi. Remplace l'ancien fichier par celui-ci, ou envoie-le sur ton téléphone : il s'ouvre directement, sans rien restaurer.</span></div>` : ''}
+        ${S.plans.length ? `<div><button class="btn small" data-act="htmlcoach">Version plan seul (pour le coach)</button><p class="sub" style="margin-top:6px">Sans ton suivi ni tes notes : à envoyer à Pierre.</p></div>` : ''}</div></details>
+      <details class="raw"><summary>Comment ça marche ?</summary><ul class="howto"><li>Tes données (suivi, notes, réglages) restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.</li><li>« Exporter mon profil » crée un petit fichier avec tout ce qui te concerne. Garde-le : c'est ta sauvegarde.</li><li>Pour changer d'appareil ou passer à une nouvelle version de l'appli, ouvre le nouveau fichier et utilise « Importer un profil ».</li></ul></details>
+    </section>
+  </div>`;
 }
 
 /* ----- Import ----- */
@@ -2891,17 +2958,17 @@ function addRecoveryPlan(dateIso) {
    ============================================================ */
 function emptyHeaderHTML() {
   const dark = effectiveDark();
-  if (!['plan', 'plans', 'vma', 'bilan', 'data'].includes(S.ui.view)) S.ui.view = 'plan';
+  if (!['plan', 'plans', 'vma', 'bilan', 'data', 'profile'].includes(S.ui.view)) S.ui.view = 'plan';
   return `<header><div class="band"><div class="wrap"><div class="brandrow"><div class="brand">${APP_NAME}</div>
-      <div class="tools"><button class="pill" data-act="tab" data-view="vma" aria-label="Mon niveau">${ICON.gauge}<span class="num">VMA ${fmtVma(S.settings.vma)}</span></button><button class="pill" data-act="theme">${dark ? ICON.sun + '<span>Clair</span>' : ICON.moon + '<span>Sombre</span>'}</button></div></div>
+      <div class="tools"><button class="pill" data-act="tab" data-view="vma" aria-label="Mon niveau">${ICON.gauge}<span class="num">VMA ${fmtVma(S.settings.vma)}</span></button><button class="pill" data-act="theme">${dark ? ICON.sun + '<span>Clair</span>' : ICON.moon + '<span>Sombre</span>'}</button>${profilePill()}</div></div>
       <div class="hero"><div class="herol">${crestHTML()}${(() => { const r = nextRace(); return r ? `<div class="count"><span class="big num">${diffDays(r.date, TODAY) > 0 ? 'J-' + diffDays(r.date, TODAY) : 'Jour J'}</span><span class="lbl"><strong>${esc(r.name)}</strong><span>${esc(frDate(r.date, true))} · ${esc(raceKmLabel(r.km))}${r.targetSec ? ' · objectif ' + esc(fmtHMS(r.targetSec)) : ''}</span></span></div><div class="count empty">` : '<div class="count empty"><span class="lbl"><strong>Pas de course prévue</strong><span>Ajoute le plan de ton coach : il se place tout seul dans le calendrier selon ta date de course.</span></span>'; })()}
-        <div style="margin-top:12px"><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="pill" data-act="pickxlsx">${ICON.up}<span>Ajouter un plan</span></button> <button class="pill" data-act="tab" data-view="data">Restaurer mes données</button></div></div></div></div></div></div>
+        <div style="margin-top:12px"><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="pill" data-act="pickxlsx">${ICON.up}<span>Ajouter un plan</span></button></div></div></div></div></div></div>
     <nav class="wrap tabs" aria-label="Sections">${tabsHTML(false)}</nav></header>`;
 }
 function shellHTML() {
   if (!S.plan) {
     const head = emptyHeaderHTML();
-    const body = S.imp.stage !== 'idle' ? importView() : S.ui.view === 'data' ? dataView() : S.ui.view === 'plans' ? plansView() : S.ui.view === 'vma' ? vmaView() : S.ui.view === 'bilan' ? bilanView() : S.ui.mode === 'week' ? weekView() : monthView();
+    const body = S.imp.stage !== 'idle' ? importView() : S.ui.view === 'data' ? dataView() : S.ui.view === 'profile' ? profileView() : S.ui.view === 'plans' ? plansView() : S.ui.view === 'vma' ? vmaView() : S.ui.view === 'bilan' ? bilanView() : S.ui.mode === 'week' ? weekView() : monthView();
     return head + `<main class="wrap">${body}</main>${footHTML()}`;
   }
   let body;
@@ -2913,6 +2980,7 @@ function shellHTML() {
   else if (S.ui.view === 'race') { S.ui.view = 'plan'; body = S.ui.mode === 'week' ? weekView() : monthView(); }
   else if (S.ui.view === 'bilan') body = bilanView();
   else if (S.ui.view === 'plans') body = plansView();
+  else if (S.ui.view === 'profile') body = profileView();
   else body = dataView();
   return headerHTML() + `<main class="wrap">${raceCtaBanner()}${backupBanner()}${body}</main>` + footHTML();
 }
@@ -3167,7 +3235,7 @@ function loadCrest(file) {
       const side = Math.min(img.width, img.height);
       c.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
       S.crest = c.toDataURL('image/jpeg', 0.85);
-      S.msg.crest = ''; saveStore(); render();
+      S.msg.crest = ''; S.ui.crestMenu = false; saveStore(); toast('Image du bandeau changée'); render();
     } catch (e) { fail(); }
     URL.revokeObjectURL(url);
   };
@@ -3179,6 +3247,7 @@ function copyText(text, onOk, onFail) {
 }
 
 document.addEventListener('click', (ev) => {
+  if (S.ui.crestMenu && !ev.target.closest('.crestwrap')) { S.ui.crestMenu = false; render(); }
   const el = ev.target.closest('[data-act]');
   if (!el) return;
   const act = el.dataset.act;
@@ -3241,7 +3310,9 @@ document.addEventListener('click', (ev) => {
     case 'wxsearch': { const q = (document.getElementById('wx-city') || {}).value || ''; if (q.trim()) searchCity(q.trim(), false); break; }
     case 'wxrsearch': { const q = (document.getElementById('wx-rcity') || {}).value || ''; if (q.trim()) searchCity(q.trim(), true); break; }
     case 'pickcrest': { const inp = document.getElementById('file-crest'); if (inp) inp.click(); break; }
-    case 'crestreset': S.crest = ''; S.msg.crest = ''; saveStore(); render(); break;
+    case 'crestreset': S.crest = ''; S.msg.crest = ''; S.ui.crestMenu = false; saveStore(); toast('Logo du club remis'); render(); break;
+    case 'crestmenu': S.ui.crestMenu = !S.ui.crestMenu; S.msg.crest = ''; render(); break;
+    case 'crestclose': S.ui.crestMenu = false; render(); break;
     case 'pickjson': { const inp = document.getElementById('file-json'); if (inp) inp.click(); break; }
     case 'useplan': usePlan(el.dataset.replace || null); break;
     case 'impcancel': S.imp = { stage: 'idle' }; render(); break;
