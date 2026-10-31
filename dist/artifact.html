@@ -2014,8 +2014,10 @@ function nextSession() {
   }
   return null;
 }
+// Pied de page : où sont les données, et un raccourci pour les sauvegarder.
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à exporter ton profil (bouton en haut à droite).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.13</p></div></footer>`;
+  const last = S.lastCopy ? 'Dernier export : ' + frDate(S.lastCopy) + '.' : 'Aucun export pour l\'instant.';
+  return `<footer class="foot"><div class="wrap"><p>Tes données restent sur cet appareil, rien n'est envoyé ailleurs. ${esc(last)} <button class="linkbtn onband" data-act="download">Exporter mon profil</button></p><p class="ver">${APP_NAME} · ${esc(S.profile.club || CLUB_NAME)} · version 3.14</p></div></footer>`;
 }
 
 /* ----- Plan : semaine ----- */
