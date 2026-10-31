@@ -16,3 +16,4 @@ main { padding-block: 22px 40px; display: flex; flex-direction: column; gap: 20p
 .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .between { justify-content: space-between; }
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 20px; }
+.grid2.top { align-items: start; }

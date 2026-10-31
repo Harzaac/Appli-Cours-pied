@@ -118,8 +118,8 @@ function notesHTML() {
 }
 function bilanView() {
   return `<div class="stack">
-    <div class="grid2">${nowHTML()}${racesHTML()}</div>
-    ${S.plan ? `<div class="grid2">${planFollowHTML()}${notesHTML()}</div>` : notesHTML()}
+    <div class="grid2 top">${nowHTML()}${racesHTML()}</div>
+    ${S.plan ? `<div class="grid2 top">${planFollowHTML()}${notesHTML()}</div>` : notesHTML()}
     ${yearBilanHTML()}
   </div>`;
 }

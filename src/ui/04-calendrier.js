@@ -127,7 +127,7 @@ function freeWeekView(w, idx) {
         <h2 class="navlabel">${frDate(w.start)} → ${frDate(w.end)}</h2>
         <button class="iconbtn" data-act="next" aria-label="Semaine suivante" ${idx === weeks.length - 1 ? 'disabled' : ''}>${ICON.right}</button></div>
       <div class="navgroup">${modeSeg()}<button class="btn small" data-act="today">Aujourd'hui</button><button class="btn small" data-act="tab" data-view="plans">Mes plans</button></div></div>
-    <div class="weekhead"><span class="badge">Pas de plan cette semaine</span><span><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="linkbtn" data-act="pickxlsx">Ajouter un plan</button></span></div>
+    <div class="weekhead"><span class="badge">Pas de plan cette semaine</span>${S.plans.length ? `<span><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="btn small" data-act="pickxlsx">${ICON.up}Ajouter un plan</button></span>` : ''}</div>
     <div class="week">${w.days.map((d) => dayCard(d)).join('')}</div>`;
 }
 function taperBanner(w) {
