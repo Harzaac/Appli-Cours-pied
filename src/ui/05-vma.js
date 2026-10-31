@@ -86,9 +86,10 @@ function vmaHighlights(vt) {
     // sans couleurs du coach : la fourchette réalisable en course (la même que pour les prédictions)
     const pd = PRED_DISTS.find((x) => Math.abs(x.km * 1000 - r.dist) / r.dist < 0.01);
     if (!pd) return '';
-    const inside = vt.pcts.filter((q) => q >= pd.lo && q <= pd.hi);
-    const ok = inside.length ? inside.includes(p) : p === vt.pcts.reduce((a, q) => (Math.abs(q - (pd.lo + pd.hi) / 2) < Math.abs(a - (pd.lo + pd.hi) / 2) ? q : a), vt.pcts[0]);
-    return ok ? 'vc-green' : '';
+    // une seule case par distance : la colonne la plus proche du milieu de la fourchette (la plus rapide en cas d'égalité)
+    const mid = (pd.lo + pd.hi) / 2;
+    const best = vt.pcts.reduce((a, q) => (Math.abs(q - mid) < Math.abs(a - mid) || (Math.abs(q - mid) === Math.abs(a - mid) && q > a) ? q : a), vt.pcts[0]);
+    return p === best && r.avail[k] ? 'vc-green' : '';
   }));
   let legend;
   if (coach) {

@@ -59,7 +59,7 @@ function headerHTML() {
       <div class="hero"><div class="herol">${crestHTML()}<div class="count"><span class="big num${chrono ? ' chrono' : ''}">${big}</span><span class="lbl">${lbl}</span></div></div>${next}</div>
     </div></div>
     <nav class="wrap tabs" aria-label="Sections">
-      ${[['plan', 'Calendrier'], ['vma', 'VMA'], ['race', 'Course'], ['bilan', 'Bilan'], ['data', 'Données']].map(([v, l]) => `<button data-act="tab" data-view="${v}" ${S.ui.view === v ? 'aria-current="page"' : ''}>${l}</button>`).join('')}
+      ${[['plan', 'Calendrier'], ['vma', 'VMA'], ['race', 'Course'], ['bilan', 'Bilan'], ['data', 'Paramètres']].map(([v, l]) => `<button data-act="tab" data-view="${v}" ${S.ui.view === v ? 'aria-current="page"' : ''}>${l}</button>`).join('')}
     </nav></header>`;
 }
 
@@ -103,5 +103,5 @@ function nextSession() {
   return null;
 }
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Données).</p><p class="ver">Appli Marathon · version 3.4</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">Appli Marathon · version 3.4.1</p></div></footer>`;
 }

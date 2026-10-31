@@ -8,7 +8,7 @@ function emptyHeaderHTML() {
       <div class="tools"><button class="pill" data-act="tab" data-view="vma" aria-label="Mon niveau">${ICON.gauge}<span class="num">VMA ${fmtVma(S.settings.vma)}</span></button><button class="pill" data-act="theme">${dark ? ICON.sun + '<span>Clair</span>' : ICON.moon + '<span>Sombre</span>'}</button></div></div>
       <div class="hero"><div class="herol">${crestHTML()}<div class="count empty"><span class="lbl"><strong>Pas de course prévue</strong><span>Ajoute le plan de ton coach : il se place tout seul dans le calendrier selon ta date de course.</span></span>
         <div style="margin-top:12px"><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="pill" data-act="pickxlsx">${ICON.up}<span>Ajouter un plan</span></button></div></div></div></div></div></div>
-    <nav class="wrap tabs" aria-label="Sections">${[['plan', 'Calendrier'], ['vma', 'VMA'], ['bilan', 'Bilan'], ['data', 'Données']].map(([v, l]) => `<button data-act="tab" data-view="${v}" ${S.ui.view === v ? 'aria-current="page"' : ''}>${l}</button>`).join('')}</nav></header>`;
+    <nav class="wrap tabs" aria-label="Sections">${[['plan', 'Calendrier'], ['vma', 'VMA'], ['bilan', 'Bilan'], ['data', 'Paramètres']].map(([v, l]) => `<button data-act="tab" data-view="${v}" ${S.ui.view === v ? 'aria-current="page"' : ''}>${l}</button>`).join('')}</nav></header>`;
 }
 function shellHTML() {
   if (!S.plan) {

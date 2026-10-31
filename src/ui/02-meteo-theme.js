@@ -75,7 +75,7 @@ function wxMonth(date) {
 }
 function weatherNotice(w) {
   if (!wxCfg().on) return `<div class="movebar" role="status"><span>La météo est désactivée.</span><button class="btn small" data-act="wxtoggle">Activer</button></div>`;
-  if (S.wxState.err && !S.wx) return `<div class="movebar" role="status"><span>Météo indisponible pour le moment (connexion ou navigateur qui bloque). Détail dans l'onglet Données.</span></div>`;
+  if (S.wxState.err && !S.wx) return `<div class="movebar" role="status"><span>Météo indisponible pour le moment (connexion ou navigateur qui bloque). Détail dans l'onglet Paramètres.</span></div>`;
   const out = [];
   weekDays(w).forEach((day) => {
     if (day.rest || day.category === 'race' || day.date < TODAY) return;
