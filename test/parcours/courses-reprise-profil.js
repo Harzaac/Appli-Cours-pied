@@ -10,8 +10,8 @@ await p.fill('#imp-race','2026-10-25');await p.dispatchEvent('#imp-race','change
 await p.evaluate(()=>{setTrack('2026-10-25',{done:true,result:12312,pr:true});render();});
 // course sans plan
 await p.click('[data-act=tab][data-view=plans] >> nth=0');
-await p.fill('#rc-name','10 km de Rennes');await p.fill('#rc-date','2026-11-22');await p.selectOption('#rc-km','10');await p.fill('#rc-target',"42'30");
-await p.click('[data-act=raceadd]');log('1 course ajoutée:',JSON.stringify(await p.evaluate(()=>S.races.map(r=>[r.name,r.date,r.km,r.targetSec]))));
+await p.fill('#rc-name','10 km de Rennes');await p.fill('#rc-date','2026-11-22');await p.selectOption('#rc-km','10');await p.fill('#rc-target',"42'30");await p.fill('#rc-url','klikego.com/inscription/10-km-de-rennes');
+await p.click('[data-act=raceadd]');log('1 course ajoutée:',JSON.stringify(await p.evaluate(()=>S.races.map(r=>[r.name,r.date,r.km,r.targetSec,r.url]))),'| lien affiché:',(await p.textContent('#races-card .racelink')).trim());
 await p.fill('#rc-date','');await p.click('[data-act=raceadd]');log('  sans date:',await p.textContent('#races-card [role=alert]'));
 // plan de reprise
 log('2 date de reprise proposée:',await p.inputValue('#rec-date'));
@@ -24,7 +24,7 @@ await p.click('.tabs [data-view=plan]');for(let k=0;k<3;k++)await p.click('[data
 log('3 semaine',await p.textContent('.navlabel'),'| puce course:',await p.$$eval('.dcard .chip.c-race',e=>e.map(x=>x.textContent).join(',')));
 await p.evaluate(()=>{window.__TODAY__=null;});
 await p.click('[data-act=open][data-date="2026-11-22"] >> nth=0');await p.waitForSelector('#rres-'+await p.evaluate(()=>S.races[0].id));
-const rid=await p.evaluate(()=>S.races[0].id);await p.fill('#rres-'+rid,"41'50");await p.press('#rres-'+rid,'Tab');await p.waitForTimeout(100);
+const rid=await p.evaluate(()=>S.races[0].id);await p.fill('#rurl-'+rid,'pas un lien');await p.press('#rurl-'+rid,'Tab');await p.waitForTimeout(80);log('  lien invalide:',await p.textContent('#toast'),'| gardé:',await p.evaluate(()=>S.races[0].url));await p.fill('#rres-'+rid,"41'50");await p.press('#rres-'+rid,'Tab');await p.waitForTimeout(100);
 log('  chrono course:',await p.evaluate(()=>S.races[0].result));await p.click('[data-act=close]');
 // progression
 await p.click('.tabs [data-view=bilan]');log('4 mes courses:',(await p.textContent('.races')).replace(/\s+/g,' ').trim().slice(0,200));

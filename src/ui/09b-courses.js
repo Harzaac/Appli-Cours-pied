@@ -1,4 +1,16 @@
 /* ----- Courses sans plan (10 km, semi, trail du club…) et plan de reprise ----- */
+// Lien vers la page de la course (inscription, parcours) : on garde seulement les adresses web complètes.
+function cleanUrl(u) {
+  u = String(u || '').trim();
+  if (!u) return '';
+  if (!/^https?:\/\//i.test(u) && /^[\w-]+(\.[\w-]+)+(\/|$)/.test(u)) u = 'https://' + u;
+  try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : ''; } catch (e) { return ''; }
+}
+function raceLinkHTML(r) {
+  if (!r.url) return '';
+  let host = ''; try { host = new URL(r.url).hostname.replace(/^www\./, ''); } catch (e) { host = 'lien'; }
+  return `<a class="racelink" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">Page de la course · ${esc(host)} ↗</a>`;
+}
 function racesOn(date) { return S.races.filter((r) => r.date === date); }
 function raceKmLabel(km) {
   if (Math.abs(km - MARATHON_KM) < 0.01) return 'marathon';
@@ -20,7 +32,7 @@ function recoveryMonday() {
 }
 function racesCardHTML() {
   const items = S.races.slice().sort((a, b) => (a.date < b.date ? 1 : -1)).map((r) => `<li class="planitem"><div class="stack" style="gap:2px"><strong>${esc(r.name)}</strong>
-      <span class="sub">${esc(frDate(r.date, true))} · ${esc(raceKmLabel(r.km))}${r.targetSec ? ' · objectif ' + esc(fmtHMS(r.targetSec)) : ''}${r.result ? ' · <strong>chrono ' + esc(fmtHMS(r.result)) + '</strong>' + (r.pr ? ' · record' : '') : ''}</span></div>
+      <span class="sub">${esc(frDate(r.date, true))} · ${esc(raceKmLabel(r.km))}${r.targetSec ? ' · objectif ' + esc(fmtHMS(r.targetSec)) : ''}${r.result ? ' · <strong>chrono ' + esc(fmtHMS(r.result)) + '</strong>' + (r.pr ? ' · record' : '') : ''}</span>${raceLinkHTML(r)}</div>
       <div class="row">${r.date <= TODAY ? `<button class="btn small" data-act="open" data-date="${r.date}">${r.result ? 'Modifier le chrono' : 'Saisir mon chrono'}</button>` : ''}<button class="btn small" data-act="racedel" data-id="${esc(r.id)}">Supprimer</button></div></li>`).join('');
   const kms = [[5, '5 km'], [10, '10 km'], [21.0975, 'Semi-marathon'], [MARATHON_KM, 'Marathon'], ['autre', 'Autre distance']];
   return `<section class="card stack" id="races-card"><div><h2>Courses sans plan</h2><p class="sub">Un 10 km, un semi ou un trail du club, sans plan d'entraînement à part. La course apparaît dans le calendrier, dans Progression, et ton chrono sert aux prédictions.</p></div>
@@ -31,6 +43,7 @@ function racesCardHTML() {
       <div class="fields3"><div class="field"><label for="rc-km">Distance</label><select id="rc-km">${kms.map(([k, n]) => `<option value="${k}"${k === 10 ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
         <div class="field"><label for="rc-other">Autre distance (km)</label><input type="text" id="rc-other" inputmode="decimal" placeholder="si « Autre »" autocomplete="off"></div>
         <div class="field"><label for="rc-target">Objectif (facultatif)</label><input type="text" id="rc-target" placeholder="ex. 42'30" autocomplete="off"></div></div>
+      <div class="field"><label for="rc-url">Lien de la course (facultatif)</label><input type="url" id="rc-url" placeholder="Colle l'adresse de la page Klikego, Finishers, du site de la course…" autocomplete="off"></div>
       ${S.msg.race2 ? `<p class="errtxt" role="alert">${esc(S.msg.race2)}</p>` : ''}
       <div><button class="btn small primary" data-act="raceadd">${ICON.check}Ajouter la course</button></div></div></section>`;
 }
@@ -46,18 +59,21 @@ function racesModalHTML(date) {
     return `<div class="stack resultbox"><div style="font-weight:700">${esc(r.name)} · ${esc(raceKmLabel(r.km))}${r.targetSec ? ' · objectif ' + esc(fmtHMS(r.targetSec)) : ''}</div>
       <div class="fields"><div class="field"><label for="rres-${esc(r.id)}">Chrono officiel</label><input type="text" id="rres-${esc(r.id)}" value="${r.result ? esc(fmtHMS(r.result)) : ''}" placeholder="ex. 42'30" autocomplete="off"></div>
         <div class="field"><label>&nbsp;</label><label class="check"><input type="checkbox" id="rpr-${esc(r.id)}"${r.pr ? ' checked' : ''}> Record personnel</label></div></div>
+      <div class="field"><label for="rurl-${esc(r.id)}">Lien de la course</label><input type="url" id="rurl-${esc(r.id)}" value="${esc(r.url || '')}" placeholder="https://… (Klikego, Finishers, site de la course)" autocomplete="off"></div>
+      ${raceLinkHTML(r)}
       ${r.result ? `<p class="sub">${diff != null ? (diff <= 0 ? esc(fmtHMS(-diff)) + ' sous l\'objectif · ' : esc(fmtHMS(diff)) + ' au-dessus de l\'objectif · ') : ''}${esc(fmtPace(r.result / r.km))}/km de moyenne.</p>` : ''}</div>`;
   }).join('');
 }
 function addRace() {
   const g = (id) => ((document.getElementById(id) || {}).value || '').trim();
-  const name = g('rc-name') || 'Course', date = g('rc-date'), kmSel = g('rc-km'), other = g('rc-other').replace(',', '.'), tgt = g('rc-target');
+  const name = g('rc-name') || 'Course', date = g('rc-date'), kmSel = g('rc-km'), other = g('rc-other').replace(',', '.'), tgt = g('rc-target'), url = cleanUrl(g('rc-url'));
+  if (g('rc-url') && !url) { S.msg.race2 = 'Le lien doit être une adresse web complète (qui commence par https://).'; return false; }
   const km = kmSel === 'autre' ? Number(other) : Number(kmSel);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { S.msg.race2 = 'Choisis la date de la course.'; return false; }
   if (!(km > 0 && km < 300)) { S.msg.race2 = 'Indique la distance en km (par exemple 15 ou 32,5).'; return false; }
   const targetSec = tgt ? parseChrono(tgt) : null;
   if (tgt && targetSec == null) { S.msg.race2 = "Objectif non compris : écris par exemple 42'30 ou 1h35'00."; return false; }
-  S.races.push({ id: 'c' + Date.now().toString(36), name, date, km, targetSec: targetSec || null, result: 0, pr: false });
+  S.races.push({ id: 'c' + Date.now().toString(36), name, date, km, targetSec: targetSec || null, result: 0, pr: false, url: url || '' });
   S.msg.race2 = ''; S.ui.raceDraft = null;
   rebuildIndex(); saveStore();
   return true;

@@ -8,6 +8,7 @@ Liste tenue à jour avec Adrien. Ce qui est fait est rayé, avec la version.
 - Comptes et club : partager un plan avec le groupe, le coach voit qui a fait quelle séance.
 - Page de club : calendrier des courses du club, sorties collectives, plans du coach disponibles d'un clic.
 - Rappels de séance sur le téléphone (une fois installable).
+- ~~Lien vers la page de la course (Klikego, Finishers…)~~ (3.13)
 - Référentiel de courses : chercher une course par nom/lieu/date et pré-remplir date, distance, dénivelé (voir l'étude ci-dessous).
 
 ## Course à pied
@@ -37,3 +38,4 @@ Liste tenue à jour avec Adrien. Ce qui est fait est rayé, avec la version.
 - RunningMap.org : calendrier national des courses, publie un jeu de données sur data.gouv.fr (licence ouverte annoncée pour le site ; contenu, format et fraîcheur du jeu à vérifier).
 - Applis commerciales (Campus Coach…) : leur propre calendrier, sans accès ouvert.
 - Piste retenue : avec la version en ligne, chercher une course dans un jeu de données ouvert et pré-remplir nom, date, lieu, distance ; sinon un petit catalogue des courses du club, tenu à la main.
+- Klikego et Finishers (vérifié le 31/10/2026) : pas d'API publique ; Klikego revendique ses droits sur sa base (reproduction soumise à accord écrit). Retenu : un simple lien vers la page de la course.

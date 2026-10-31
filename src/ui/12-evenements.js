@@ -144,6 +144,12 @@ document.addEventListener('change', (ev) => {
     if (raw && sec == null) { toast('Chrono non compris'); return; }
     r.result = sec || 0; saveStore(); if (sec) toast('Chrono enregistré : ' + fmtHMS(sec)); render(); return;
   }
+  if (/^rurl-/.test(t.id)) {
+    const r = S.races.find((x) => x.id === t.id.slice(5)); if (!r) return;
+    const u = cleanUrl(t.value);
+    if (t.value.trim() && !u) { toast('Lien non valide : colle une adresse web complète'); return; }
+    r.url = u; saveStore(); toast(u ? 'Lien enregistré' : 'Lien retiré'); render(); return;
+  }
   if (/^rpr-/.test(t.id)) { const r = S.races.find((x) => x.id === t.id.slice(4)); if (r) { r.pr = t.checked; saveStore(); render(); } return; }
   if (t.id === 'vt-kind') { S.ui.vtKind = t.value; S.msg.vt = ''; render(); return; }
   if (t.id === 'pf-fcmax') {

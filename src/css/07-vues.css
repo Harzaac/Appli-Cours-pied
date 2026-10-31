@@ -92,3 +92,7 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 .vtlist li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
 .vtlist strong { font-family: var(--f-display); font-size: 24px; line-height: 1; }
 .vmachart { width: 100%; max-width: 420px; height: auto; background: var(--surface-2); border-radius: 12px; }
+
+.racelink { align-self: flex-start; font-size: 13px; font-weight: 700; color: var(--accent, var(--focus)); text-decoration: underline; overflow-wrap: anywhere; }
+.resultbox .racelink { color: inherit; }
+.field input[type="url"] { min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); padding: 0 12px; font-size: 15px; width: 100%; color: var(--ink); }

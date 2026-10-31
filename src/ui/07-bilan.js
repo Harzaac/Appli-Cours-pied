@@ -94,7 +94,7 @@ function planFollowHTML() {
 }
 function racesHTML() {
   const list = S.plans.filter((e) => e.plan.raceDate).map((e) => { const t = track(e.plan.raceDate); return { name: planName(e), date: e.plan.raceDate, km: MARATHON_KM, result: t.result, pr: t.pr, tgt: e.settings && e.settings.targetSec }; })
-    .concat(S.races.map((r) => ({ name: r.name, date: r.date, km: r.km, result: r.result, pr: r.pr, tgt: r.targetSec })))
+    .concat(S.races.map((r) => ({ name: r.name, date: r.date, km: r.km, result: r.result, pr: r.pr, tgt: r.targetSec, url: r.url })))
     .sort((a, b) => (a.date < b.date ? 1 : -1));
   const ref = S.profile && S.profile.ref;
   if (!list.length && !ref) return `<section class="card stack"><div><h2>Mes courses</h2><p class="sub">Tes courses et leurs chronos apparaîtront ici : ajoute un plan ou une course (Calendrier › Mes plans), puis saisis ton résultat le jour J.</p></div></section>`;
@@ -103,7 +103,7 @@ function racesHTML() {
     const diff = x.result && x.tgt ? x.result - x.tgt : null;
     const near = PRED_DISTS.reduce((a, d) => (Math.abs(d.km - x.km) < Math.abs(a.km - x.km) ? d : a), PRED_DISTS[0]);
     const vmaEq = x.result ? (x.km / (x.result / 3600)) / ((near.lo + near.hi) / 200) : null;
-    return `<li class="race${x.pr ? ' pr' : ''}"><div class="stack" style="gap:2px"><strong>${esc(x.name)}</strong><span class="sub">${esc(frDate(x.date, true))} · ${esc(raceKmLabel(x.km))}${x.tgt ? ' · objectif ' + esc(fmtHMS(x.tgt)) : ''}</span></div>
+    return `<li class="race${x.pr ? ' pr' : ''}"><div class="stack" style="gap:2px"><strong>${esc(x.name)}</strong><span class="sub">${esc(frDate(x.date, true))} · ${esc(raceKmLabel(x.km))}${x.tgt ? ' · objectif ' + esc(fmtHMS(x.tgt)) : ''}</span>${x.url ? raceLinkHTML(x) : ''}</div>
       <div class="raceres">${x.result ? `<span class="num big2">${esc(fmtHMS(x.result))}</span><span class="sub">${x.pr ? '<span class="badge ok">Record</span> ' : ''}${diff != null ? (diff <= 0 ? esc(fmtHMS(-diff)) + ' sous l\'objectif' : esc(fmtHMS(diff)) + ' au-dessus') + ' · ' : ''}VMA ≈ ${fmtVma(Math.round(vmaEq * 2) / 2)}</span>` : past ? `<button class="btn small" data-act="open" data-date="${x.date}">Saisir mon chrono</button>` : `<span class="sub">dans ${diffDays(x.date, TODAY)} jours</span>`}</div></li>`;
   }).join('');
   return `<section class="card stack"><div><h2>Mes courses</h2><p class="sub">Tes chronos, tes records, et la VMA qu'ils laissent supposer.</p></div>
