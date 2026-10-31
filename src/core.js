@@ -532,6 +532,31 @@ function shiftPlan(plan, delta) {
   if (c.raceDate) c.raceDate = addDays(c.raceDate, delta);
   return c;
 }
+// Plan de reprise après un marathon : 3 semaines de footings progressifs, à valider avec son coach.
+function buildRecoveryPlan(startMon, vma, nowIso) {
+  const foot = (min, pct) => [{ k: 'steady', min, pct: [pct, pct], raw: fmtMinPlain(min) + ' ' + pct + '% VMA' }];
+  const S_ = (cat, type, obj, steps) => ({ cat, type, obj, steps });
+  const R = null;
+  const weeks = [
+    [R, R, S_('footing', 'Footing', 'très facile, en aisance', foot(30, 65)), R, R, S_('footing', 'Footing', 'très facile, en aisance', foot(35, 65)), R],
+    [R, S_('footing', 'Footing', 'facile', foot(40, 65)), R, S_('footing', 'Footing', 'facile, avec lignes droites', foot(35, 65).concat([{ k: 'strides', n: 6, raw: '6 LD' }])), R, S_('footing', 'Footing', 'facile', foot(45, 65)), R],
+    [R, S_('footing', 'Footing', 'facile', foot(45, 65)), R, S_('vma', 'Fartlek léger', 'réveil musculaire, sans forcer', [{ k: 'warmup', min: 15, raw: '0h15 éch' }, { k: 'timed', sets: 1, n: 6, on: 60, off: 60, pct: [85, 85], raw: '6 x 1\'/1\' 85% VMA' }, { k: 'cooldown', min: 10, raw: 'retour au calme 0h10' }]), R, S_('footing', 'Footing', 'facile', foot(45, 65)), S_('long', 'Sortie longue', 'tranquille', foot(60, 65))],
+  ];
+  const DOWS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+  const plan = { app: 'appli-marathon', version: 1, kind: 'recovery', title: 'REPRISE APRÈS MARATHON', source: '', importedAt: nowIso || '', vma, levels: [], refs: [], vmaTable: null, raceDate: null, weeks: [] };
+  weeks.forEach((wk, n) => {
+    const start = addDays(startMon, 7 * n);
+    const days = wk.map((x, i) => {
+      const date = addDays(start, i);
+      if (!x) return { i, dow: DOWS[i], date, rest: true, category: 'rest', typeText: '', objective: '', lines: [], durationText: '', durationMin: null, steps: [] };
+      const min = x.steps.reduce((a, st) => a + (st.min || (st.k === 'timed' ? st.n * (st.on + st.off) / 60 : 0)), 0);
+      return { i, dow: DOWS[i], date, rest: false, category: x.cat, typeText: x.type, objective: x.obj, lines: x.steps.map((st) => st.raw), durationText: fmtMinPlain(min), durationMin: min, steps: x.steps };
+    });
+    plan.weeks.push({ id: 'R' + (n + 1), num: n + 1, general: false, label: 'Reprise ' + (n + 1), start, end: addDays(start, 6), totalMin: days.reduce((a, d) => a + (d.durationMin || 0), 0), assimilation: false, days });
+  });
+  return plan;
+}
+function fmtMinPlain(min) { const h = Math.floor(min / 60), m = Math.round(min % 60); return h + 'h' + String(m).padStart(2, '0'); }
 // « MARATHON DE LILLE 2026 » -> « Marathon de Lille »
 function raceLabel(plan) {
   const t = String((plan && plan.title) || '').replace(/\b(19|20)\d{2}\b/g, '').replace(/\s+/g, ' ').trim();
@@ -727,7 +752,7 @@ function describeStep(st, ctx) {
     case 'strides': out.title = st.n + ' lignes droites souples'; out.tone = 'easy'; break;
     case 'event': out.title = st.label; out.tone = 'event'; break;
     case 'race':
-      out.title = 'Marathon de Lille'; out.tone = 'race';
+      out.title = 'Marathon'; out.tone = 'race';
       out.sub.push(fmtHMS(ctx.marathon * MARATHON_KM) + ' · ' + fmtPace(ctx.marathon) + '/km');
       break;
     case 'text': out.title = st.raw; out.tone = 'fast'; out.sub.push('texte du coach'); break;
@@ -741,6 +766,6 @@ if (typeof module !== 'undefined') {
   module.exports = {
     buildPlan, parseLines, parseWeekSheet, parseSommaire, parseVmaSheet, describeStep, makeSettings, paceCtx,
     paceSecPerKm, fmtPace, fmtHMS, fmtMS, fmtMin, parseTarget, parsePaceInput, parseVmaInput, addDays, diffDays, readXlsx, norm,
-    planRange, mondayOf, shiftPlanToRace, shiftPlan, raceLabel, parseChrono, parseDurationMin,
+    planRange, mondayOf, shiftPlanToRace, shiftPlan, raceLabel, buildRecoveryPlan, parseChrono, parseDurationMin,
   };
 }

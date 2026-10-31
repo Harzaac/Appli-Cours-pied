@@ -52,7 +52,7 @@ log('G chevauchement au recalage:',(await p.textContent('.redate [role=alert]').
 await p.click('[data-act=redatecancel]');
 await p.screenshot({path:root+'/shots/v32-donnees.png',fullPage:false,clip:{x:0,y:480,width:1280,height:420}});
 // I. copie + restauration
-await p.click('.tabs [data-view=data]');const [dl]=await Promise.all([p.waitForEvent('download'),p.click('[data-act=htmlcopy]')]);await dl.saveAs(root+'/shots/v32-copie.html');
+await p.click('.tabs [data-view=data]');const [dl]=await Promise.all([p.waitForEvent('download'),(async()=>{await p.evaluate(()=>document.querySelectorAll('details.raw').forEach(d=>d.open=true));await p.click('[data-act=htmlcopy]');})()]);await dl.saveAs(root+'/shots/v32-copie.html');
 const c2=await b.newContext({viewport:{width:390,height:844}});const q=await c2.newPage();q.on('pageerror',e=>errs.push('mobile: '+e.message));await q.route(/open-meteo\.com|fonts\.g/,r=>r.abort());
 await q.addInitScript(()=>{window.__TODAY__='2026-10-31'});await q.goto('file://'+root+'/shots/v32-copie.html');await q.waitForSelector('.week');
 log('I copie ouverte: plans',await q.evaluate(()=>S.plans.length),'| notes',await q.evaluate(([a,b])=>[track(a).note,track(b).note].join(','),['2026-10-07',d2b]));

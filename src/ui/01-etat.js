@@ -77,6 +77,7 @@ const S = {
   tracking: saved.tracking || {},
   moves: saved.moves || {},
   logs: saved.logs && typeof saved.logs === 'object' ? saved.logs : {},
+  races: Array.isArray(saved.races) ? saved.races : [],
   profile: null,
   weather: saved.weather && typeof saved.weather === 'object' ? saved.weather : null,
   crest: typeof saved.crest === 'string' ? saved.crest : '',
@@ -116,7 +117,7 @@ function saveStore() {
   if (cur) { cur.plan = S.plan; cur.settings = S.settings; }
   // le profil suit la dernière VMA saisie
   if (S.settings && S.settings !== S.profile && S.settings.vma) S.profile.vma = S.settings.vma;
-  try { localStorage.setItem(KEY, JSON.stringify({ savedAt: new Date().toISOString(), profile: S.profile, logs: S.logs, plans: S.plans.map((e) => ({ id: e.id, plan: e.plan, settings: e.settings })), activeId: S.activeId, tracking: S.tracking, moves: S.moves, weather: S.weather, crest: S.crest, wx: S.wx, theme: S.ui.theme, accent: S.ui.accent, lastCopy: S.lastCopy, remindUntil: S.remindUntil, ctaOff: S.ctaOff })); } catch (e) { /* stockage indisponible */ }
+  try { localStorage.setItem(KEY, JSON.stringify({ savedAt: new Date().toISOString(), profile: S.profile, logs: S.logs, races: S.races, plans: S.plans.map((e) => ({ id: e.id, plan: e.plan, settings: e.settings })), activeId: S.activeId, tracking: S.tracking, moves: S.moves, weather: S.weather, crest: S.crest, wx: S.wx, theme: S.ui.theme, accent: S.ui.accent, lastCopy: S.lastCopy, remindUntil: S.remindUntil, ctaOff: S.ctaOff })); } catch (e) { /* stockage indisponible */ }
 }
 function planName(e) {
   const y = (e.plan.raceDate || rangeOf(e).end).slice(0, 4);
@@ -221,5 +222,6 @@ function lastRaceResult() {
     const t = d && S.tracking[d];
     if (t && t.result && (!best || d > best.date)) best = { date: d, sec: t.result, km: MARATHON_KM, pr: !!t.pr, name: planName(e), target: e.settings && e.settings.targetSec };
   });
+  S.races.forEach((r) => { if (r.result && r.date <= TODAY && (!best || r.date > best.date)) best = { date: r.date, sec: r.result, km: r.km, pr: !!r.pr, name: r.name, target: r.targetSec }; });
   return best;
 }

@@ -6,7 +6,7 @@ function emptyHeaderHTML() {
   if (!['plan', 'plans', 'vma', 'bilan', 'data'].includes(S.ui.view)) S.ui.view = 'plan';
   return `<header><div class="band"><div class="wrap"><div class="brandrow"><div class="brand">${APP_NAME}</div>
       <div class="tools"><button class="pill" data-act="tab" data-view="vma" aria-label="Mon niveau">${ICON.gauge}<span class="num">VMA ${fmtVma(S.settings.vma)}</span></button><button class="pill" data-act="theme">${dark ? ICON.sun + '<span>Clair</span>' : ICON.moon + '<span>Sombre</span>'}</button></div></div>
-      <div class="hero"><div class="herol">${crestHTML()}<div class="count empty"><span class="lbl"><strong>Pas de course prévue</strong><span>Ajoute le plan de ton coach : il se place tout seul dans le calendrier selon ta date de course.</span></span>
+      <div class="hero"><div class="herol">${crestHTML()}${(() => { const r = nextRace(); return r ? `<div class="count"><span class="big num">${diffDays(r.date, TODAY) > 0 ? 'J-' + diffDays(r.date, TODAY) : 'Jour J'}</span><span class="lbl"><strong>${esc(r.name)}</strong><span>${esc(frDate(r.date, true))} · ${esc(raceKmLabel(r.km))}${r.targetSec ? ' · objectif ' + esc(fmtHMS(r.targetSec)) : ''}</span></span></div><div class="count empty">` : '<div class="count empty"><span class="lbl"><strong>Pas de course prévue</strong><span>Ajoute le plan de ton coach : il se place tout seul dans le calendrier selon ta date de course.</span></span>'; })()}
         <div style="margin-top:12px"><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="pill" data-act="pickxlsx">${ICON.up}<span>Ajouter un plan</span></button> <button class="pill" data-act="tab" data-view="data">Restaurer mes données</button></div></div></div></div></div></div>
     <nav class="wrap tabs" aria-label="Sections">${tabsHTML(false)}</nav></header>`;
 }
@@ -21,7 +21,8 @@ function shellHTML() {
   if (S.imp.stage !== 'idle') body = importView();
   else if (S.ui.view === 'plan') body = S.ui.mode === 'week' ? weekView() : monthView();
   else if (S.ui.view === 'vma') body = vmaView();
-  else if (S.ui.view === 'race') body = raceView();
+  else if (S.ui.view === 'race' && S.plan.raceDate) body = raceView();
+  else if (S.ui.view === 'race') { S.ui.view = 'plan'; body = S.ui.mode === 'week' ? weekView() : monthView(); }
   else if (S.ui.view === 'bilan') body = bilanView();
   else if (S.ui.view === 'plans') body = plansView();
   else body = dataView();

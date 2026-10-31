@@ -69,7 +69,9 @@ function restoreFrom(text) {
     if (!raw || raw.app !== 'appli-marathon') throw new Error('format');
     const d = normalizeData(raw);
     const hasLogs = d.logs && typeof d.logs === 'object' && Object.keys(d.logs).length;
-    if (!d.plans.length && !hasLogs) throw new Error('format');
+    const hasRaces = Array.isArray(d.races) && d.races.length;
+    if (!d.plans.length && !hasLogs && !hasRaces) throw new Error('format');
+    S.races = hasRaces ? d.races : [];
     S.plans = d.plans;
     S.activeId = null; S.plan = null; S.settings = null;
     S.tracking = d.tracking || {};

@@ -33,6 +33,11 @@ document.addEventListener('click', (ev) => {
     case 'ravmode': { const r = ravSettings(); S.settings.rav = { mode: el.dataset.m, every: el.dataset.m === 'min' ? 30 : 5 }; S.msg.rav = ''; saveStore(); render(); break; }
     case 'printrace': try { window.print(); } catch (e) { S.msg.race = "L'impression n'est pas disponible ici : ouvre le fichier dans ton navigateur."; render(); } break;
     case 'copyrace': copyText(raceText(), () => { S.msg.race = 'Texte copié : colle-le dans tes notes ou un message.'; render(); }, () => { S.msg.race = 'La copie est bloquée ici. Ouvre le fichier dans ton navigateur.'; render(); }); break;
+    case 'raceadd': if (addRace()) { toast('Course ajoutée'); } render(); break;
+    case 'racedel': if (S.ui.confirmRace !== el.dataset.id) { S.ui.confirmRace = el.dataset.id; render(); } else { S.races = S.races.filter((r) => r.id !== el.dataset.id); S.ui.confirmRace = null; rebuildIndex(); saveStore(); toast('Course supprimée'); render(); } break;
+    case 'racedelcancel': S.ui.confirmRace = null; render(); break;
+    case 'racedraft': S.ui.raceDraft = el.dataset.date; S.ui.modal = null; S.ui.view = 'plans'; S.msg.race2 = ''; render(); { const c = document.getElementById('races-card'); if (c) c.scrollIntoView(); const n = document.getElementById('rc-name'); if (n) n.focus(); } break;
+    case 'recadd': { const err = addRecoveryPlan(((document.getElementById('rec-date') || {}).value || '')); S.msg.rec = err; if (!err) { S.ui.view = 'plan'; S.ui.mode = 'week'; toast('Plan de reprise ajouté'); } render(); if (!err) window.scrollTo(0, 0); break; }
     case 'lognew': S.ui.logEdit = { date: S.ui.modal, id: null, feel: 0 }; S.msg.log = ''; renderModal(); break;
     case 'logedit': { const l = logsOf(S.ui.modal).find((x) => x.id === el.dataset.id); if (l) { S.ui.logEdit = { date: S.ui.modal, id: l.id, feel: l.feel || 0 }; S.msg.log = ''; renderModal(); } break; }
     case 'logfeel': { const n = Number(el.dataset.n); if (S.ui.logEdit) { keepLogForm(); S.ui.logEdit.feel = S.ui.logEdit.feel === n ? 0 : n; renderModal(); restoreLogForm(); } break; }
@@ -75,17 +80,17 @@ document.addEventListener('click', (ev) => {
       try {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([backupText()], { type: 'application/json' }));
-        a.download = 'marathon-sauvegarde-' + TODAY + '.json';
+        a.download = profileFileName();
         S.lastCopy = TODAY; saveStore();
         document.body.appendChild(a); a.click(); a.remove();
-        S.msg.backup = 'Sauvegarde générée. Range le fichier à côté de ton Excel.';
+        S.msg.backup = 'Profil exporté : « ' + profileFileName() + ' ». Garde ce fichier, c\'est ta sauvegarde.'; toast('Profil exporté');
       } catch (e) { S.msg.backup = 'Le téléchargement est bloqué ici : ouvre l\'appli depuis ton disque.'; }
       render(); break;
     }
     case 'wipe':
       if (!S.ui.confirmWipe) { S.ui.confirmWipe = true; render(); break; }
       try { localStorage.removeItem(KEY); } catch (e) { /* rien */ }
-      S.plans = []; S.weeks = []; S.tracking = {}; S.moves = {}; S.logs = {}; S.profile = defaultProfile(); useProfile(); S.crest = ''; S.byDate = {}; S.ui.confirmWipe = false; S.ui.view = 'plan'; S.ui.modal = null; S.imp = { stage: 'idle' };
+      S.plans = []; S.weeks = []; S.tracking = {}; S.moves = {}; S.logs = {}; S.races = []; S.profile = defaultProfile(); useProfile(); S.crest = ''; S.byDate = {}; S.ui.confirmWipe = false; S.ui.view = 'plan'; S.ui.modal = null; S.imp = { stage: 'idle' };
       S.ui.weekId = null; S.ui.monthKey = null; rebuildIndex();
       render(); break;
     case 'wipecancel': S.ui.confirmWipe = false; render(); break;
@@ -120,6 +125,14 @@ document.addEventListener('change', (ev) => {
     if (sec == null) { S.msg.result = "Chrono non compris : écris par exemple 3h25'12 ou 3:25:12."; renderModal(); return; }
     setTrack(S.ui.modal, { result: sec, done: true, skipped: false }); S.msg.result = ''; toast('Chrono enregistré : ' + fmtHMS(sec)); render(); return;
   }
+  if (/^rres-/.test(t.id)) {
+    const r = S.races.find((x) => x.id === t.id.slice(5)); if (!r) return;
+    const raw = t.value.trim(); const sec = raw ? parseChrono(raw) : 0;
+    if (raw && sec == null) { toast('Chrono non compris'); return; }
+    r.result = sec || 0; saveStore(); if (sec) toast('Chrono enregistré : ' + fmtHMS(sec)); render(); return;
+  }
+  if (/^rpr-/.test(t.id)) { const r = S.races.find((x) => x.id === t.id.slice(4)); if (r) { r.pr = t.checked; saveStore(); render(); } return; }
+  if (t.id === 'pf-name' || t.id === 'pf-club') { S.profile[t.id === 'pf-name' ? 'name' : 'club'] = t.value.trim(); saveStore(); toast('Profil enregistré'); render(); return; }
   if (t.id === 'note-input' && S.ui.modal) { toast('Note enregistrée'); return; }
   if (t.id === 'race-pr' && S.ui.modal) { setTrack(S.ui.modal, { pr: t.checked }); render(); return; }
   if (t.id === 'vma-input') {

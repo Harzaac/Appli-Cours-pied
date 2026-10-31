@@ -11,6 +11,7 @@ function weekActivity(mon) {
       if (ref.day.category === 'race') { min += t.result ? t.result / 60 : 0; km += MARATHON_KM; } else min += ref.day.durationMin || 0;
     }
     logsOf(d).forEach((l) => { n++; min += l.min || 0; km += l.km || 0; });
+    racesOn(d).forEach((r) => { if (r.result) { n++; min += r.result / 60; km += r.km; } });
   }
   return { mon, min: Math.round(min), km, n };
 }
@@ -92,19 +93,22 @@ function planFollowHTML() {
     <div class="bars">${rows}</div></section>`;
 }
 function racesHTML() {
-  const races = S.plans.filter((e) => e.plan.raceDate).map((e) => ({ e, date: e.plan.raceDate, t: track(e.plan.raceDate), tgt: e.settings && e.settings.targetSec })).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const list = S.plans.filter((e) => e.plan.raceDate).map((e) => { const t = track(e.plan.raceDate); return { name: planName(e), date: e.plan.raceDate, km: MARATHON_KM, result: t.result, pr: t.pr, tgt: e.settings && e.settings.targetSec }; })
+    .concat(S.races.map((r) => ({ name: r.name, date: r.date, km: r.km, result: r.result, pr: r.pr, tgt: r.targetSec })))
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
   const ref = S.profile && S.profile.ref;
-  if (!races.length && !ref) return `<section class="card stack"><div><h2>Mes courses</h2><p class="sub">Tes courses et leurs chronos apparaîtront ici : ajoute un plan, puis saisis ton résultat le jour J.</p></div></section>`;
-  const items = races.map(({ e, date, t, tgt }) => {
-    const past = date <= TODAY;
-    const diff = t.result && tgt ? t.result - tgt : null;
-    const vmaEq = t.result ? (MARATHON_KM / (t.result / 3600)) / 0.775 : null;
-    return `<li class="race${t.pr ? ' pr' : ''}"><div class="stack" style="gap:2px"><strong>${esc(planName(e))}</strong><span class="sub">${esc(frDate(date, true))}${tgt ? ' · objectif ' + esc(fmtHMS(tgt)) : ''}</span></div>
-      <div class="raceres">${t.result ? `<span class="num big2">${esc(fmtHMS(t.result))}</span><span class="sub">${t.pr ? '<span class="badge ok">Record</span> ' : ''}${diff != null ? (diff <= 0 ? esc(fmtHMS(-diff)) + ' sous l\'objectif' : esc(fmtHMS(diff)) + ' au-dessus') : ''}${vmaEq ? ' · VMA ≈ ' + fmtVma(Math.round(vmaEq * 2) / 2) : ''}</span>` : past ? `<button class="btn small" data-act="open" data-date="${date}">Saisir mon chrono</button>` : `<span class="sub">dans ${diffDays(date, TODAY)} jours</span>`}</div></li>`;
+  if (!list.length && !ref) return `<section class="card stack"><div><h2>Mes courses</h2><p class="sub">Tes courses et leurs chronos apparaîtront ici : ajoute un plan ou une course (Calendrier › Mes plans), puis saisis ton résultat le jour J.</p></div></section>`;
+  const items = list.map((x) => {
+    const past = x.date <= TODAY;
+    const diff = x.result && x.tgt ? x.result - x.tgt : null;
+    const near = PRED_DISTS.reduce((a, d) => (Math.abs(d.km - x.km) < Math.abs(a.km - x.km) ? d : a), PRED_DISTS[0]);
+    const vmaEq = x.result ? (x.km / (x.result / 3600)) / ((near.lo + near.hi) / 200) : null;
+    return `<li class="race${x.pr ? ' pr' : ''}"><div class="stack" style="gap:2px"><strong>${esc(x.name)}</strong><span class="sub">${esc(frDate(x.date, true))} · ${esc(raceKmLabel(x.km))}${x.tgt ? ' · objectif ' + esc(fmtHMS(x.tgt)) : ''}</span></div>
+      <div class="raceres">${x.result ? `<span class="num big2">${esc(fmtHMS(x.result))}</span><span class="sub">${x.pr ? '<span class="badge ok">Record</span> ' : ''}${diff != null ? (diff <= 0 ? esc(fmtHMS(-diff)) + ' sous l\'objectif' : esc(fmtHMS(diff)) + ' au-dessus') + ' · ' : ''}VMA ≈ ${fmtVma(Math.round(vmaEq * 2) / 2)}</span>` : past ? `<button class="btn small" data-act="open" data-date="${x.date}">Saisir mon chrono</button>` : `<span class="sub">dans ${diffDays(x.date, TODAY)} jours</span>`}</div></li>`;
   }).join('');
   return `<section class="card stack"><div><h2>Mes courses</h2><p class="sub">Tes chronos, tes records, et la VMA qu'ils laissent supposer.</p></div>
     <ul class="races">${items}</ul>
-    ${ref ? `<p class="sub">Course de référence des prédictions : ${esc(fmtHMS(ref.sec))} sur ${esc(String(ref.km).replace('.', ',').replace(/(\.\d)\d+/, '$1'))} km (onglet VMA).</p>` : ''}</section>`;
+    ${ref ? `<p class="sub">Course de référence des prédictions : ${esc(fmtHMS(ref.sec))} sur ${esc(raceKmLabel(ref.km))} (onglet VMA).</p>` : ''}</section>`;
 }
 function notesHTML() {
   const items = [];

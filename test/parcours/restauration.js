@@ -7,9 +7,9 @@ await p.setInputFiles('#file-xlsx',root+'/test/donnees/plan-test.xlsx');await p.
 await p.evaluate(()=>{setTrack('2026-10-07',{done:true,note:'MA-NOTE'});S.ui.accent='braise';saveStore();render();});
 await p.click('[data-act=tab][data-view=data]');
 await p.screenshot({path:root+'/shots/v27-donnees.png',clip:{x:0,y:480,width:1280,height:520}});
-const [d1]=await Promise.all([p.waitForEvent('download'),p.click('[data-act=htmlcopy]')]);await d1.saveAs(root+'/shots/r-copie.html');
-const [d2]=await Promise.all([p.waitForEvent('download'),p.click('[data-act=htmlcoach]')]);await d2.saveAs(root+'/shots/r-coach.html');
-await p.click('details.raw:has-text("Autre format") summary');
+const [d1]=await Promise.all([p.waitForEvent('download'),(async()=>{await p.evaluate(()=>document.querySelectorAll('details.raw').forEach(d=>d.open=true));await p.click('[data-act=htmlcopy]');})()]);await d1.saveAs(root+'/shots/r-copie.html');
+const [d2]=await Promise.all([p.waitForEvent('download'),(async()=>{await p.evaluate(()=>document.querySelectorAll('details.raw').forEach(d=>d.open=true));await p.click('[data-act=htmlcoach]');})()]);await d2.saveAs(root+'/shots/r-coach.html');
+
 const [d3]=await Promise.all([p.waitForEvent('download'),p.click('[data-act=download]')]);await d3.saveAs(root+'/shots/r-save.json');
 console.log('textarea restante:',await p.$$eval('textarea.json',e=>e.length));
 // nouvelle version = fichier vierge, contexte neuf

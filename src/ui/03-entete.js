@@ -10,13 +10,20 @@ function headerHTML() {
   const n = plan.raceDate ? diffDays(plan.raceDate, TODAY) : null;
   const res = plan.raceDate ? track(plan.raceDate) : {};
   const chrono = n != null && n <= 0 && res.result;
-  const big = n == null ? '' : chrono ? fmtHMS(res.result) : n > 0 ? 'J-' + n : n === 0 ? 'Jour J' : 'Bravo';
+  let big = n == null ? '' : chrono ? fmtHMS(res.result) : n > 0 ? 'J-' + n : n === 0 ? 'Jour J' : 'Bravo';
   const tgt = S.settings && S.settings.targetSec;
-  const lbl = n == null ? '' : chrono
+  let lbl = n == null ? '' : chrono
     ? '<strong>' + esc(raceNameOf()) + (res.pr ? ' · record personnel' : '') + '</strong><span>' + frDate(plan.raceDate, true) + (tgt ? ' · objectif ' + fmtHMS(tgt) : '') + '</span>'
     : n >= 0
     ? '<strong>' + (n === 0 ? 'Aujourd\'hui, c\'est la course' : 'avant le marathon') + '</strong><span>' + frDate(plan.raceDate, true) + '</span>'
     : '<strong>Marathon couru</strong><span>' + frDate(plan.raceDate, true) + ' · <button class="linkbtn onband" data-act="open" data-date="' + plan.raceDate + '">saisir mon chrono</button></span>';
+  // plan sans course (plan de reprise) : on montre la semaine en cours du plan
+  if (!plan.raceDate) {
+    const ws = plan.weeks, k = ws.findIndex((w) => TODAY >= w.start && TODAY <= w.end);
+    if (TODAY < ws[0].start) { const d = diffDays(ws[0].start, TODAY); big = 'J-' + d; lbl = '<strong>avant le début du plan</strong><span>' + esc(planName(curEntry())) + ' · ' + frDate(ws[0].start, true) + '</span>'; }
+    else if (k >= 0) { big = 'S' + (k + 1); lbl = '<strong>semaine ' + (k + 1) + ' sur ' + ws.length + '</strong><span>' + esc(planName(curEntry())) + ' · jusqu\'au ' + frDate(ws[ws.length - 1].end) + '</span>'; }
+    else { big = 'Fini'; lbl = '<strong>plan terminé</strong><span>' + esc(planName(curEntry())) + '</span>'; }
+  }
   const nx = nextSession();
   let next = '';
   if (nx) {
@@ -40,7 +47,7 @@ function headerHTML() {
       <div class="hero"><div class="herol">${crestHTML()}<div class="count"><span class="big num${chrono ? ' chrono' : ''}">${big}</span><span class="lbl">${lbl}</span></div></div>${next}</div>
     </div></div>
     <nav class="wrap tabs" aria-label="Sections">
-      ${tabsHTML(true)}
+      ${tabsHTML(!!plan.raceDate)}
     </nav></header>`;
 }
 
@@ -90,5 +97,5 @@ function nextSession() {
   return null;
 }
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.7</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.8</p></div></footer>`;
 }

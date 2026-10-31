@@ -1056,6 +1056,31 @@ function shiftPlan(plan, delta) {
   if (c.raceDate) c.raceDate = addDays(c.raceDate, delta);
   return c;
 }
+// Plan de reprise après un marathon : 3 semaines de footings progressifs, à valider avec son coach.
+function buildRecoveryPlan(startMon, vma, nowIso) {
+  const foot = (min, pct) => [{ k: 'steady', min, pct: [pct, pct], raw: fmtMinPlain(min) + ' ' + pct + '% VMA' }];
+  const S_ = (cat, type, obj, steps) => ({ cat, type, obj, steps });
+  const R = null;
+  const weeks = [
+    [R, R, S_('footing', 'Footing', 'très facile, en aisance', foot(30, 65)), R, R, S_('footing', 'Footing', 'très facile, en aisance', foot(35, 65)), R],
+    [R, S_('footing', 'Footing', 'facile', foot(40, 65)), R, S_('footing', 'Footing', 'facile, avec lignes droites', foot(35, 65).concat([{ k: 'strides', n: 6, raw: '6 LD' }])), R, S_('footing', 'Footing', 'facile', foot(45, 65)), R],
+    [R, S_('footing', 'Footing', 'facile', foot(45, 65)), R, S_('vma', 'Fartlek léger', 'réveil musculaire, sans forcer', [{ k: 'warmup', min: 15, raw: '0h15 éch' }, { k: 'timed', sets: 1, n: 6, on: 60, off: 60, pct: [85, 85], raw: '6 x 1\'/1\' 85% VMA' }, { k: 'cooldown', min: 10, raw: 'retour au calme 0h10' }]), R, S_('footing', 'Footing', 'facile', foot(45, 65)), S_('long', 'Sortie longue', 'tranquille', foot(60, 65))],
+  ];
+  const DOWS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+  const plan = { app: 'appli-marathon', version: 1, kind: 'recovery', title: 'REPRISE APRÈS MARATHON', source: '', importedAt: nowIso || '', vma, levels: [], refs: [], vmaTable: null, raceDate: null, weeks: [] };
+  weeks.forEach((wk, n) => {
+    const start = addDays(startMon, 7 * n);
+    const days = wk.map((x, i) => {
+      const date = addDays(start, i);
+      if (!x) return { i, dow: DOWS[i], date, rest: true, category: 'rest', typeText: '', objective: '', lines: [], durationText: '', durationMin: null, steps: [] };
+      const min = x.steps.reduce((a, st) => a + (st.min || (st.k === 'timed' ? st.n * (st.on + st.off) / 60 : 0)), 0);
+      return { i, dow: DOWS[i], date, rest: false, category: x.cat, typeText: x.type, objective: x.obj, lines: x.steps.map((st) => st.raw), durationText: fmtMinPlain(min), durationMin: min, steps: x.steps };
+    });
+    plan.weeks.push({ id: 'R' + (n + 1), num: n + 1, general: false, label: 'Reprise ' + (n + 1), start, end: addDays(start, 6), totalMin: days.reduce((a, d) => a + (d.durationMin || 0), 0), assimilation: false, days });
+  });
+  return plan;
+}
+function fmtMinPlain(min) { const h = Math.floor(min / 60), m = Math.round(min % 60); return h + 'h' + String(m).padStart(2, '0'); }
 // « MARATHON DE LILLE 2026 » -> « Marathon de Lille »
 function raceLabel(plan) {
   const t = String((plan && plan.title) || '').replace(/\b(19|20)\d{2}\b/g, '').replace(/\s+/g, ' ').trim();
@@ -1251,7 +1276,7 @@ function describeStep(st, ctx) {
     case 'strides': out.title = st.n + ' lignes droites souples'; out.tone = 'easy'; break;
     case 'event': out.title = st.label; out.tone = 'event'; break;
     case 'race':
-      out.title = 'Marathon de Lille'; out.tone = 'race';
+      out.title = 'Marathon'; out.tone = 'race';
       out.sub.push(fmtHMS(ctx.marathon * MARATHON_KM) + ' · ' + fmtPace(ctx.marathon) + '/km');
       break;
     case 'text': out.title = st.raw; out.tone = 'fast'; out.sub.push('texte du coach'); break;
@@ -1265,7 +1290,7 @@ if (typeof module !== 'undefined') {
   module.exports = {
     buildPlan, parseLines, parseWeekSheet, parseSommaire, parseVmaSheet, describeStep, makeSettings, paceCtx,
     paceSecPerKm, fmtPace, fmtHMS, fmtMS, fmtMin, parseTarget, parsePaceInput, parseVmaInput, addDays, diffDays, readXlsx, norm,
-    planRange, mondayOf, shiftPlanToRace, shiftPlan, raceLabel, parseChrono, parseDurationMin,
+    planRange, mondayOf, shiftPlanToRace, shiftPlan, raceLabel, buildRecoveryPlan, parseChrono, parseDurationMin,
   };
 }
 
@@ -1543,6 +1568,7 @@ const S = {
   tracking: saved.tracking || {},
   moves: saved.moves || {},
   logs: saved.logs && typeof saved.logs === 'object' ? saved.logs : {},
+  races: Array.isArray(saved.races) ? saved.races : [],
   profile: null,
   weather: saved.weather && typeof saved.weather === 'object' ? saved.weather : null,
   crest: typeof saved.crest === 'string' ? saved.crest : '',
@@ -1582,7 +1608,7 @@ function saveStore() {
   if (cur) { cur.plan = S.plan; cur.settings = S.settings; }
   // le profil suit la dernière VMA saisie
   if (S.settings && S.settings !== S.profile && S.settings.vma) S.profile.vma = S.settings.vma;
-  try { localStorage.setItem(KEY, JSON.stringify({ savedAt: new Date().toISOString(), profile: S.profile, logs: S.logs, plans: S.plans.map((e) => ({ id: e.id, plan: e.plan, settings: e.settings })), activeId: S.activeId, tracking: S.tracking, moves: S.moves, weather: S.weather, crest: S.crest, wx: S.wx, theme: S.ui.theme, accent: S.ui.accent, lastCopy: S.lastCopy, remindUntil: S.remindUntil, ctaOff: S.ctaOff })); } catch (e) { /* stockage indisponible */ }
+  try { localStorage.setItem(KEY, JSON.stringify({ savedAt: new Date().toISOString(), profile: S.profile, logs: S.logs, races: S.races, plans: S.plans.map((e) => ({ id: e.id, plan: e.plan, settings: e.settings })), activeId: S.activeId, tracking: S.tracking, moves: S.moves, weather: S.weather, crest: S.crest, wx: S.wx, theme: S.ui.theme, accent: S.ui.accent, lastCopy: S.lastCopy, remindUntil: S.remindUntil, ctaOff: S.ctaOff })); } catch (e) { /* stockage indisponible */ }
 }
 function planName(e) {
   const y = (e.plan.raceDate || rangeOf(e).end).slice(0, 4);
@@ -1687,6 +1713,7 @@ function lastRaceResult() {
     const t = d && S.tracking[d];
     if (t && t.result && (!best || d > best.date)) best = { date: d, sec: t.result, km: MARATHON_KM, pr: !!t.pr, name: planName(e), target: e.settings && e.settings.targetSec };
   });
+  S.races.forEach((r) => { if (r.result && r.date <= TODAY && (!best || r.date > best.date)) best = { date: r.date, sec: r.result, km: r.km, pr: !!r.pr, name: r.name, target: r.targetSec }; });
   return best;
 }
 
@@ -1814,13 +1841,20 @@ function headerHTML() {
   const n = plan.raceDate ? diffDays(plan.raceDate, TODAY) : null;
   const res = plan.raceDate ? track(plan.raceDate) : {};
   const chrono = n != null && n <= 0 && res.result;
-  const big = n == null ? '' : chrono ? fmtHMS(res.result) : n > 0 ? 'J-' + n : n === 0 ? 'Jour J' : 'Bravo';
+  let big = n == null ? '' : chrono ? fmtHMS(res.result) : n > 0 ? 'J-' + n : n === 0 ? 'Jour J' : 'Bravo';
   const tgt = S.settings && S.settings.targetSec;
-  const lbl = n == null ? '' : chrono
+  let lbl = n == null ? '' : chrono
     ? '<strong>' + esc(raceNameOf()) + (res.pr ? ' · record personnel' : '') + '</strong><span>' + frDate(plan.raceDate, true) + (tgt ? ' · objectif ' + fmtHMS(tgt) : '') + '</span>'
     : n >= 0
     ? '<strong>' + (n === 0 ? 'Aujourd\'hui, c\'est la course' : 'avant le marathon') + '</strong><span>' + frDate(plan.raceDate, true) + '</span>'
     : '<strong>Marathon couru</strong><span>' + frDate(plan.raceDate, true) + ' · <button class="linkbtn onband" data-act="open" data-date="' + plan.raceDate + '">saisir mon chrono</button></span>';
+  // plan sans course (plan de reprise) : on montre la semaine en cours du plan
+  if (!plan.raceDate) {
+    const ws = plan.weeks, k = ws.findIndex((w) => TODAY >= w.start && TODAY <= w.end);
+    if (TODAY < ws[0].start) { const d = diffDays(ws[0].start, TODAY); big = 'J-' + d; lbl = '<strong>avant le début du plan</strong><span>' + esc(planName(curEntry())) + ' · ' + frDate(ws[0].start, true) + '</span>'; }
+    else if (k >= 0) { big = 'S' + (k + 1); lbl = '<strong>semaine ' + (k + 1) + ' sur ' + ws.length + '</strong><span>' + esc(planName(curEntry())) + ' · jusqu\'au ' + frDate(ws[ws.length - 1].end) + '</span>'; }
+    else { big = 'Fini'; lbl = '<strong>plan terminé</strong><span>' + esc(planName(curEntry())) + '</span>'; }
+  }
   const nx = nextSession();
   let next = '';
   if (nx) {
@@ -1844,7 +1878,7 @@ function headerHTML() {
       <div class="hero"><div class="herol">${crestHTML()}<div class="count"><span class="big num${chrono ? ' chrono' : ''}">${big}</span><span class="lbl">${lbl}</span></div></div>${next}</div>
     </div></div>
     <nav class="wrap tabs" aria-label="Sections">
-      ${tabsHTML(true)}
+      ${tabsHTML(!!plan.raceDate)}
     </nav></header>`;
 }
 
@@ -1894,7 +1928,7 @@ function nextSession() {
   return null;
 }
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.7</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.8</p></div></footer>`;
 }
 
 /* ----- Plan : semaine ----- */
@@ -1982,7 +2016,8 @@ function dayCard(day) {
   const head = `<div class="dhead"><div><span class="dow">${DOW_SHORT[day.i]}</span><span class="dnum num">${parseISO(day.date).getUTCDate()}</span></div><div class="dright">${tr.skipped && !tr.done ? `<span class="tick skip" title="Séance sautée">${ICON.cross}<span class="sr">Séance sautée</span></span>` : ''}${qc}</div></div>`;
   const movedTag = day.from ? `<span class="badge moved">Décalée depuis ${DOW_SHORT[weekdayIndex(day.from)].toLowerCase()}.</span>` : '';
   const logs = logsOf(day.date);
-  const logChips = logs.length ? `<ul class="loglist">${logs.map((l) => `<li><span class="chip c-free">${esc(logLine(l))}</span></li>`).join('')}</ul>` : '';
+  const dayRaces = racesOn(day.date);
+  const logChips = logs.length || dayRaces.length ? `<ul class="loglist">${dayRaces.map((r) => `<li>${raceChip(r)}</li>`).join('')}${logs.map((l) => `<li><span class="chip c-free">${esc(logLine(l))}</span></li>`).join('')}</ul>` : '';
   const dayLbl = DOW[day.i].toLowerCase() + ' ' + parseISO(day.date).getUTCDate();
   if (day.free) return `<article class="dcard rest free${day.date === TODAY ? ' today' : ''}${logs.length ? ' haslog' : ''}" data-act="open" data-date="${day.date}"><div class="dhead"><div><span class="dow">${DOW_SHORT[day.i]}</span><span class="dnum num">${parseISO(day.date).getUTCDate()}</span></div></div>${wxMini(day.date, false)}${logChips || '<p class="restlabel">Libre</p>'}<button class="addlog" data-act="open" data-date="${day.date}" aria-label="Noter une sortie le ${dayLbl}">+ Noter une sortie</button></article>`;
   if (day.rest) return `<article class="${cls.join(' ')}${logs.length ? ' haslog' : ''}"${slot}${target ? '' : ` data-act="open" data-date="${day.date}"`}>${head}${wxMini(day.date, false)}${logChips || '<p class="restlabel">Repos</p>'}${target ? '' : `<button class="addlog" data-act="open" data-date="${day.date}" aria-label="Noter une sortie le ${dayLbl}">+ Noter une sortie</button>`}${target ? `<button class="btn small" data-act="moveto" data-date="${day.date}">Placer ici</button>` : ''}</article>`;
@@ -1992,6 +2027,7 @@ function dayCard(day) {
     <div class="stack" style="gap:6px"><span class="chip c-${day.category}" style="align-self:flex-start">${esc(dayChipLabel(day))}</span>${movedTag}
     <div class="dur num">${esc(dayDuration(day))}</div>${day.objective ? `<div class="obj">${esc(day.objective)}</div>` : ''}</div>
     ${stepsCompact(day)}
+    ${dayRaces.length ? `<ul class="loglist">${dayRaces.map((r) => `<li>${raceChip(r)}</li>`).join('')}</ul>` : ''}
     ${logs.length ? `<div class="sub">+ ${esc(logs.map(logLine).join(', '))}</div>` : ''}
     ${act}</article>`;
 }
@@ -2075,8 +2111,9 @@ function monthView() {
     } else {
       const real = ref && !ref.day.free;
       const lg = logsOf(date);
-      if (!real && !lg.length) cls.push('empty');
-      const inner = `<span class="n num"><span>${n}</span></span>${lg.length ? `<span><span class="chip c-free">${esc(logTypeLabel(lg[0].type))}${lg.length > 1 ? ' +' + (lg.length - 1) : ''}</span><span class="dd num" style="display:block;margin-top:4px">${esc(lg[0].min ? fmtMin(lg[0].min) : lg[0].km ? String(lg[0].km).replace('.', ',') + ' km' : '')}</span></span>` : real ? '<span class="dd">Repos</span>' : ''}${ref ? wxMonth(date) : ''}`;
+      const rc = racesOn(date);
+      if (!real && !lg.length && !rc.length) cls.push('empty');
+      const inner = `<span class="n num"><span>${n}</span></span>${rc.length ? `<span><span class="chip c-race">${esc(rc[0].name)}</span><span class="dot d-race"></span></span>` : lg.length ? `<span><span class="chip c-free">${esc(logTypeLabel(lg[0].type))}${lg.length > 1 ? ' +' + (lg.length - 1) : ''}</span><span class="dd num" style="display:block;margin-top:4px">${esc(lg[0].min ? fmtMin(lg[0].min) : lg[0].km ? String(lg[0].km).replace('.', ',') + ' km' : '')}</span></span>` : real ? '<span class="dd">Repos</span>' : ''}${ref ? wxMonth(date) : ''}`;
       cells.push(ref ? `<button class="${cls.join(' ')}" data-act="open" data-date="${date}" aria-label="${esc(frDate(date, true))}${lg.length ? ' : ' + esc(lg.map(logLine).join(', ')) : ''}">${inner}</button>` : `<div class="${cls.join(' ')}">${inner}</div>`);
     }
   }
@@ -2142,6 +2179,7 @@ function modalHTML() {
         <div class="feel" role="group" aria-label="Sensations">${FEELS.map((f, i) => `<button data-act="feel" data-n="${i + 1}" aria-pressed="${tr.feel === i + 1}">${f}</button>`).join('')}</div></div>
       <div class="field"><label for="note-input">Notes</label><textarea class="note" id="note-input" placeholder="Allure réelle, terrain, fatigue…">${esc(tr.note || '')}</textarea></div>
     </div>`}
+    ${racesModalHTML(date)}
     ${logsHTML(date, day)}
   </div></div>`;
 }
@@ -2174,7 +2212,7 @@ function logsHTML(date, day) {
       <div class="row"><button class="btn small" data-act="logedit" data-id="${esc(l.id)}">Modifier</button><button class="btn small" data-act="logdel" data-id="${esc(l.id)}">Supprimer</button></div></li>`).join('');
   return `<section class="stack logsec"><div style="font-weight:700">${title}</div>
     ${items ? `<ul class="logitems">${items}</ul>` : ''}
-    ${form || `<div><button class="btn small" data-act="lognew">+ Noter une sortie</button></div>`}</section>`;
+    ${form || `<div class="row"><button class="btn small" data-act="lognew">+ Noter une sortie</button><button class="btn small" data-act="racedraft" data-date="${date}">+ Ajouter une course ce jour-là</button></div>`}</section>`;
 }
 function saveLog() {
   const ed = S.ui.logEdit;
@@ -2453,6 +2491,7 @@ function weekActivity(mon) {
       if (ref.day.category === 'race') { min += t.result ? t.result / 60 : 0; km += MARATHON_KM; } else min += ref.day.durationMin || 0;
     }
     logsOf(d).forEach((l) => { n++; min += l.min || 0; km += l.km || 0; });
+    racesOn(d).forEach((r) => { if (r.result) { n++; min += r.result / 60; km += r.km; } });
   }
   return { mon, min: Math.round(min), km, n };
 }
@@ -2534,19 +2573,22 @@ function planFollowHTML() {
     <div class="bars">${rows}</div></section>`;
 }
 function racesHTML() {
-  const races = S.plans.filter((e) => e.plan.raceDate).map((e) => ({ e, date: e.plan.raceDate, t: track(e.plan.raceDate), tgt: e.settings && e.settings.targetSec })).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const list = S.plans.filter((e) => e.plan.raceDate).map((e) => { const t = track(e.plan.raceDate); return { name: planName(e), date: e.plan.raceDate, km: MARATHON_KM, result: t.result, pr: t.pr, tgt: e.settings && e.settings.targetSec }; })
+    .concat(S.races.map((r) => ({ name: r.name, date: r.date, km: r.km, result: r.result, pr: r.pr, tgt: r.targetSec })))
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
   const ref = S.profile && S.profile.ref;
-  if (!races.length && !ref) return `<section class="card stack"><div><h2>Mes courses</h2><p class="sub">Tes courses et leurs chronos apparaîtront ici : ajoute un plan, puis saisis ton résultat le jour J.</p></div></section>`;
-  const items = races.map(({ e, date, t, tgt }) => {
-    const past = date <= TODAY;
-    const diff = t.result && tgt ? t.result - tgt : null;
-    const vmaEq = t.result ? (MARATHON_KM / (t.result / 3600)) / 0.775 : null;
-    return `<li class="race${t.pr ? ' pr' : ''}"><div class="stack" style="gap:2px"><strong>${esc(planName(e))}</strong><span class="sub">${esc(frDate(date, true))}${tgt ? ' · objectif ' + esc(fmtHMS(tgt)) : ''}</span></div>
-      <div class="raceres">${t.result ? `<span class="num big2">${esc(fmtHMS(t.result))}</span><span class="sub">${t.pr ? '<span class="badge ok">Record</span> ' : ''}${diff != null ? (diff <= 0 ? esc(fmtHMS(-diff)) + ' sous l\'objectif' : esc(fmtHMS(diff)) + ' au-dessus') : ''}${vmaEq ? ' · VMA ≈ ' + fmtVma(Math.round(vmaEq * 2) / 2) : ''}</span>` : past ? `<button class="btn small" data-act="open" data-date="${date}">Saisir mon chrono</button>` : `<span class="sub">dans ${diffDays(date, TODAY)} jours</span>`}</div></li>`;
+  if (!list.length && !ref) return `<section class="card stack"><div><h2>Mes courses</h2><p class="sub">Tes courses et leurs chronos apparaîtront ici : ajoute un plan ou une course (Calendrier › Mes plans), puis saisis ton résultat le jour J.</p></div></section>`;
+  const items = list.map((x) => {
+    const past = x.date <= TODAY;
+    const diff = x.result && x.tgt ? x.result - x.tgt : null;
+    const near = PRED_DISTS.reduce((a, d) => (Math.abs(d.km - x.km) < Math.abs(a.km - x.km) ? d : a), PRED_DISTS[0]);
+    const vmaEq = x.result ? (x.km / (x.result / 3600)) / ((near.lo + near.hi) / 200) : null;
+    return `<li class="race${x.pr ? ' pr' : ''}"><div class="stack" style="gap:2px"><strong>${esc(x.name)}</strong><span class="sub">${esc(frDate(x.date, true))} · ${esc(raceKmLabel(x.km))}${x.tgt ? ' · objectif ' + esc(fmtHMS(x.tgt)) : ''}</span></div>
+      <div class="raceres">${x.result ? `<span class="num big2">${esc(fmtHMS(x.result))}</span><span class="sub">${x.pr ? '<span class="badge ok">Record</span> ' : ''}${diff != null ? (diff <= 0 ? esc(fmtHMS(-diff)) + ' sous l\'objectif' : esc(fmtHMS(diff)) + ' au-dessus') + ' · ' : ''}VMA ≈ ${fmtVma(Math.round(vmaEq * 2) / 2)}</span>` : past ? `<button class="btn small" data-act="open" data-date="${x.date}">Saisir mon chrono</button>` : `<span class="sub">dans ${diffDays(x.date, TODAY)} jours</span>`}</div></li>`;
   }).join('');
   return `<section class="card stack"><div><h2>Mes courses</h2><p class="sub">Tes chronos, tes records, et la VMA qu'ils laissent supposer.</p></div>
     <ul class="races">${items}</ul>
-    ${ref ? `<p class="sub">Course de référence des prédictions : ${esc(fmtHMS(ref.sec))} sur ${esc(String(ref.km).replace('.', ',').replace(/(\.\d)\d+/, '$1'))} km (onglet VMA).</p>` : ''}</section>`;
+    ${ref ? `<p class="sub">Course de référence des prédictions : ${esc(fmtHMS(ref.sec))} sur ${esc(raceKmLabel(ref.km))} (onglet VMA).</p>` : ''}</section>`;
 }
 function notesHTML() {
   const items = [];
@@ -2585,15 +2627,15 @@ function backupBanner() {
   if (n < 3) return '';
   if (S.lastCopy && diffDays(TODAY, S.lastCopy) < 7) return '';
   if (S.remindUntil && S.remindUntil > TODAY) return '';
-  return `<div class="remind" role="note"><span>${S.lastCopy ? 'Ta dernière copie date du ' + esc(frDate(S.lastCopy)) + '.' : 'Tu as déjà ' + n + ' séances suivies.'} Pense à enregistrer une copie de tes données.</span>
-    <span class="row"><button class="btn small" data-act="htmlcopy">Enregistrer une copie</button><button class="iconbtn small" data-act="remindlater" aria-label="Me le rappeler dans une semaine">✕</button></span></div>`;
+  return `<div class="remind" role="note"><span>${S.lastCopy ? 'Ta dernière sauvegarde date du ' + esc(frDate(S.lastCopy)) + '.' : 'Tu as déjà ' + n + ' séances suivies.'} Pense à exporter ton profil.</span>
+    <span class="row"><button class="btn small" data-act="download">Exporter mon profil</button><button class="iconbtn small" data-act="remindlater" aria-label="Me le rappeler dans une semaine">✕</button></span></div>`;
 }
 function plansForSave() { saveStore(); return S.plans.map((e) => ({ id: e.id, plan: e.plan, settings: e.settings })); }
 function htmlCopy(forCoach) {
   const cur = curEntry();
   const data = forCoach
     ? { savedAt: new Date().toISOString(), plans: [{ id: cur.id, plan: cur.plan, settings: cur.settings }], activeId: cur.id }
-    : { savedAt: new Date().toISOString(), plans: plansForSave(), activeId: S.activeId, tracking: S.tracking, moves: S.moves, weather: S.weather, crest: S.crest, wx: S.wx, theme: S.ui.theme, accent: S.ui.accent, lastCopy: TODAY, remindUntil: S.remindUntil, logs: S.logs, profile: S.profile, ctaOff: S.ctaOff };
+    : { savedAt: new Date().toISOString(), plans: plansForSave(), activeId: S.activeId, tracking: S.tracking, moves: S.moves, weather: S.weather, crest: S.crest, wx: S.wx, theme: S.ui.theme, accent: S.ui.accent, lastCopy: TODAY, remindUntil: S.remindUntil, logs: S.logs, races: S.races, profile: S.profile, ctaOff: S.ctaOff };
   const json = JSON.stringify(data).replace(/</g, '\\u003c');
   const re = /(<script type="application\/json" id="embedded-data">)[\s\S]*?(<\/script>)/;
   if (!re.test(SRC_HTML)) return null;
@@ -2613,25 +2655,26 @@ function saveHtmlCopy(forCoach) {
   render();
 }
 function backupText() {
-  return JSON.stringify({ app: 'appli-marathon', version: 2, exportedAt: new Date().toISOString(), plans: plansForSave(), activeId: S.activeId, plan: S.plan, settings: S.settings, tracking: S.tracking, moves: S.moves, logs: S.logs, profile: S.profile, weather: S.weather, crest: S.crest, accent: S.ui.accent, theme: S.ui.theme });
+  return JSON.stringify({ app: 'appli-marathon', version: 2, exportedAt: new Date().toISOString(), plans: plansForSave(), activeId: S.activeId, plan: S.plan, settings: S.settings, tracking: S.tracking, moves: S.moves, logs: S.logs, races: S.races, profile: S.profile, weather: S.weather, crest: S.crest, accent: S.ui.accent, theme: S.ui.theme });
 }
 function dataView() {
   const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done || S.tracking[k].skipped || S.tracking[k].note || S.tracking[k].feel).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
   return `<div class="stack">
 
     <div class="grid2">
-    <section class="card stack"><div><h2>Sauvegarde et restauration</h2><p class="sub">${nTr} séance(s) et sortie(s) suivie(s). Enregistre une copie de temps en temps : elle contient ton plan, tes réglages et ton suivi.</p></div>
-
-      <div class="row nowrap"><button class="btn primary grow" data-act="htmlcopy">${ICON.down}<span>Enregistrer une copie avec mes données</span></button><button class="iconbtn" data-act="copyinfo" aria-label="À quoi sert cette copie ?" aria-expanded="${!!S.ui.copyInfo}">ⓘ</button></div>
-      ${S.ui.copyInfo ? `<div class="fitinfo" role="note"><span>Un nouveau fichier de l'appli qui contient déjà ton plan, tes réglages et ton suivi. Remplace l'ancien fichier par celui-ci, ou envoie-le sur ton téléphone : il s'ouvre directement, sans rien restaurer.</span></div>` : ''}
-      <details class="raw"><summary>Comment ça marche ?</summary><ul class="howto"><li>Tes données (suivi, notes, réglages) restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.</li><li>« Enregistrer une copie » crée un fichier de l'appli avec tout dedans. Garde-le : c'est ta sauvegarde.</li><li>Pour changer d'appareil ou passer à une nouvelle version de l'appli, ouvre le nouveau fichier et utilise « Restauration » avec ta copie.</li></ul></details>
-      ${S.plans.length ? `<div><button class="btn small" data-act="htmlcoach">Version plan seul (pour le coach)</button><p class="sub" style="margin-top:6px">Sans ton suivi ni tes notes : à envoyer à Pierre.</p></div>` : ''}
-      <details class="raw"><summary>Autre format</summary><div class="stack" style="gap:8px;margin-top:8px"><p class="sub">Un petit fichier de données seules (.json), sans l'appli.</p><div><button class="btn small" data-act="download">Sauvegarde seule (.json)</button></div></div></details>
+    <section class="card stack"><div><h2>Mon profil</h2><p class="sub">Tout ce qui te concerne : réglages, plans, suivi, sorties et courses. Exporte-le pour le garder ou le passer sur un autre appareil ; importe-le pour tout retrouver.</p></div>
+      <div class="fields"><div class="field"><label for="pf-name">Prénom</label><input type="text" id="pf-name" value="${esc(S.profile.name || '')}" placeholder="ex. Adrien" autocomplete="off"></div>
+        <div class="field"><label for="pf-club">Club</label><input type="text" id="pf-club" value="${esc(S.profile.club || CLUB_NAME)}" autocomplete="off"></div></div>
+      <p class="sub">${profileSummary()}</p>
+      <div class="row"><button class="btn primary" data-act="download">${ICON.down}Exporter mon profil</button><input type="file" id="file-json" accept=".html,.htm,.json,text/html,application/json" class="sr"><button class="btn" data-act="pickjson">${ICON.up}Importer un profil</button></div>
+      <p class="sub">L'import remplace les données de cet appareil par celles du profil (un profil exporté ou une copie de l'appli).</p>
       ${S.msg.backup ? `<p class="sub" role="status">${esc(S.msg.backup)}</p>` : ''}
-      <div class="stack" style="gap:8px;padding-top:12px;border-top:1px solid var(--line)"><div><strong>Restauration</strong><p class="sub">Retrouve ton plan et ton suivi depuis une copie de l'appli (.html) ou une sauvegarde (.json). Pratique après une mise à jour de l'appli.</p></div>
-
-      <div><input type="file" id="file-json" accept=".html,.htm,.json,text/html,application/json" class="sr"><button class="btn" data-act="pickjson">${ICON.up}Choisir une copie ou une sauvegarde</button></div>
-      ${S.msg.restore ? `<p class="${S.msg.restoreErr ? 'errtxt' : 'sub'}" role="status">${esc(S.msg.restore)}</p>` : ''}</div>
+      ${S.msg.restore ? `<p class="${S.msg.restoreErr ? 'errtxt' : 'sub'}" role="status">${esc(S.msg.restore)}</p>` : ''}
+      <details class="raw"><summary>Copie de l'appli avec mes données</summary><div class="stack" style="gap:10px;margin-top:10px">
+        <div class="row nowrap"><button class="btn grow" data-act="htmlcopy">${ICON.down}<span>Enregistrer une copie avec mes données</span></button><button class="iconbtn" data-act="copyinfo" aria-label="À quoi sert cette copie ?" aria-expanded="${!!S.ui.copyInfo}">ⓘ</button></div>
+        ${S.ui.copyInfo ? `<div class="fitinfo" role="note"><span>Un nouveau fichier de l'appli qui contient déjà ton plan, tes réglages et ton suivi. Remplace l'ancien fichier par celui-ci, ou envoie-le sur ton téléphone : il s'ouvre directement, sans rien restaurer.</span></div>` : ''}
+        ${S.plans.length ? `<div><button class="btn small" data-act="htmlcoach">Version plan seul (pour le coach)</button><p class="sub" style="margin-top:6px">Sans ton suivi ni tes notes : à envoyer à Pierre.</p></div>` : ''}</div></details>
+      <details class="raw"><summary>Comment ça marche ?</summary><ul class="howto"><li>Tes données (suivi, notes, réglages) restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.</li><li>« Exporter mon profil » crée un petit fichier avec tout ce qui te concerne. Garde-le : c'est ta sauvegarde.</li><li>Pour changer d'appareil ou passer à une nouvelle version de l'appli, ouvre le nouveau fichier et utilise « Importer un profil ».</li></ul></details>
     </section>
     <section class="card stack"><div><h2>Préférences</h2><p class="sub">Réglages rangés par thème : ouvre celui qui t'intéresse.</p></div>
       <details class="raw pref"${S.ui.pref === 'wx' ? ' open' : ''} data-pref="wx"><summary>Météo</summary><div class="stack prefbody"><p class="sub">Prévisions affichées sur les jours du plan (service Open-Meteo, sans compte). Les jours d'entraînement utilisent ta ville d'entraînement ; le jour de la course utilise la ville de la course. Seule la position de la ville est envoyée. Il faut une connexion internet : sans réseau, la dernière météo reçue reste affichée.</p>
@@ -2683,7 +2726,19 @@ function plansView() {
       }).join('')}</ul>
       <div><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="btn" data-act="pickxlsx">${ICON.up}Ajouter un plan (fichier Excel)</button></div>
       <p class="sub">Le fichier est contrôlé avant d'être utilisé, et tu choisis la date de la course. Pour mettre à jour un plan déjà chargé, recharge son fichier : ton suivi est conservé.</p></section>
+    <div class="grid2 top">${racesCardHTML()}${recoveryCardHTML()}</div>
   </div>`;
+}
+
+function profileSummary() {
+  const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done || S.tracking[k].note || S.tracking[k].feel).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
+  const parts = [esc(S.profile.name || 'Coureur ou coureuse'), esc(S.profile.club || CLUB_NAME), 'VMA ' + fmtVma((S.settings || S.profile).vma) + ' km/h',
+    S.plans.length + ' plan' + (S.plans.length > 1 ? 's' : ''), S.races.length + ' course' + (S.races.length > 1 ? 's' : '') + ' sans plan', nTr + (nTr > 1 ? ' séances et sorties notées' : ' séance ou sortie notée')];
+  return parts.join(' · ');
+}
+function profileFileName() {
+  const slug = (S.profile.name || 'coureur').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'coureur';
+  return 'profil-' + slug + '-' + TODAY + '.json';
 }
 
 /* ----- Import ----- */
@@ -2748,6 +2803,89 @@ function pickButton(label, small) {
   return `<span><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="btn ${small ? '' : 'primary'}" data-act="pickxlsx">${ICON.up}${label}</button></span>`;
 }
 
+/* ----- Courses sans plan (10 km, semi, trail du club…) et plan de reprise ----- */
+function racesOn(date) { return S.races.filter((r) => r.date === date); }
+function raceKmLabel(km) {
+  if (Math.abs(km - MARATHON_KM) < 0.01) return 'marathon';
+  if (Math.abs(km - 21.0975) < 0.01) return 'semi';
+  return String(Math.round(km * 100) / 100).replace('.', ',') + ' km';
+}
+function raceChip(r) { return `<span class="chip c-race">${esc(r.name)} · ${esc(raceKmLabel(r.km))}${r.result ? ' · ' + esc(fmtHMS(r.result)) : ''}</span>`; }
+function nextRace() {
+  const list = S.races.filter((r) => r.date >= TODAY).sort((a, b) => (a.date < b.date ? -1 : 1));
+  return list[0] || null;
+}
+// Lundi proposé pour la reprise : celui qui suit la dernière course passée, au plus tôt cette semaine.
+function recoveryMonday() {
+  let last = '';
+  S.plans.forEach((e) => { if (e.plan.raceDate && e.plan.raceDate <= TODAY && e.plan.raceDate > last) last = e.plan.raceDate; });
+  S.races.forEach((r) => { if (r.date <= TODAY && r.date > last) last = r.date; });
+  const m = last ? addDays(mondayOf(last), 7) : addDays(mondayOf(TODAY), 7);
+  return m < mondayOf(TODAY) ? mondayOf(TODAY) : m;
+}
+function racesCardHTML() {
+  const del = S.ui.confirmRace;
+  const items = S.races.slice().sort((a, b) => (a.date < b.date ? 1 : -1)).map((r) => `<li class="planitem"><div class="stack" style="gap:2px"><strong>${esc(r.name)}</strong>
+      <span class="sub">${esc(frDate(r.date, true))} · ${esc(raceKmLabel(r.km))}${r.targetSec ? ' · objectif ' + esc(fmtHMS(r.targetSec)) : ''}${r.result ? ' · <strong>chrono ' + esc(fmtHMS(r.result)) + '</strong>' + (r.pr ? ' · record' : '') : ''}</span></div>
+      <div class="row">${r.date <= TODAY ? `<button class="btn small" data-act="open" data-date="${r.date}">${r.result ? 'Modifier le chrono' : 'Saisir mon chrono'}</button>` : ''}${del === r.id ? `<button class="btn small danger" data-act="racedel" data-id="${esc(r.id)}">Oui, supprimer</button><button class="btn small" data-act="racedelcancel">Annuler</button>` : `<button class="btn small" data-act="racedel" data-id="${esc(r.id)}">Supprimer</button>`}</div></li>`).join('');
+  const kms = [[5, '5 km'], [10, '10 km'], [21.0975, 'Semi-marathon'], [MARATHON_KM, 'Marathon'], ['autre', 'Autre distance']];
+  return `<section class="card stack" id="races-card"><div><h2>Courses sans plan</h2><p class="sub">Un 10 km, un semi ou un trail du club, sans plan d'entraînement à part. La course apparaît dans le calendrier, dans Progression, et ton chrono sert aux prédictions.</p></div>
+    ${items ? `<ul class="planlist">${items}</ul>` : ''}
+    <div class="logform stack"><strong>Ajouter une course</strong>
+      <div class="fields"><div class="field"><label for="rc-name">Nom</label><input type="text" id="rc-name" placeholder="ex. 10 km de Rennes" autocomplete="off"></div>
+        <div class="field"><label for="rc-date">Date</label><input type="date" id="rc-date" value="${esc(S.ui.raceDraft || '')}"></div></div>
+      <div class="fields3"><div class="field"><label for="rc-km">Distance</label><select id="rc-km">${kms.map(([k, n]) => `<option value="${k}"${k === 10 ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
+        <div class="field"><label for="rc-other">Autre distance (km)</label><input type="text" id="rc-other" inputmode="decimal" placeholder="si « Autre »" autocomplete="off"></div>
+        <div class="field"><label for="rc-target">Objectif (facultatif)</label><input type="text" id="rc-target" placeholder="ex. 42'30" autocomplete="off"></div></div>
+      ${S.msg.race2 ? `<p class="errtxt" role="alert">${esc(S.msg.race2)}</p>` : ''}
+      <div><button class="btn small primary" data-act="raceadd">${ICON.check}Ajouter la course</button></div></div></section>`;
+}
+function recoveryCardHTML() {
+  return `<section class="card stack"><div><h2>Plan de reprise</h2><p class="sub">Trois semaines pour revenir en douceur après un marathon : footings courts au début, puis lignes droites, un fartlek léger et une sortie longue tranquille. C'est un modèle prudent : fais-le valider par ton coach.</p></div>
+    <div class="fields"><div class="field"><label for="rec-date">Début de la reprise (lundi)</label><input type="date" id="rec-date" value="${esc(recoveryMonday())}"></div></div>
+    ${S.msg.rec ? `<p class="errtxt" role="alert">${esc(S.msg.rec)}</p>` : ''}
+    <div><button class="btn small primary" data-act="recadd">${ICON.check}Ajouter le plan de reprise</button></div></section>`;
+}
+function racesModalHTML(date) {
+  return racesOn(date).map((r) => {
+    const diff = r.result && r.targetSec ? r.result - r.targetSec : null;
+    return `<div class="stack resultbox"><div style="font-weight:700">${esc(r.name)} · ${esc(raceKmLabel(r.km))}${r.targetSec ? ' · objectif ' + esc(fmtHMS(r.targetSec)) : ''}</div>
+      <div class="fields"><div class="field"><label for="rres-${esc(r.id)}">Chrono officiel</label><input type="text" id="rres-${esc(r.id)}" value="${r.result ? esc(fmtHMS(r.result)) : ''}" placeholder="ex. 42'30" autocomplete="off"></div>
+        <div class="field"><label>&nbsp;</label><label class="check"><input type="checkbox" id="rpr-${esc(r.id)}"${r.pr ? ' checked' : ''}> Record personnel</label></div></div>
+      ${r.result ? `<p class="sub">${diff != null ? (diff <= 0 ? esc(fmtHMS(-diff)) + ' sous l\'objectif · ' : esc(fmtHMS(diff)) + ' au-dessus de l\'objectif · ') : ''}${esc(fmtPace(r.result / r.km))}/km de moyenne.</p>` : ''}</div>`;
+  }).join('');
+}
+function addRace() {
+  const g = (id) => ((document.getElementById(id) || {}).value || '').trim();
+  const name = g('rc-name') || 'Course', date = g('rc-date'), kmSel = g('rc-km'), other = g('rc-other').replace(',', '.'), tgt = g('rc-target');
+  const km = kmSel === 'autre' ? Number(other) : Number(kmSel);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { S.msg.race2 = 'Choisis la date de la course.'; return false; }
+  if (!(km > 0 && km < 300)) { S.msg.race2 = 'Indique la distance en km (par exemple 15 ou 32,5).'; return false; }
+  const targetSec = tgt ? parseChrono(tgt) : null;
+  if (tgt && targetSec == null) { S.msg.race2 = "Objectif non compris : écris par exemple 42'30 ou 1h35'00."; return false; }
+  S.races.push({ id: 'c' + Date.now().toString(36), name, date, km, targetSec: targetSec || null, result: 0, pr: false });
+  S.msg.race2 = ''; S.ui.raceDraft = null;
+  rebuildIndex(); saveStore();
+  return true;
+}
+function addRecoveryPlan(dateIso) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateIso || '')) return 'Choisis la date de début.';
+  const base = S.settings || S.profile;
+  const plan = buildRecoveryPlan(mondayOf(dateIso), base.vma, new Date().toISOString());
+  const rg = planRange(plan);
+  const clash = S.plans.find((x) => rangeOf(x).start <= rg.end && rangeOf(x).end >= rg.start);
+  if (clash) return 'Ces trois semaines chevauchent « ' + planName(clash) + ' ». Choisis une autre date.';
+  const settings = { vma: base.vma, targetSec: base.targetSec, targetMode: 'time', cautKm: 10, cautD: 3 };
+  const e = { id: nextPlanId(), plan, settings };
+  S.plans.push(e);
+  activate(e.id);
+  S.ui.weekId = null; S.ui.monthKey = null;
+  rebuildIndex();
+  S.ui.weekId = defaultWeekFor(e).key; S.ui.monthKey = defaultWeekFor(e).start.slice(0, 7);
+  saveStore();
+  return '';
+}
+
 /* ============================================================
    Rendu
    ============================================================ */
@@ -2756,7 +2894,7 @@ function emptyHeaderHTML() {
   if (!['plan', 'plans', 'vma', 'bilan', 'data'].includes(S.ui.view)) S.ui.view = 'plan';
   return `<header><div class="band"><div class="wrap"><div class="brandrow"><div class="brand">${APP_NAME}</div>
       <div class="tools"><button class="pill" data-act="tab" data-view="vma" aria-label="Mon niveau">${ICON.gauge}<span class="num">VMA ${fmtVma(S.settings.vma)}</span></button><button class="pill" data-act="theme">${dark ? ICON.sun + '<span>Clair</span>' : ICON.moon + '<span>Sombre</span>'}</button></div></div>
-      <div class="hero"><div class="herol">${crestHTML()}<div class="count empty"><span class="lbl"><strong>Pas de course prévue</strong><span>Ajoute le plan de ton coach : il se place tout seul dans le calendrier selon ta date de course.</span></span>
+      <div class="hero"><div class="herol">${crestHTML()}${(() => { const r = nextRace(); return r ? `<div class="count"><span class="big num">${diffDays(r.date, TODAY) > 0 ? 'J-' + diffDays(r.date, TODAY) : 'Jour J'}</span><span class="lbl"><strong>${esc(r.name)}</strong><span>${esc(frDate(r.date, true))} · ${esc(raceKmLabel(r.km))}${r.targetSec ? ' · objectif ' + esc(fmtHMS(r.targetSec)) : ''}</span></span></div><div class="count empty">` : '<div class="count empty"><span class="lbl"><strong>Pas de course prévue</strong><span>Ajoute le plan de ton coach : il se place tout seul dans le calendrier selon ta date de course.</span></span>'; })()}
         <div style="margin-top:12px"><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="pill" data-act="pickxlsx">${ICON.up}<span>Ajouter un plan</span></button> <button class="pill" data-act="tab" data-view="data">Restaurer mes données</button></div></div></div></div></div></div>
     <nav class="wrap tabs" aria-label="Sections">${tabsHTML(false)}</nav></header>`;
 }
@@ -2771,7 +2909,8 @@ function shellHTML() {
   if (S.imp.stage !== 'idle') body = importView();
   else if (S.ui.view === 'plan') body = S.ui.mode === 'week' ? weekView() : monthView();
   else if (S.ui.view === 'vma') body = vmaView();
-  else if (S.ui.view === 'race') body = raceView();
+  else if (S.ui.view === 'race' && S.plan.raceDate) body = raceView();
+  else if (S.ui.view === 'race') { S.ui.view = 'plan'; body = S.ui.mode === 'week' ? weekView() : monthView(); }
   else if (S.ui.view === 'bilan') body = bilanView();
   else if (S.ui.view === 'plans') body = plansView();
   else body = dataView();
@@ -2883,7 +3022,9 @@ function restoreFrom(text) {
     if (!raw || raw.app !== 'appli-marathon') throw new Error('format');
     const d = normalizeData(raw);
     const hasLogs = d.logs && typeof d.logs === 'object' && Object.keys(d.logs).length;
-    if (!d.plans.length && !hasLogs) throw new Error('format');
+    const hasRaces = Array.isArray(d.races) && d.races.length;
+    if (!d.plans.length && !hasLogs && !hasRaces) throw new Error('format');
+    S.races = hasRaces ? d.races : [];
     S.plans = d.plans;
     S.activeId = null; S.plan = null; S.settings = null;
     S.tracking = d.tracking || {};
@@ -3072,6 +3213,11 @@ document.addEventListener('click', (ev) => {
     case 'ravmode': { const r = ravSettings(); S.settings.rav = { mode: el.dataset.m, every: el.dataset.m === 'min' ? 30 : 5 }; S.msg.rav = ''; saveStore(); render(); break; }
     case 'printrace': try { window.print(); } catch (e) { S.msg.race = "L'impression n'est pas disponible ici : ouvre le fichier dans ton navigateur."; render(); } break;
     case 'copyrace': copyText(raceText(), () => { S.msg.race = 'Texte copié : colle-le dans tes notes ou un message.'; render(); }, () => { S.msg.race = 'La copie est bloquée ici. Ouvre le fichier dans ton navigateur.'; render(); }); break;
+    case 'raceadd': if (addRace()) { toast('Course ajoutée'); } render(); break;
+    case 'racedel': if (S.ui.confirmRace !== el.dataset.id) { S.ui.confirmRace = el.dataset.id; render(); } else { S.races = S.races.filter((r) => r.id !== el.dataset.id); S.ui.confirmRace = null; rebuildIndex(); saveStore(); toast('Course supprimée'); render(); } break;
+    case 'racedelcancel': S.ui.confirmRace = null; render(); break;
+    case 'racedraft': S.ui.raceDraft = el.dataset.date; S.ui.modal = null; S.ui.view = 'plans'; S.msg.race2 = ''; render(); { const c = document.getElementById('races-card'); if (c) c.scrollIntoView(); const n = document.getElementById('rc-name'); if (n) n.focus(); } break;
+    case 'recadd': { const err = addRecoveryPlan(((document.getElementById('rec-date') || {}).value || '')); S.msg.rec = err; if (!err) { S.ui.view = 'plan'; S.ui.mode = 'week'; toast('Plan de reprise ajouté'); } render(); if (!err) window.scrollTo(0, 0); break; }
     case 'lognew': S.ui.logEdit = { date: S.ui.modal, id: null, feel: 0 }; S.msg.log = ''; renderModal(); break;
     case 'logedit': { const l = logsOf(S.ui.modal).find((x) => x.id === el.dataset.id); if (l) { S.ui.logEdit = { date: S.ui.modal, id: l.id, feel: l.feel || 0 }; S.msg.log = ''; renderModal(); } break; }
     case 'logfeel': { const n = Number(el.dataset.n); if (S.ui.logEdit) { keepLogForm(); S.ui.logEdit.feel = S.ui.logEdit.feel === n ? 0 : n; renderModal(); restoreLogForm(); } break; }
@@ -3114,17 +3260,17 @@ document.addEventListener('click', (ev) => {
       try {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([backupText()], { type: 'application/json' }));
-        a.download = 'marathon-sauvegarde-' + TODAY + '.json';
+        a.download = profileFileName();
         S.lastCopy = TODAY; saveStore();
         document.body.appendChild(a); a.click(); a.remove();
-        S.msg.backup = 'Sauvegarde générée. Range le fichier à côté de ton Excel.';
+        S.msg.backup = 'Profil exporté : « ' + profileFileName() + ' ». Garde ce fichier, c\'est ta sauvegarde.'; toast('Profil exporté');
       } catch (e) { S.msg.backup = 'Le téléchargement est bloqué ici : ouvre l\'appli depuis ton disque.'; }
       render(); break;
     }
     case 'wipe':
       if (!S.ui.confirmWipe) { S.ui.confirmWipe = true; render(); break; }
       try { localStorage.removeItem(KEY); } catch (e) { /* rien */ }
-      S.plans = []; S.weeks = []; S.tracking = {}; S.moves = {}; S.logs = {}; S.profile = defaultProfile(); useProfile(); S.crest = ''; S.byDate = {}; S.ui.confirmWipe = false; S.ui.view = 'plan'; S.ui.modal = null; S.imp = { stage: 'idle' };
+      S.plans = []; S.weeks = []; S.tracking = {}; S.moves = {}; S.logs = {}; S.races = []; S.profile = defaultProfile(); useProfile(); S.crest = ''; S.byDate = {}; S.ui.confirmWipe = false; S.ui.view = 'plan'; S.ui.modal = null; S.imp = { stage: 'idle' };
       S.ui.weekId = null; S.ui.monthKey = null; rebuildIndex();
       render(); break;
     case 'wipecancel': S.ui.confirmWipe = false; render(); break;
@@ -3159,6 +3305,14 @@ document.addEventListener('change', (ev) => {
     if (sec == null) { S.msg.result = "Chrono non compris : écris par exemple 3h25'12 ou 3:25:12."; renderModal(); return; }
     setTrack(S.ui.modal, { result: sec, done: true, skipped: false }); S.msg.result = ''; toast('Chrono enregistré : ' + fmtHMS(sec)); render(); return;
   }
+  if (/^rres-/.test(t.id)) {
+    const r = S.races.find((x) => x.id === t.id.slice(5)); if (!r) return;
+    const raw = t.value.trim(); const sec = raw ? parseChrono(raw) : 0;
+    if (raw && sec == null) { toast('Chrono non compris'); return; }
+    r.result = sec || 0; saveStore(); if (sec) toast('Chrono enregistré : ' + fmtHMS(sec)); render(); return;
+  }
+  if (/^rpr-/.test(t.id)) { const r = S.races.find((x) => x.id === t.id.slice(4)); if (r) { r.pr = t.checked; saveStore(); render(); } return; }
+  if (t.id === 'pf-name' || t.id === 'pf-club') { S.profile[t.id === 'pf-name' ? 'name' : 'club'] = t.value.trim(); saveStore(); toast('Profil enregistré'); render(); return; }
   if (t.id === 'note-input' && S.ui.modal) { toast('Note enregistrée'); return; }
   if (t.id === 'race-pr' && S.ui.modal) { setTrack(S.ui.modal, { pr: t.checked }); render(); return; }
   if (t.id === 'vma-input') {

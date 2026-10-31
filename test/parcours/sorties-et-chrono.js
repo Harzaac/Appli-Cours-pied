@@ -51,7 +51,7 @@ await p.click('details[data-pref=look] summary');await p.click('[data-act=accent
 log('  Apparence reste ouverte:',await p.$eval('details[data-pref=look]',d=>d.open));
 await p.screenshot({path:root+'/shots/v35-donnees.png',fullPage:true});
 // 6. copie
-const [dl]=await Promise.all([p.waitForEvent('download'),p.click('[data-act=htmlcopy]')]);await dl.saveAs(root+'/shots/v35-copie.html');
+const [dl]=await Promise.all([p.waitForEvent('download'),(async()=>{await p.evaluate(()=>document.querySelectorAll('details.raw').forEach(d=>d.open=true));await p.click('[data-act=htmlcopy]');})()]);await dl.saveAs(root+'/shots/v35-copie.html');
 const q=await (await b.newContext({viewport:{width:390,height:844}})).newPage();q.on('pageerror',e=>errs.push('m:'+e.message));await q.route(/open-meteo\.com|fonts\.g/,r=>r.abort());
 await q.addInitScript(()=>{window.__TODAY__='2026-10-31'});await q.goto('file://'+root+'/shots/v35-copie.html');await q.waitForSelector('.week');
 log('6 copie: sorties',await q.evaluate(()=>Object.keys(S.logs).length),'| chrono',await q.evaluate(()=>track('2026-10-25').result),'| réf profil',await q.evaluate(()=>!!S.profile.ref));

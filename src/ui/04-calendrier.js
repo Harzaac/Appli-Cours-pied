@@ -83,7 +83,8 @@ function dayCard(day) {
   const head = `<div class="dhead"><div><span class="dow">${DOW_SHORT[day.i]}</span><span class="dnum num">${parseISO(day.date).getUTCDate()}</span></div><div class="dright">${tr.skipped && !tr.done ? `<span class="tick skip" title="Séance sautée">${ICON.cross}<span class="sr">Séance sautée</span></span>` : ''}${qc}</div></div>`;
   const movedTag = day.from ? `<span class="badge moved">Décalée depuis ${DOW_SHORT[weekdayIndex(day.from)].toLowerCase()}.</span>` : '';
   const logs = logsOf(day.date);
-  const logChips = logs.length ? `<ul class="loglist">${logs.map((l) => `<li><span class="chip c-free">${esc(logLine(l))}</span></li>`).join('')}</ul>` : '';
+  const dayRaces = racesOn(day.date);
+  const logChips = logs.length || dayRaces.length ? `<ul class="loglist">${dayRaces.map((r) => `<li>${raceChip(r)}</li>`).join('')}${logs.map((l) => `<li><span class="chip c-free">${esc(logLine(l))}</span></li>`).join('')}</ul>` : '';
   const dayLbl = DOW[day.i].toLowerCase() + ' ' + parseISO(day.date).getUTCDate();
   if (day.free) return `<article class="dcard rest free${day.date === TODAY ? ' today' : ''}${logs.length ? ' haslog' : ''}" data-act="open" data-date="${day.date}"><div class="dhead"><div><span class="dow">${DOW_SHORT[day.i]}</span><span class="dnum num">${parseISO(day.date).getUTCDate()}</span></div></div>${wxMini(day.date, false)}${logChips || '<p class="restlabel">Libre</p>'}<button class="addlog" data-act="open" data-date="${day.date}" aria-label="Noter une sortie le ${dayLbl}">+ Noter une sortie</button></article>`;
   if (day.rest) return `<article class="${cls.join(' ')}${logs.length ? ' haslog' : ''}"${slot}${target ? '' : ` data-act="open" data-date="${day.date}"`}>${head}${wxMini(day.date, false)}${logChips || '<p class="restlabel">Repos</p>'}${target ? '' : `<button class="addlog" data-act="open" data-date="${day.date}" aria-label="Noter une sortie le ${dayLbl}">+ Noter une sortie</button>`}${target ? `<button class="btn small" data-act="moveto" data-date="${day.date}">Placer ici</button>` : ''}</article>`;
@@ -93,6 +94,7 @@ function dayCard(day) {
     <div class="stack" style="gap:6px"><span class="chip c-${day.category}" style="align-self:flex-start">${esc(dayChipLabel(day))}</span>${movedTag}
     <div class="dur num">${esc(dayDuration(day))}</div>${day.objective ? `<div class="obj">${esc(day.objective)}</div>` : ''}</div>
     ${stepsCompact(day)}
+    ${dayRaces.length ? `<ul class="loglist">${dayRaces.map((r) => `<li>${raceChip(r)}</li>`).join('')}</ul>` : ''}
     ${logs.length ? `<div class="sub">+ ${esc(logs.map(logLine).join(', '))}</div>` : ''}
     ${act}</article>`;
 }
@@ -176,8 +178,9 @@ function monthView() {
     } else {
       const real = ref && !ref.day.free;
       const lg = logsOf(date);
-      if (!real && !lg.length) cls.push('empty');
-      const inner = `<span class="n num"><span>${n}</span></span>${lg.length ? `<span><span class="chip c-free">${esc(logTypeLabel(lg[0].type))}${lg.length > 1 ? ' +' + (lg.length - 1) : ''}</span><span class="dd num" style="display:block;margin-top:4px">${esc(lg[0].min ? fmtMin(lg[0].min) : lg[0].km ? String(lg[0].km).replace('.', ',') + ' km' : '')}</span></span>` : real ? '<span class="dd">Repos</span>' : ''}${ref ? wxMonth(date) : ''}`;
+      const rc = racesOn(date);
+      if (!real && !lg.length && !rc.length) cls.push('empty');
+      const inner = `<span class="n num"><span>${n}</span></span>${rc.length ? `<span><span class="chip c-race">${esc(rc[0].name)}</span><span class="dot d-race"></span></span>` : lg.length ? `<span><span class="chip c-free">${esc(logTypeLabel(lg[0].type))}${lg.length > 1 ? ' +' + (lg.length - 1) : ''}</span><span class="dd num" style="display:block;margin-top:4px">${esc(lg[0].min ? fmtMin(lg[0].min) : lg[0].km ? String(lg[0].km).replace('.', ',') + ' km' : '')}</span></span>` : real ? '<span class="dd">Repos</span>' : ''}${ref ? wxMonth(date) : ''}`;
       cells.push(ref ? `<button class="${cls.join(' ')}" data-act="open" data-date="${date}" aria-label="${esc(frDate(date, true))}${lg.length ? ' : ' + esc(lg.map(logLine).join(', ')) : ''}">${inner}</button>` : `<div class="${cls.join(' ')}">${inner}</div>`);
     }
   }
@@ -243,6 +246,7 @@ function modalHTML() {
         <div class="feel" role="group" aria-label="Sensations">${FEELS.map((f, i) => `<button data-act="feel" data-n="${i + 1}" aria-pressed="${tr.feel === i + 1}">${f}</button>`).join('')}</div></div>
       <div class="field"><label for="note-input">Notes</label><textarea class="note" id="note-input" placeholder="Allure réelle, terrain, fatigue…">${esc(tr.note || '')}</textarea></div>
     </div>`}
+    ${racesModalHTML(date)}
     ${logsHTML(date, day)}
   </div></div>`;
 }
@@ -275,7 +279,7 @@ function logsHTML(date, day) {
       <div class="row"><button class="btn small" data-act="logedit" data-id="${esc(l.id)}">Modifier</button><button class="btn small" data-act="logdel" data-id="${esc(l.id)}">Supprimer</button></div></li>`).join('');
   return `<section class="stack logsec"><div style="font-weight:700">${title}</div>
     ${items ? `<ul class="logitems">${items}</ul>` : ''}
-    ${form || `<div><button class="btn small" data-act="lognew">+ Noter une sortie</button></div>`}</section>`;
+    ${form || `<div class="row"><button class="btn small" data-act="lognew">+ Noter une sortie</button><button class="btn small" data-act="racedraft" data-date="${date}">+ Ajouter une course ce jour-là</button></div>`}</section>`;
 }
 function saveLog() {
   const ed = S.ui.logEdit;
