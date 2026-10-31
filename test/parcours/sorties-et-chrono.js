@@ -28,7 +28,7 @@ await p.click('[data-act=mode][data-mode=week]');
 // 3. bilan sans plan
 await p.click('.tabs [data-view=bilan]');log('3 bilan:',(await p.textContent('main .kpis')).replace(/\s+/g,' ').trim(),'| barres',await p.$$eval('.ycol',e=>e.length));
 // 4. plan + résultat
-await p.click('.tabs [data-view=data]');
+await p.click('.tabs [data-view=plan]');await p.click('[data-act=tab][data-view=plans] >> nth=0');
 await p.setInputFiles('#file-xlsx',root+'/test/donnees/plan-test.xlsx');await p.waitForSelector('#imp-race');
 await p.fill('#imp-race','2026-10-25');await p.dispatchEvent('#imp-race','change');await p.waitForTimeout(100);
 log('4 case VMA:',(await p.textContent('label.check')).trim().slice(0,60));
@@ -44,8 +44,9 @@ await p.screenshot({path:root+'/shots/v35-entete.png',clip:{x:0,y:0,width:1280,h
 await p.click('.tabs [data-view=vma]');await p.click('[data-act=refclear]').catch(()=>{});
 log('  réf. prédiction:',(await p.$$eval('main section',s=>s.find(x=>x.querySelector('h2').textContent.includes('Prédictions')).querySelector('.stack p').textContent)).trim());
 // 5. préférences repliables
-await p.click('.tabs [data-view=data]');
+await p.click('.tabs [data-view=plan]');await p.click('[data-act=tab][data-view=plans] >> nth=0');
 log('5 plan list:',(await p.textContent('.planitem')).replace(/\s+/g,' ').trim().slice(0,160));
+await p.click('.tabs [data-view=data]');
 await p.click('details[data-pref=look] summary');await p.click('[data-act=accent][data-id=foret]');
 log('  Apparence reste ouverte:',await p.$eval('details[data-pref=look]',d=>d.open));
 await p.screenshot({path:root+'/shots/v35-donnees.png',fullPage:true});

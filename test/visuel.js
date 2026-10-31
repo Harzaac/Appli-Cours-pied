@@ -20,7 +20,7 @@ for(const [w,h,dev] of [[1280,900,'pc'],[390,844,'mob']]) for(const scheme of ['
  await p.click('[data-act=next]');await p.click('[data-act=next]');await p.click('[data-act=open][data-date="2026-10-25"] >> nth=0');await p.waitForSelector('#race-result');
  await p.fill('#race-result',"3h25'12");await p.press('#race-result','Tab');await p.waitForTimeout(80);await shot('modale-course',false);await p.click('[data-act=close]');
  await shot('semaine-course');
- for(const v of ['vma','race','bilan','data']){await p.click(`.tabs [data-view=${v}]`);if(v==='data'){await p.click('details[data-pref=wx] summary');await p.click('details[data-pref=look] summary');}await shot(v);}
+ for(const v of ['vma','race','bilan','data','plans']){if(v==='plans'){await p.click('.tabs [data-view=plan]');await p.click('[data-act=tab][data-view=plans] >> nth=0');}else await p.click(`.tabs [data-view=${v}]`);if(v==='data'){await p.click('details[data-pref=wx] summary');await p.click('details[data-pref=look] summary');}await shot(v);}
  await p.click('.tabs [data-view=race]');await p.click('.racecta [data-act=racemode]');await shot('ecran-course');await p.click('[data-act=racequit]');
  await p.evaluate(()=>{S.ui.accent='braise';saveStore();render();});await p.click('.tabs [data-view=plan]');await shot('braise');
  await ctx.close();}

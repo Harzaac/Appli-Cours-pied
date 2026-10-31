@@ -27,8 +27,8 @@ Produit `dist/appli-marathon.html` (le fichier à ouvrir ou à transmettre) et `
   | `04-calendrier.js` | semaine, mois, cartes de jour, fenêtre de détail, sorties libres, résultat |
   | `05-vma.js` | onglet VMA, prédictions, modèle de passage (départ prudent) |
   | `06-course.js` | plan de course, ravitaillements, écran de course |
-  | `07-bilan.js` | bilan sur 12 mois et bilan du plan |
-  | `08-donnees.js` | onglet Données, copies du fichier, sauvegarde `.json` |
+  | `07-bilan.js` | onglet Progression : où j'en suis, suivi du plan, mes courses, sensations, l'année |
+  | `08-donnees.js` | onglet Paramètres (sauvegarde, préférences) et vue Mes plans |
   | `09-import.js` | vérification d'un Excel et choix de la date de course |
   | `10-rendu.js` | assemblage de la page, rendu |
   | `11-actions.js` | actions métier (ajout, mise à jour, recalage, suppression de plan, restauration) |

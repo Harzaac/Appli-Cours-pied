@@ -3,17 +3,17 @@
    ============================================================ */
 function emptyHeaderHTML() {
   const dark = effectiveDark();
-  if (!['plan', 'vma', 'bilan', 'data'].includes(S.ui.view)) S.ui.view = 'plan';
+  if (!['plan', 'plans', 'vma', 'bilan', 'data'].includes(S.ui.view)) S.ui.view = 'plan';
   return `<header><div class="band"><div class="wrap"><div class="brandrow"><div class="brand">Appli Marathon</div>
       <div class="tools"><button class="pill" data-act="tab" data-view="vma" aria-label="Mon niveau">${ICON.gauge}<span class="num">VMA ${fmtVma(S.settings.vma)}</span></button><button class="pill" data-act="theme">${dark ? ICON.sun + '<span>Clair</span>' : ICON.moon + '<span>Sombre</span>'}</button></div></div>
       <div class="hero"><div class="herol">${crestHTML()}<div class="count empty"><span class="lbl"><strong>Pas de course prévue</strong><span>Ajoute le plan de ton coach : il se place tout seul dans le calendrier selon ta date de course.</span></span>
         <div style="margin-top:12px"><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="pill" data-act="pickxlsx">${ICON.up}<span>Ajouter un plan</span></button></div></div></div></div></div></div>
-    <nav class="wrap tabs" aria-label="Sections">${[['plan', 'Calendrier'], ['vma', 'VMA'], ['bilan', 'Bilan'], ['data', 'Paramètres']].map(([v, l]) => `<button data-act="tab" data-view="${v}" ${S.ui.view === v ? 'aria-current="page"' : ''}>${l}</button>`).join('')}</nav></header>`;
+    <nav class="wrap tabs" aria-label="Sections">${tabsHTML(false)}</nav></header>`;
 }
 function shellHTML() {
   if (!S.plan) {
     const head = emptyHeaderHTML();
-    const body = S.imp.stage !== 'idle' ? importView() : S.ui.view === 'data' ? dataView() : S.ui.view === 'vma' ? vmaView() : S.ui.view === 'bilan' ? bilanView() : S.ui.mode === 'week' ? weekView() : monthView();
+    const body = S.imp.stage !== 'idle' ? importView() : S.ui.view === 'data' ? dataView() : S.ui.view === 'plans' ? plansView() : S.ui.view === 'vma' ? vmaView() : S.ui.view === 'bilan' ? bilanView() : S.ui.mode === 'week' ? weekView() : monthView();
     return head + `<main class="wrap">${body}</main>${footHTML()}`;
   }
   let body;
@@ -23,6 +23,7 @@ function shellHTML() {
   else if (S.ui.view === 'vma') body = vmaView();
   else if (S.ui.view === 'race') body = raceView();
   else if (S.ui.view === 'bilan') body = bilanView();
+  else if (S.ui.view === 'plans') body = plansView();
   else body = dataView();
   return headerHTML() + `<main class="wrap">${raceCtaBanner()}${backupBanner()}${body}</main>` + footHTML();
 }

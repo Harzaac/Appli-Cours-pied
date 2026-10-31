@@ -59,10 +59,16 @@ function headerHTML() {
       <div class="hero"><div class="herol">${crestHTML()}<div class="count"><span class="big num${chrono ? ' chrono' : ''}">${big}</span><span class="lbl">${lbl}</span></div></div>${next}</div>
     </div></div>
     <nav class="wrap tabs" aria-label="Sections">
-      ${[['plan', 'Calendrier'], ['vma', 'VMA'], ['race', 'Course'], ['bilan', 'Bilan'], ['data', 'Paramètres']].map(([v, l]) => `<button data-act="tab" data-view="${v}" ${S.ui.view === v ? 'aria-current="page"' : ''}>${l}</button>`).join('')}
+      ${tabsHTML(true)}
     </nav></header>`;
 }
 
+// Onglets : « Mes plans » dépend du Calendrier ; Paramètres se réduit à une roue dentée sur petit écran.
+function tabsHTML(withPlan) {
+  const list = [['plan', 'Calendrier'], ['vma', 'VMA']].concat(withPlan ? [['race', 'Course']] : [], [['bilan', 'Progression'], ['data', 'Paramètres']]);
+  const cur = S.ui.view === 'plans' ? 'plan' : S.ui.view;
+  return list.map(([v, l]) => `<button data-act="tab" data-view="${v}" ${cur === v ? 'aria-current="page"' : ''}${v === 'data' ? ' class="tabgear" aria-label="Paramètres"' : ''}>${v === 'data' ? ICON.gear + '<span>' + l + '</span>' : l}</button>`).join('');
+}
 function nextSteps(day, c) {
   if (day.category === 'race') return '';
   c = c || ctx();
@@ -103,5 +109,5 @@ function nextSession() {
   return null;
 }
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">Appli Marathon · version 3.4.1</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">Appli Marathon · version 3.5</p></div></footer>`;
 }

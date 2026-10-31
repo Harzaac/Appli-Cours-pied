@@ -240,6 +240,12 @@ input[type="date"] { font: inherit; border: 1px solid var(--line); background: v
   /* sur téléphone, la prochaine séance reste courte : le détail est dans la séance */
   .next .nsteps { display: none; }
 }
+.tabs .tabgear { display: inline-flex; align-items: center; gap: 6px; }
+.tabs .tabgear svg { width: 18px; height: 18px; flex: none; }
+@media (max-width: 559px) {
+  .tabs .tabgear { flex: 0 0 44px; justify-content: center; padding: 0; }
+  .tabs .tabgear span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
 
 /* Calendrier : semaine, cartes de jour, mois, bandeaux au-dessus du calendrier */
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
@@ -456,6 +462,22 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 .vcsw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-left: 2px; }
 .vcsw.vc-green { background: var(--mint); } .vcsw.vc-yellow { background: var(--gold); } .vcsw.vc-orange { background: var(--orange); }
 .vcsw.vc-red { background: var(--red-ink); } .vcsw.vc-blue { background: var(--blue); } .vcsw.vc-violet { background: var(--violet); } .vcsw.vc-dark { background: var(--ink); }
+/* Progression */
+.delta { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 6px; font-weight: 700; font-size: 12px; background: var(--surface); color: var(--muted); }
+.delta.up { color: var(--mint-ink); }
+.delta.down { color: var(--orange-ink); }
+.weeks5 { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; align-items: end; }
+.wk { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 13px; min-width: 0; }
+.wkbar { width: 100%; max-width: 56px; height: 96px; display: flex; align-items: flex-end; background: var(--surface-2); border-radius: 8px; overflow: hidden; }
+.wkbar i { display: block; width: 100%; background: linear-gradient(180deg, var(--band-a), var(--band-b)); border-radius: 8px 8px 0 0; }
+.wk.now .wkbar { outline: 2px solid var(--ink); outline-offset: 2px; }
+.wk .wkl { font-size: 12px; color: var(--muted); text-align: center; }
+.bar-row.future { opacity: .55; }
+.races { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.race { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 14px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); }
+.race.pr { border-color: var(--gold); }
+.raceres { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
+.big2 { font-family: var(--f-display); font-weight: 700; font-size: 30px; line-height: 1; }
 
 /* Impression (plan de course, écran de course) */
 @media print {
@@ -1438,6 +1460,7 @@ const ICON = {
   sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>',
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
   gauge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18a8 8 0 1 1 16 0M12 18l4-6"/></svg>',
 };
 
@@ -1818,10 +1841,16 @@ function headerHTML() {
       <div class="hero"><div class="herol">${crestHTML()}<div class="count"><span class="big num${chrono ? ' chrono' : ''}">${big}</span><span class="lbl">${lbl}</span></div></div>${next}</div>
     </div></div>
     <nav class="wrap tabs" aria-label="Sections">
-      ${[['plan', 'Calendrier'], ['vma', 'VMA'], ['race', 'Course'], ['bilan', 'Bilan'], ['data', 'Paramètres']].map(([v, l]) => `<button data-act="tab" data-view="${v}" ${S.ui.view === v ? 'aria-current="page"' : ''}>${l}</button>`).join('')}
+      ${tabsHTML(true)}
     </nav></header>`;
 }
 
+// Onglets : « Mes plans » dépend du Calendrier ; Paramètres se réduit à une roue dentée sur petit écran.
+function tabsHTML(withPlan) {
+  const list = [['plan', 'Calendrier'], ['vma', 'VMA']].concat(withPlan ? [['race', 'Course']] : [], [['bilan', 'Progression'], ['data', 'Paramètres']]);
+  const cur = S.ui.view === 'plans' ? 'plan' : S.ui.view;
+  return list.map(([v, l]) => `<button data-act="tab" data-view="${v}" ${cur === v ? 'aria-current="page"' : ''}${v === 'data' ? ' class="tabgear" aria-label="Paramètres"' : ''}>${v === 'data' ? ICON.gear + '<span>' + l + '</span>' : l}</button>`).join('');
+}
 function nextSteps(day, c) {
   if (day.category === 'race') return '';
   c = c || ctx();
@@ -1862,7 +1891,7 @@ function nextSession() {
   return null;
 }
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">Appli Marathon · version 3.4.1</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">Appli Marathon · version 3.5</p></div></footer>`;
 }
 
 /* ----- Plan : semaine ----- */
@@ -1978,7 +2007,7 @@ function weekView() {
       <div class="navgroup"><button class="iconbtn" data-act="prev" aria-label="Semaine précédente" ${idx === 0 ? 'disabled' : ''}>${ICON.left}</button>
         <h2 class="navlabel">${w.id.replace('G', ' G')} · ${frDate(w.start)} → ${frDate(w.end)}</h2>
         <button class="iconbtn" data-act="next" aria-label="Semaine suivante" ${idx === weeks.length - 1 ? 'disabled' : ''}>${ICON.right}</button></div>
-      <div class="navgroup">${modeSeg()}<button class="btn small" data-act="today">Aujourd'hui</button></div></div>
+      <div class="navgroup">${modeSeg()}<button class="btn small" data-act="today">Aujourd'hui</button><button class="btn small" data-act="tab" data-view="plans">Mes plans</button></div></div>
     <div class="weekhead">${S.plans.length > 1 ? `<span class="badge plan">${esc(planName(curEntry()))}</span>` : ''}<span class="badge">${w.general ? 'Préparation générale' : 'Plan spécifique'}</span>
       ${w.assimilation ? '<span class="badge warn">Semaine d\'assimilation</span>' : ''}
       <span class="muted num">${fmtMin(planned)} prévues · ${nDone}/${nSess} séances faites${nSkip ? ' · ' + nSkip + ' sautée' + (nSkip > 1 ? 's' : '') : ''}</span>${nPast ? `<button class="linkbtn" data-act="bulkdone">Marquer les séances passées comme faites (${nPast})</button>` : ''}</div>
@@ -1993,7 +2022,7 @@ function freeWeekView(w, idx) {
       <div class="navgroup"><button class="iconbtn" data-act="prev" aria-label="Semaine précédente" ${idx === 0 ? 'disabled' : ''}>${ICON.left}</button>
         <h2 class="navlabel">${frDate(w.start)} → ${frDate(w.end)}</h2>
         <button class="iconbtn" data-act="next" aria-label="Semaine suivante" ${idx === weeks.length - 1 ? 'disabled' : ''}>${ICON.right}</button></div>
-      <div class="navgroup">${modeSeg()}<button class="btn small" data-act="today">Aujourd'hui</button></div></div>
+      <div class="navgroup">${modeSeg()}<button class="btn small" data-act="today">Aujourd'hui</button><button class="btn small" data-act="tab" data-view="plans">Mes plans</button></div></div>
     <div class="weekhead"><span class="badge">Pas de plan cette semaine</span><span><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="linkbtn" data-act="pickxlsx">Ajouter un plan</button></span></div>
     <div class="week">${w.days.map((d) => dayCard(d)).join('')}</div>`;
 }
@@ -2052,7 +2081,7 @@ function monthView() {
       <div class="navgroup"><button class="iconbtn" data-act="prev" aria-label="Mois précédent" ${i <= 0 ? 'disabled' : ''}>${ICON.left}</button>
         <h2 class="navlabel">${MONTHS[m - 1].charAt(0).toUpperCase() + MONTHS[m - 1].slice(1)} ${y}</h2>
         <button class="iconbtn" data-act="next" aria-label="Mois suivant" ${i >= keys.length - 1 ? 'disabled' : ''}>${ICON.right}</button></div>
-      <div class="navgroup">${modeSeg()}<button class="btn small" data-act="today">Aujourd'hui</button></div></div>
+      <div class="navgroup">${modeSeg()}<button class="btn small" data-act="today">Aujourd'hui</button><button class="btn small" data-act="tab" data-view="plans">Mes plans</button></div></div>
     <div class="monthwrap"><div class="month">${DOW_SHORT.map((d) => `<div class="mh"><span class="mhl">${d}</span><span class="mhs">${d.charAt(0)}</span></div>`).join('')}${cells.join('')}</div></div>
     <div class="legend" aria-label="Légende des couleurs"><span class="d-footing"><i></i>Footing</span><span class="d-vma"><i></i>VMA et côtes</span><span class="d-spe"><i></i>Spé marathon</span><span class="d-long"><i></i>Sortie longue</span><span class="d-race"><i></i>Course</span></div>`;
 }
@@ -2407,35 +2436,7 @@ function raceView() {
       ${S.settings.raceNote ? `<p class="racenote">${esc(S.settings.raceNote).replace(/\n/g, '<br>')}</p>` : ''}</section></div>`;
 }
 
-/* ----- Bilan ----- */
-function planBilanHTML() {
-  const weeks = S.plan.weeks;
-  const planLine = S.plans.length > 1 ? `<p class="sub">Bilan du plan « ${esc(planName(curEntry()))} ». Change de plan avec le sélecteur en haut de page.</p>` : '';
-  let totalP = 0, totalD = 0, nS = 0, nD = 0, nSk = 0;
-  const rows = weeks.map((w) => {
-    const sess = weekDays(w).filter((d) => !d.rest);
-    nSk += sess.filter((d) => track(d.date).skipped).length;
-    const p = sess.reduce((a, d) => a + (d.durationMin || 0), 0);
-    const dn = Math.round(sess.filter((d) => track(d.date).done).reduce((a, d) => a + (d.category === 'race' && track(d.date).result ? track(d.date).result / 60 : (d.durationMin || 0)), 0));
-    totalP += p; totalD += dn; nS += sess.length; nD += sess.filter((d) => track(d.date).done).length;
-    const pct = p ? Math.min(100, Math.round(dn / p * 100)) : 0;
-    return `<div class="bar-row ${w.general ? 'gen' : ''}"><span class="num"><strong>${w.id.replace('G', ' G')}</strong></span>
-      <div class="track" role="img" aria-label="${w.id} : ${fmtMin(dn)} faites sur ${fmtMin(p)}"><i style="width:${pct}%"></i></div><span class="num muted">${fmtMin(dn) || '0 min'} / ${fmtMin(p)}</span></div>`;
-  }).join('');
-  const feels = Object.keys(S.tracking).filter((k) => S.tracking[k].feel && S.byDate[k]);
-  const avg = feels.length ? feels.reduce((a, k) => a + S.tracking[k].feel, 0) / feels.length : null;
-  const notes = Object.keys(S.tracking).filter((k) => S.byDate[k] && (S.tracking[k].note || S.tracking[k].feel)).sort().reverse().slice(0, 8);
-  return `<div class="grid2">
-    <section class="card stack"><div><h2>Volume prévu et réalisé</h2><p class="sub">Les séances comptent quand tu les marques comme faites.</p>${planLine}</div>
-      <div class="kpis"><div class="kpi"><span class="v num">${nD}/${nS}</span><span class="l">séances faites${nSk ? ' · ' + nSk + ' sautée' + (nSk > 1 ? 's' : '') : ''}</span></div>
-      <div class="kpi"><span class="v num">${fmtMin(totalD) || '0 min'}</span><span class="l">faites sur ${fmtMin(totalP)}</span></div>
-      <div class="kpi"><span class="v num">${avg == null ? '–' : avg.toFixed(1).replace('.', ',')}</span><span class="l">sensations moyennes (sur 5)</span></div></div>
-      <div class="bars">${rows}</div></section>
-    <section class="card stack"><div><h2>Dernières séances notées</h2></div>
-      ${notes.length ? `<ul class="notes">${notes.map((k) => { const t = S.tracking[k], d = S.byDate[k].day; return `<li><div class="row between"><strong>${esc(frDate(k, true))} · ${esc(dayChipLabel(d))}</strong><span class="muted">${t.feel ? FEELS[t.feel - 1] : ''}</span></div>${t.note ? `<div class="muted">${esc(t.note)}</div>` : ''}</li>`; }).join('')}</ul>` : '<p class="muted">Aucune séance notée pour l\'instant. Ouvre une séance du plan pour la marquer comme faite et noter tes sensations.</p>'}
-    </section></div>`;
-}
-
+/* ----- Progression ----- */
 /* ----- Bilan sur 12 mois : séances du plan cochées + sorties libres + course ----- */
 function weekActivity(mon) {
   let min = 0, km = 0, n = 0;
@@ -2477,9 +2478,88 @@ function yearBilanHTML() {
       ${totKm ? `<div class="kpi"><span class="v num">${Math.round(totKm)} km</span><span class="l">notés (sorties avec distance et courses)</span></div>` : ''}</div>
     <div class="yearwrap"><div class="yearbars" style="min-width:${Math.max(0, weeks.length * 10)}px" role="img" aria-label="Temps d'entraînement par semaine sur la période">${bars}</div></div></section>`;
 }
+/* ----- Progression : où j'en suis, suivi du plan, mes courses, l'année ----- */
+function pctDelta(cur, ref) {
+  if (!ref) return '';
+  const d = Math.round((cur - ref) / ref * 100);
+  if (Math.abs(d) < 3) return '<span class="delta">stable</span>';
+  return `<span class="delta ${d > 0 ? 'up' : 'down'}">${d > 0 ? '+' : ''}${d} %</span>`;
+}
+function nowHTML() {
+  const thisMon = mondayOf(TODAY);
+  const weeks = [];
+  for (let k = 8; k >= 0; k--) weeks.push(weekActivity(addDays(thisMon, -7 * k)));
+  // 0-3 : les 4 semaines d'avant ; 4-7 : les 4 dernières semaines ; 8 : la semaine en cours
+  const cur = weeks[8], last4 = weeks.slice(4, 8), prev4 = weeks.slice(0, 4);
+  const sum = (ws, k) => ws.reduce((a, w) => a + w[k], 0);
+  const m4 = sum(last4, 'min'), mp = sum(prev4, 'min');
+  const km4 = sum(last4, 'km'), n4 = sum(last4, 'n');
+  const max = Math.max(60, ...weeks.slice(4).map((w) => w.min));
+  const cols = weeks.slice(4).map((w) => `<div class="wk${w.mon === thisMon ? ' now' : ''}"><div class="wkbar" title="${esc('Semaine du ' + frDate(w.mon) + ' : ' + (fmtMin(w.min) || 'rien de noté'))}"><i style="height:${w.min ? Math.max(4, Math.round(w.min / max * 100)) : 0}%"></i></div><span class="num">${fmtMin(w.min) || '–'}</span><span class="wkl">${w.mon === thisMon ? 'cette sem.' : esc(frDate(w.mon).replace(/ (\S{3})\S*$/, ' $1.'))}</span></div>`).join('');
+  return `<section class="card stack"><div><h2>Où j'en suis</h2><p class="sub">Les 4 dernières semaines et la semaine en cours : séances cochées, sorties libres et courses.</p></div>
+    <div class="kpis">
+      <div class="kpi"><span class="v num">${fmtMin(cur.min) || '0 min'}</span><span class="l">cette semaine · ${cur.n} sortie${cur.n > 1 ? 's' : ''}</span></div>
+      <div class="kpi"><span class="v num">${fmtMin(Math.round(m4 / 4)) || '0 min'}</span><span class="l">par semaine sur 4 semaines ${pctDelta(m4, mp)}</span></div>
+      <div class="kpi"><span class="v num">${n4}</span><span class="l">sorties en 4 semaines${km4 ? ' · ' + Math.round(km4) + ' km notés' : ''}</span></div>
+    </div>
+    <div class="weeks5">${cols}</div>
+    <p class="sub">L'évolution compare les 4 dernières semaines aux 4 précédentes.</p></section>`;
+}
+function planFollowHTML() {
+  if (!S.plan) return '';
+  const e = curEntry();
+  let nPast = 0, nDone = 0, nSkip = 0, pMin = 0, dMin = 0;
+  const rows = S.plan.weeks.map((w) => {
+    const sess = weekDays(w).filter((d) => !d.rest);
+    const p = sess.reduce((a, d) => a + (d.durationMin || 0), 0);
+    const dn = Math.round(sess.filter((d) => track(d.date).done).reduce((a, d) => a + (d.category === 'race' && track(d.date).result ? track(d.date).result / 60 : (d.durationMin || 0)), 0));
+    sess.forEach((d) => { if (d.date <= TODAY) { nPast++; pMin += d.durationMin || 0; if (track(d.date).done) nDone++; if (track(d.date).skipped) nSkip++; } });
+    dMin += dn;
+    const pct = p ? Math.min(100, Math.round(dn / p * 100)) : 0;
+    const future = w.start > TODAY;
+    return `<div class="bar-row ${w.general ? 'gen' : ''}${future ? ' future' : ''}"><span class="num"><strong>${w.id.replace('G', ' G')}</strong></span>
+      <div class="track" role="img" aria-label="${w.id} : ${fmtMin(dn) || '0 min'} faites sur ${fmtMin(p)}"><i style="width:${pct}%"></i></div><span class="num muted">${future ? 'à venir · ' + fmtMin(p) : (fmtMin(dn) || '0 min') + ' / ' + fmtMin(p)}</span></div>`;
+  }).join('');
+  const rate = nPast ? Math.round(nDone / nPast * 100) : null;
+  const st = planState(e);
+  return `<section class="card stack"><div><h2>Suivi du plan</h2><p class="sub">${esc(planName(e))} · ${esc(st)}${S.plans.length > 1 ? ' · change de plan avec le sélecteur en haut de page' : ''}.</p></div>
+    <div class="kpis">
+      <div class="kpi"><span class="v num">${rate == null ? '–' : rate + ' %'}</span><span class="l">${nPast ? nDone + (nDone > 1 ? ' séances faites' : ' séance faite') + ' sur ' + nPast + ' passées' : 'le plan n\'a pas commencé'}${nSkip ? ' · ' + nSkip + ' sautée' + (nSkip > 1 ? 's' : '') : ''}</span></div>
+      <div class="kpi"><span class="v num">${fmtMin(dMin) || '0 min'}</span><span class="l">faites${pMin ? ' sur ' + fmtMin(pMin) + ' prévues à ce jour' : ''}</span></div>
+    </div>
+    <div class="bars">${rows}</div></section>`;
+}
+function racesHTML() {
+  const races = S.plans.filter((e) => e.plan.raceDate).map((e) => ({ e, date: e.plan.raceDate, t: track(e.plan.raceDate), tgt: e.settings && e.settings.targetSec })).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const ref = S.profile && S.profile.ref;
+  if (!races.length && !ref) return `<section class="card stack"><div><h2>Mes courses</h2><p class="sub">Tes courses et leurs chronos apparaîtront ici : ajoute un plan, puis saisis ton résultat le jour J.</p></div></section>`;
+  const items = races.map(({ e, date, t, tgt }) => {
+    const past = date <= TODAY;
+    const diff = t.result && tgt ? t.result - tgt : null;
+    const vmaEq = t.result ? (MARATHON_KM / (t.result / 3600)) / 0.775 : null;
+    return `<li class="race${t.pr ? ' pr' : ''}"><div class="stack" style="gap:2px"><strong>${esc(planName(e))}</strong><span class="sub">${esc(frDate(date, true))}${tgt ? ' · objectif ' + esc(fmtHMS(tgt)) : ''}</span></div>
+      <div class="raceres">${t.result ? `<span class="num big2">${esc(fmtHMS(t.result))}</span><span class="sub">${t.pr ? '<span class="badge ok">Record</span> ' : ''}${diff != null ? (diff <= 0 ? esc(fmtHMS(-diff)) + ' sous l\'objectif' : esc(fmtHMS(diff)) + ' au-dessus') : ''}${vmaEq ? ' · VMA ≈ ' + fmtVma(Math.round(vmaEq * 2) / 2) : ''}</span>` : past ? `<button class="btn small" data-act="open" data-date="${date}">Saisir mon chrono</button>` : `<span class="sub">dans ${diffDays(date, TODAY)} jours</span>`}</div></li>`;
+  }).join('');
+  return `<section class="card stack"><div><h2>Mes courses</h2><p class="sub">Tes chronos, tes records, et la VMA qu'ils laissent supposer.</p></div>
+    <ul class="races">${items}</ul>
+    ${ref ? `<p class="sub">Course de référence des prédictions : ${esc(fmtHMS(ref.sec))} sur ${esc(String(ref.km).replace('.', ',').replace(/(\.\d)\d+/, '$1'))} km (onglet VMA).</p>` : ''}</section>`;
+}
+function notesHTML() {
+  const items = [];
+  Object.keys(S.tracking).forEach((k) => { const t = S.tracking[k]; const ref = S.byDate[k]; if (ref && ref.entry && (t.note || t.feel)) items.push({ date: k, what: dayChipLabel(ref.day), feel: t.feel, note: t.note }); });
+  Object.keys(S.logs).forEach((k) => S.logs[k].forEach((l) => { if (l.note || l.feel) items.push({ date: k, what: logLine(l), feel: l.feel, note: l.note }); }));
+  items.sort((a, b) => (a.date < b.date ? 1 : -1));
+  const feels = items.filter((x) => x.feel).slice(0, 10);
+  const avg = feels.length ? feels.reduce((a, x) => a + x.feel, 0) / feels.length : null;
+  return `<section class="card stack"><div><h2>Sensations et notes</h2><p class="sub">${avg == null ? 'Note tes sensations dans une séance ou une sortie : elles s\'afficheront ici.' : 'Moyenne des 10 dernières sensations : <strong>' + avg.toFixed(1).replace('.', ',') + ' / 5</strong> (' + FEELS[Math.round(avg) - 1].toLowerCase() + ').'}</p></div>
+    ${items.length ? `<ul class="notes">${items.slice(0, 8).map((x) => `<li><div class="row between"><strong>${esc(frDate(x.date, true))} · ${esc(x.what)}</strong><span class="muted">${x.feel ? FEELS[x.feel - 1] : ''}</span></div>${x.note ? `<div class="sub">${esc(x.note)}</div>` : ''}</li>`).join('')}</ul>` : ''}</section>`;
+}
 function bilanView() {
-  const year = yearBilanHTML();
-  return `<div class="stack">${year}${S.plan ? planBilanHTML() : ''}</div>`;
+  return `<div class="stack">
+    <div class="grid2">${nowHTML()}${racesHTML()}</div>
+    ${S.plan ? `<div class="grid2">${planFollowHTML()}${notesHTML()}</div>` : notesHTML()}
+    ${yearBilanHTML()}
+  </div>`;
 }
 
 /* ----- Données ----- */
@@ -2534,25 +2614,7 @@ function backupText() {
 function dataView() {
   const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done || S.tracking[k].skipped || S.tracking[k].note || S.tracking[k].feel).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
   return `<div class="stack">
-    <section class="card stack"><div><h2>Mes plans</h2><p class="sub">Chaque plan se place dans le calendrier selon sa date de course. Les anciens plans restent consultables avec ton suivi.</p></div>
-      ${S.plans.length ? '' : '<p class="sub">Aucun plan pour l\'instant.</p>'}<ul class="planlist">${S.plans.slice().sort((a, b) => (rangeOf(a).start < rangeOf(b).start ? -1 : 1)).map((e) => {
-        const r = rangeOf(e), nSess = e.plan.weeks.reduce((a, w) => a + w.days.filter((d) => !d.rest).length, 0);
-        const done = Object.keys(S.tracking).filter((k) => S.tracking[k].done && S.byDate[k] && S.byDate[k].entry === e).length;
-        const del = S.ui.confirmDel === e.id;
-        return `<li class="planitem${e.id === S.activeId ? ' on' : ''}"><div class="stack" style="gap:2px"><strong>${esc(planName(e))}</strong>
-          <span class="sub">${esc(planState(e))} · ${esc(frDate(r.start))} → ${esc(frDate(r.end))}${e.plan.raceDate ? ' · course le ' + esc(frDate(e.plan.raceDate)) : ''}</span>
-          ${e.plan.raceDate && track(e.plan.raceDate).result ? `<span class="sub"><strong>Chrono ${esc(fmtHMS(track(e.plan.raceDate).result))}</strong>${track(e.plan.raceDate).pr ? ' · record personnel' : ''}${e.settings && e.settings.targetSec ? ' · objectif ' + esc(fmtHMS(e.settings.targetSec)) : ''}</span>` : ''}
-          <span class="sub">${e.plan.weeks.length} semaines · ${done}/${nSess} séances faites${e.plan.source ? ' · fichier « ' + esc(e.plan.source) + ' »' : ''}</span></div>
-          <div class="row">${e.id === S.activeId ? '<span class="badge">Affiché</span>' : `<button class="btn small" data-act="planshow" data-id="${esc(e.id)}">Afficher</button>`}
-          ${del ? `<button class="btn small danger" data-act="plandel" data-id="${esc(e.id)}">Oui, supprimer</button><button class="btn small" data-act="plandelcancel">Annuler</button>` : `<button class="btn small" data-act="plandel" data-id="${esc(e.id)}" aria-label="Supprimer ${esc(planName(e))}">Supprimer</button>`}</div>
-          ${del ? '<p class="sub" style="flex-basis:100%">Le plan et le suivi de ses séances seront effacés de cet appareil.</p>' : ''}
-          ${e.plan.raceDate ? (S.ui.redate === e.id ? `<div class="redate"><div class="field"><label for="redate-${esc(e.id)}">Nouvelle date de course</label><input type="date" id="redate-${esc(e.id)}" value="${esc(e.plan.raceDate)}"></div>
-            <div class="row"><button class="btn small primary" data-act="redateok" data-id="${esc(e.id)}">Recaler le plan</button><button class="btn small" data-act="redatecancel">Annuler</button></div>
-            <p class="sub">Tout le plan se décale par semaines entières, avec tes séances cochées, tes notes et tes déplacements.</p>
-            ${S.msg.redate ? `<p class="errtxt" role="alert">${esc(S.msg.redate)}</p>` : ''}</div>` : `<button class="linkbtn" data-act="redate" data-id="${esc(e.id)}">Changer la date de course</button>`) : ''}</li>`;
-      }).join('')}</ul>
-      <div><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="btn" data-act="pickxlsx">${ICON.up}Ajouter un plan (fichier Excel)</button></div>
-      <p class="sub">Le fichier est contrôlé avant d'être utilisé, et tu choisis la date de la course. Pour mettre à jour un plan déjà chargé, recharge son fichier : ton suivi est conservé.</p></section>
+
     <div class="grid2">
     <section class="card stack"><div><h2>Sauvegarde et restauration</h2><p class="sub">${nTr} séance(s) et sortie(s) suivie(s). Enregistre une copie de temps en temps : elle contient ton plan, tes réglages et ton suivi.</p></div>
 
@@ -2591,6 +2653,31 @@ function dataView() {
       <div class="row">${S.ui.confirmWipe ? '<button class="btn danger" data-act="wipe">Oui, tout effacer</button><button class="btn" data-act="wipecancel">Annuler</button>' : '<button class="btn danger" data-act="wipe">Effacer mes données</button>'}</div></div></details>
     </section>
     </div>
+  </div>`;
+}
+
+/* ----- Mes plans (ouvert depuis le Calendrier) ----- */
+function plansView() {
+  return `<div class="stack">
+    <section class="card stack"><div class="row between"><div><h2>Mes plans</h2><p class="sub">Chaque plan se place dans le calendrier selon sa date de course. Les anciens plans restent consultables avec ton suivi.</p></div><button class="btn small" data-act="tab" data-view="plan">${ICON.left}Retour au calendrier</button></div>
+      ${S.plans.length ? '' : '<p class="sub">Aucun plan pour l\'instant.</p>'}<ul class="planlist">${S.plans.slice().sort((a, b) => (rangeOf(a).start < rangeOf(b).start ? -1 : 1)).map((e) => {
+        const r = rangeOf(e), nSess = e.plan.weeks.reduce((a, w) => a + w.days.filter((d) => !d.rest).length, 0);
+        const done = Object.keys(S.tracking).filter((k) => S.tracking[k].done && S.byDate[k] && S.byDate[k].entry === e).length;
+        const del = S.ui.confirmDel === e.id;
+        return `<li class="planitem${e.id === S.activeId ? ' on' : ''}"><div class="stack" style="gap:2px"><strong>${esc(planName(e))}</strong>
+          <span class="sub">${esc(planState(e))} · ${esc(frDate(r.start))} → ${esc(frDate(r.end))}${e.plan.raceDate ? ' · course le ' + esc(frDate(e.plan.raceDate)) : ''}</span>
+          ${e.plan.raceDate && track(e.plan.raceDate).result ? `<span class="sub"><strong>Chrono ${esc(fmtHMS(track(e.plan.raceDate).result))}</strong>${track(e.plan.raceDate).pr ? ' · record personnel' : ''}${e.settings && e.settings.targetSec ? ' · objectif ' + esc(fmtHMS(e.settings.targetSec)) : ''}</span>` : ''}
+          <span class="sub">${e.plan.weeks.length} semaines · ${done}/${nSess} séances faites${e.plan.source ? ' · fichier « ' + esc(e.plan.source) + ' »' : ''}</span></div>
+          <div class="row">${e.id === S.activeId ? '<span class="badge">Affiché</span>' : `<button class="btn small" data-act="planshow" data-id="${esc(e.id)}">Afficher</button>`}
+          ${del ? `<button class="btn small danger" data-act="plandel" data-id="${esc(e.id)}">Oui, supprimer</button><button class="btn small" data-act="plandelcancel">Annuler</button>` : `<button class="btn small" data-act="plandel" data-id="${esc(e.id)}" aria-label="Supprimer ${esc(planName(e))}">Supprimer</button>`}</div>
+          ${del ? '<p class="sub" style="flex-basis:100%">Le plan et le suivi de ses séances seront effacés de cet appareil.</p>' : ''}
+          ${e.plan.raceDate ? (S.ui.redate === e.id ? `<div class="redate"><div class="field"><label for="redate-${esc(e.id)}">Nouvelle date de course</label><input type="date" id="redate-${esc(e.id)}" value="${esc(e.plan.raceDate)}"></div>
+            <div class="row"><button class="btn small primary" data-act="redateok" data-id="${esc(e.id)}">Recaler le plan</button><button class="btn small" data-act="redatecancel">Annuler</button></div>
+            <p class="sub">Tout le plan se décale par semaines entières, avec tes séances cochées, tes notes et tes déplacements.</p>
+            ${S.msg.redate ? `<p class="errtxt" role="alert">${esc(S.msg.redate)}</p>` : ''}</div>` : `<button class="linkbtn" data-act="redate" data-id="${esc(e.id)}">Changer la date de course</button>`) : ''}</li>`;
+      }).join('')}</ul>
+      <div><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="btn" data-act="pickxlsx">${ICON.up}Ajouter un plan (fichier Excel)</button></div>
+      <p class="sub">Le fichier est contrôlé avant d'être utilisé, et tu choisis la date de la course. Pour mettre à jour un plan déjà chargé, recharge son fichier : ton suivi est conservé.</p></section>
   </div>`;
 }
 
@@ -2661,17 +2748,17 @@ function pickButton(label, small) {
    ============================================================ */
 function emptyHeaderHTML() {
   const dark = effectiveDark();
-  if (!['plan', 'vma', 'bilan', 'data'].includes(S.ui.view)) S.ui.view = 'plan';
+  if (!['plan', 'plans', 'vma', 'bilan', 'data'].includes(S.ui.view)) S.ui.view = 'plan';
   return `<header><div class="band"><div class="wrap"><div class="brandrow"><div class="brand">Appli Marathon</div>
       <div class="tools"><button class="pill" data-act="tab" data-view="vma" aria-label="Mon niveau">${ICON.gauge}<span class="num">VMA ${fmtVma(S.settings.vma)}</span></button><button class="pill" data-act="theme">${dark ? ICON.sun + '<span>Clair</span>' : ICON.moon + '<span>Sombre</span>'}</button></div></div>
       <div class="hero"><div class="herol">${crestHTML()}<div class="count empty"><span class="lbl"><strong>Pas de course prévue</strong><span>Ajoute le plan de ton coach : il se place tout seul dans le calendrier selon ta date de course.</span></span>
         <div style="margin-top:12px"><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="pill" data-act="pickxlsx">${ICON.up}<span>Ajouter un plan</span></button></div></div></div></div></div></div>
-    <nav class="wrap tabs" aria-label="Sections">${[['plan', 'Calendrier'], ['vma', 'VMA'], ['bilan', 'Bilan'], ['data', 'Paramètres']].map(([v, l]) => `<button data-act="tab" data-view="${v}" ${S.ui.view === v ? 'aria-current="page"' : ''}>${l}</button>`).join('')}</nav></header>`;
+    <nav class="wrap tabs" aria-label="Sections">${tabsHTML(false)}</nav></header>`;
 }
 function shellHTML() {
   if (!S.plan) {
     const head = emptyHeaderHTML();
-    const body = S.imp.stage !== 'idle' ? importView() : S.ui.view === 'data' ? dataView() : S.ui.view === 'vma' ? vmaView() : S.ui.view === 'bilan' ? bilanView() : S.ui.mode === 'week' ? weekView() : monthView();
+    const body = S.imp.stage !== 'idle' ? importView() : S.ui.view === 'data' ? dataView() : S.ui.view === 'plans' ? plansView() : S.ui.view === 'vma' ? vmaView() : S.ui.view === 'bilan' ? bilanView() : S.ui.mode === 'week' ? weekView() : monthView();
     return head + `<main class="wrap">${body}</main>${footHTML()}`;
   }
   let body;
@@ -2681,6 +2768,7 @@ function shellHTML() {
   else if (S.ui.view === 'vma') body = vmaView();
   else if (S.ui.view === 'race') body = raceView();
   else if (S.ui.view === 'bilan') body = bilanView();
+  else if (S.ui.view === 'plans') body = plansView();
   else body = dataView();
   return headerHTML() + `<main class="wrap">${raceCtaBanner()}${backupBanner()}${body}</main>` + footHTML();
 }

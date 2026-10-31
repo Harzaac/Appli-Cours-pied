@@ -50,25 +50,7 @@ function backupText() {
 function dataView() {
   const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done || S.tracking[k].skipped || S.tracking[k].note || S.tracking[k].feel).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
   return `<div class="stack">
-    <section class="card stack"><div><h2>Mes plans</h2><p class="sub">Chaque plan se place dans le calendrier selon sa date de course. Les anciens plans restent consultables avec ton suivi.</p></div>
-      ${S.plans.length ? '' : '<p class="sub">Aucun plan pour l\'instant.</p>'}<ul class="planlist">${S.plans.slice().sort((a, b) => (rangeOf(a).start < rangeOf(b).start ? -1 : 1)).map((e) => {
-        const r = rangeOf(e), nSess = e.plan.weeks.reduce((a, w) => a + w.days.filter((d) => !d.rest).length, 0);
-        const done = Object.keys(S.tracking).filter((k) => S.tracking[k].done && S.byDate[k] && S.byDate[k].entry === e).length;
-        const del = S.ui.confirmDel === e.id;
-        return `<li class="planitem${e.id === S.activeId ? ' on' : ''}"><div class="stack" style="gap:2px"><strong>${esc(planName(e))}</strong>
-          <span class="sub">${esc(planState(e))} · ${esc(frDate(r.start))} → ${esc(frDate(r.end))}${e.plan.raceDate ? ' · course le ' + esc(frDate(e.plan.raceDate)) : ''}</span>
-          ${e.plan.raceDate && track(e.plan.raceDate).result ? `<span class="sub"><strong>Chrono ${esc(fmtHMS(track(e.plan.raceDate).result))}</strong>${track(e.plan.raceDate).pr ? ' · record personnel' : ''}${e.settings && e.settings.targetSec ? ' · objectif ' + esc(fmtHMS(e.settings.targetSec)) : ''}</span>` : ''}
-          <span class="sub">${e.plan.weeks.length} semaines · ${done}/${nSess} séances faites${e.plan.source ? ' · fichier « ' + esc(e.plan.source) + ' »' : ''}</span></div>
-          <div class="row">${e.id === S.activeId ? '<span class="badge">Affiché</span>' : `<button class="btn small" data-act="planshow" data-id="${esc(e.id)}">Afficher</button>`}
-          ${del ? `<button class="btn small danger" data-act="plandel" data-id="${esc(e.id)}">Oui, supprimer</button><button class="btn small" data-act="plandelcancel">Annuler</button>` : `<button class="btn small" data-act="plandel" data-id="${esc(e.id)}" aria-label="Supprimer ${esc(planName(e))}">Supprimer</button>`}</div>
-          ${del ? '<p class="sub" style="flex-basis:100%">Le plan et le suivi de ses séances seront effacés de cet appareil.</p>' : ''}
-          ${e.plan.raceDate ? (S.ui.redate === e.id ? `<div class="redate"><div class="field"><label for="redate-${esc(e.id)}">Nouvelle date de course</label><input type="date" id="redate-${esc(e.id)}" value="${esc(e.plan.raceDate)}"></div>
-            <div class="row"><button class="btn small primary" data-act="redateok" data-id="${esc(e.id)}">Recaler le plan</button><button class="btn small" data-act="redatecancel">Annuler</button></div>
-            <p class="sub">Tout le plan se décale par semaines entières, avec tes séances cochées, tes notes et tes déplacements.</p>
-            ${S.msg.redate ? `<p class="errtxt" role="alert">${esc(S.msg.redate)}</p>` : ''}</div>` : `<button class="linkbtn" data-act="redate" data-id="${esc(e.id)}">Changer la date de course</button>`) : ''}</li>`;
-      }).join('')}</ul>
-      <div><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="btn" data-act="pickxlsx">${ICON.up}Ajouter un plan (fichier Excel)</button></div>
-      <p class="sub">Le fichier est contrôlé avant d'être utilisé, et tu choisis la date de la course. Pour mettre à jour un plan déjà chargé, recharge son fichier : ton suivi est conservé.</p></section>
+
     <div class="grid2">
     <section class="card stack"><div><h2>Sauvegarde et restauration</h2><p class="sub">${nTr} séance(s) et sortie(s) suivie(s). Enregistre une copie de temps en temps : elle contient ton plan, tes réglages et ton suivi.</p></div>
 
@@ -107,5 +89,30 @@ function dataView() {
       <div class="row">${S.ui.confirmWipe ? '<button class="btn danger" data-act="wipe">Oui, tout effacer</button><button class="btn" data-act="wipecancel">Annuler</button>' : '<button class="btn danger" data-act="wipe">Effacer mes données</button>'}</div></div></details>
     </section>
     </div>
+  </div>`;
+}
+
+/* ----- Mes plans (ouvert depuis le Calendrier) ----- */
+function plansView() {
+  return `<div class="stack">
+    <section class="card stack"><div class="row between"><div><h2>Mes plans</h2><p class="sub">Chaque plan se place dans le calendrier selon sa date de course. Les anciens plans restent consultables avec ton suivi.</p></div><button class="btn small" data-act="tab" data-view="plan">${ICON.left}Retour au calendrier</button></div>
+      ${S.plans.length ? '' : '<p class="sub">Aucun plan pour l\'instant.</p>'}<ul class="planlist">${S.plans.slice().sort((a, b) => (rangeOf(a).start < rangeOf(b).start ? -1 : 1)).map((e) => {
+        const r = rangeOf(e), nSess = e.plan.weeks.reduce((a, w) => a + w.days.filter((d) => !d.rest).length, 0);
+        const done = Object.keys(S.tracking).filter((k) => S.tracking[k].done && S.byDate[k] && S.byDate[k].entry === e).length;
+        const del = S.ui.confirmDel === e.id;
+        return `<li class="planitem${e.id === S.activeId ? ' on' : ''}"><div class="stack" style="gap:2px"><strong>${esc(planName(e))}</strong>
+          <span class="sub">${esc(planState(e))} · ${esc(frDate(r.start))} → ${esc(frDate(r.end))}${e.plan.raceDate ? ' · course le ' + esc(frDate(e.plan.raceDate)) : ''}</span>
+          ${e.plan.raceDate && track(e.plan.raceDate).result ? `<span class="sub"><strong>Chrono ${esc(fmtHMS(track(e.plan.raceDate).result))}</strong>${track(e.plan.raceDate).pr ? ' · record personnel' : ''}${e.settings && e.settings.targetSec ? ' · objectif ' + esc(fmtHMS(e.settings.targetSec)) : ''}</span>` : ''}
+          <span class="sub">${e.plan.weeks.length} semaines · ${done}/${nSess} séances faites${e.plan.source ? ' · fichier « ' + esc(e.plan.source) + ' »' : ''}</span></div>
+          <div class="row">${e.id === S.activeId ? '<span class="badge">Affiché</span>' : `<button class="btn small" data-act="planshow" data-id="${esc(e.id)}">Afficher</button>`}
+          ${del ? `<button class="btn small danger" data-act="plandel" data-id="${esc(e.id)}">Oui, supprimer</button><button class="btn small" data-act="plandelcancel">Annuler</button>` : `<button class="btn small" data-act="plandel" data-id="${esc(e.id)}" aria-label="Supprimer ${esc(planName(e))}">Supprimer</button>`}</div>
+          ${del ? '<p class="sub" style="flex-basis:100%">Le plan et le suivi de ses séances seront effacés de cet appareil.</p>' : ''}
+          ${e.plan.raceDate ? (S.ui.redate === e.id ? `<div class="redate"><div class="field"><label for="redate-${esc(e.id)}">Nouvelle date de course</label><input type="date" id="redate-${esc(e.id)}" value="${esc(e.plan.raceDate)}"></div>
+            <div class="row"><button class="btn small primary" data-act="redateok" data-id="${esc(e.id)}">Recaler le plan</button><button class="btn small" data-act="redatecancel">Annuler</button></div>
+            <p class="sub">Tout le plan se décale par semaines entières, avec tes séances cochées, tes notes et tes déplacements.</p>
+            ${S.msg.redate ? `<p class="errtxt" role="alert">${esc(S.msg.redate)}</p>` : ''}</div>` : `<button class="linkbtn" data-act="redate" data-id="${esc(e.id)}">Changer la date de course</button>`) : ''}</li>`;
+      }).join('')}</ul>
+      <div><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="btn" data-act="pickxlsx">${ICON.up}Ajouter un plan (fichier Excel)</button></div>
+      <p class="sub">Le fichier est contrôlé avant d'être utilisé, et tu choisis la date de la course. Pour mettre à jour un plan déjà chargé, recharge son fichier : ton suivi est conservé.</p></section>
   </div>`;
 }
