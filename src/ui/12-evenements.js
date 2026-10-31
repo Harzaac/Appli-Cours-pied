@@ -42,6 +42,9 @@ document.addEventListener('click', (ev) => {
     case 'editcancel': S.ui.editing = null; S.msg.edit = ''; renderModal(); break;
     case 'editsave': { const d = el.dataset.date; const nrev = saveSession(d); if (nrev == null) { renderModal(); break; } S.ui.editing = null; rebuildIndex(); saveStore(); render(); toast(nrev ? 'Séance enregistrée · ' + nrev + ' ligne(s) à vérifier' : 'Séance enregistrée'); break; }
     case 'editreset': { const d = el.dataset.date; withUndo('Séance d\'origine remise', () => { delete S.edits[d]; rebuildIndex(); saveStore(); render(); }); break; }
+    case 'vtadd': { const t = addVmaTest(); render(); if (t) toast('Test enregistré : VMA ' + fmtVma(t.vma) + ' km/h', null); break; }
+    case 'vtuse': { const t = (S.profile.vmaTests || []).find((x) => x.id === el.dataset.id); if (t) { const old = S.settings.vma; useVma(t.vma); render(); toast('VMA mise à jour : ' + fmtVma(t.vma) + ' km/h', () => { useVma(old); render(); }); } break; }
+    case 'vtdel': { const id = el.dataset.id; withUndo('Test supprimé', () => { S.profile.vmaTests = (S.profile.vmaTests || []).filter((x) => x.id !== id); saveStore(); render(); }); break; }
     case 'lognew': S.ui.logEdit = { date: S.ui.modal, id: null, feel: 0 }; S.msg.log = ''; renderModal(); break;
     case 'logedit': { const l = logsOf(S.ui.modal).find((x) => x.id === el.dataset.id); if (l) { S.ui.logEdit = { date: S.ui.modal, id: l.id, feel: l.feel || 0 }; S.msg.log = ''; renderModal(); } break; }
     case 'logfeel': { const n = Number(el.dataset.n); if (S.ui.logEdit) { keepLogForm(); S.ui.logEdit.feel = S.ui.logEdit.feel === n ? 0 : n; renderModal(); restoreLogForm(); } break; }
@@ -142,6 +145,7 @@ document.addEventListener('change', (ev) => {
     r.result = sec || 0; saveStore(); if (sec) toast('Chrono enregistré : ' + fmtHMS(sec)); render(); return;
   }
   if (/^rpr-/.test(t.id)) { const r = S.races.find((x) => x.id === t.id.slice(4)); if (r) { r.pr = t.checked; saveStore(); render(); } return; }
+  if (t.id === 'vt-kind') { S.ui.vtKind = t.value; S.msg.vt = ''; render(); return; }
   if (t.id === 'pf-fcmax') {
     const raw = t.value.trim(); const n = Number(raw);
     if (!raw) { delete S.profile.fcmax; saveStore(); toast('FC max retirée'); render(); return; }
@@ -256,12 +260,13 @@ function toast(msg, undo) {
   clearTimeout(TOAST_TIMER); TOAST_TIMER = setTimeout(() => el.classList.remove('on'), undo ? 7000 : 2200);
 }
 // Suppression immédiate, avec « Annuler » pendant quelques secondes au lieu d'une confirmation.
-function snapshot() { return JSON.stringify({ plans: S.plans, tracking: S.tracking, moves: S.moves, logs: S.logs, races: S.races, edits: S.edits, activeId: S.activeId }); }
+function snapshot() { return JSON.stringify({ profile: S.profile, plans: S.plans, tracking: S.tracking, moves: S.moves, logs: S.logs, races: S.races, edits: S.edits, activeId: S.activeId }); }
 function withUndo(msg, action) {
   const snap = snapshot();
   action();
   toast(msg, () => {
     const d = JSON.parse(snap);
+    if (d.profile) S.profile = d.profile;
     Object.assign(S, { plans: d.plans, tracking: d.tracking, moves: d.moves, logs: d.logs, races: d.races, edits: d.edits || {} });
     S.activeId = null; S.plan = null; S.settings = null;
     if (S.plans.length) activate(entryOf(d.activeId) ? d.activeId : pickActive(S.plans)); else useProfile();

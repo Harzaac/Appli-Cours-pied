@@ -86,3 +86,9 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 .besttimes li { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
 .besttimes strong { font-family: var(--f-display); font-size: 26px; line-height: 1; }
 .stack.narrow > div { max-width: 760px; }
+
+/* tests de VMA */
+.vtlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.vtlist li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
+.vtlist strong { font-family: var(--f-display); font-size: 24px; line-height: 1; }
+.vmachart { width: 100%; max-width: 420px; height: auto; background: var(--surface-2); border-radius: 12px; }

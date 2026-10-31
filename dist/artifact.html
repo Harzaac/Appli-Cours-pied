@@ -535,6 +535,12 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 .besttimes strong { font-family: var(--f-display); font-size: 26px; line-height: 1; }
 .stack.narrow > div { max-width: 760px; }
 
+/* tests de VMA */
+.vtlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.vtlist li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
+.vtlist strong { font-family: var(--f-display); font-size: 24px; line-height: 1; }
+.vmachart { width: 100%; max-width: 420px; height: auto; background: var(--surface-2); border-radius: 12px; }
+
 /* Impression (plan de course, écran de course) */
 @media print {
   header, .foot, .noprint, .toolbar { display: none !important; }
@@ -1860,6 +1866,22 @@ function weatherNotice(w) {
   if (!out.length) return '';
   return `<div class="movebar warn" role="status"><span><strong>Météo à surveiller.</strong> ${esc(out.slice(0, 3).join(' · '))}. Tu peux décaler la séance avec « Déplacer ».</span></div>`;
 }
+// Conseils pour une séance selon la météo prévue (séance intense ou facile, sortie longue).
+function wxAdvice(day, d) {
+  if (!d || !day || day.rest || day.category === 'race') return [];
+  const c = wxCfg(), hard = ['vma', 'hills', 'spe'].includes(day.category), long = day.category === 'long', out = [];
+  if (d.tmax >= c.hot) out.push(hard ? 'Chaleur : fais la séance tôt le matin ou en soirée, et accepte 5 à 10 s/km de plus sur les fractions : l\'effort compte plus que l\'allure.' : 'Chaleur : cours aux heures fraîches, bois avant et pendant' + (long ? ' (emporte de l\'eau sur la sortie longue)' : '') + ', et laisse le ressenti ou la FC guider plutôt que l\'allure.');
+  else if (d.tmax >= 20 && (hard || long)) out.push('Il fera doux : hydrate-toi avant, les allures cibles coûteront un peu plus que d\'habitude.');
+  if (d.tmin <= c.cold) out.push('Froid : échauffement 5 à 10 minutes plus long, mains et tête couvertes' + (hard ? ', et attention au sol glissant dans les virages' : '') + '.');
+  if (d.wind >= c.wind) out.push(hard ? 'Vent fort : fais les fractions à l\'abri ou sur piste, et vise l\'effort plutôt que l\'allure contre le vent.' : 'Vent fort : pars vent de face pour rentrer vent dans le dos.');
+  if (d.pp != null && d.pp >= c.rain) out.push(hard ? 'Pluie probable : choisis une piste ou un parcours connu, sans virages piégeux.' : 'Pluie probable : vêtement léger imperméable' + (long ? ', et protège les pieds (chaussettes, crème anti-frottements)' : '') + '.');
+  return out;
+}
+function wxAdviceHTML(day) {
+  const d = wxDay(day.date), tips = wxAdvice(day, d);
+  if (!tips.length) return '';
+  return `<div class="wxrace wxtip"><div class="wxrh"><span class="wxbig" aria-hidden="true">${wxIcon(d.code)}</span><div><strong>Conseil météo</strong><div class="num">${Math.round(d.tmin)}–${Math.round(d.tmax)}° · vent ${Math.round(d.wind)} km/h${d.pp != null ? ' · pluie ' + Math.round(d.pp) + ' %' : ''}</div></div></div><ul>${tips.map((t) => '<li>' + esc(t) + '</li>').join('')}</ul></div>`;
+}
 function raceWeatherHTML() {
   const d = S.plan.raceDate && wxDay(S.plan.raceDate);
   if (!d) return '';
@@ -1989,7 +2011,7 @@ function nextSession() {
   return null;
 }
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à exporter ton profil (bouton en haut à droite).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.11</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à exporter ton profil (bouton en haut à droite).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.12</p></div></footer>`;
 }
 
 /* ----- Plan : semaine ----- */
@@ -2234,6 +2256,7 @@ function modalHTML() {
       <div class="row"><span class="chip c-${day.category}">${esc(dayChipLabel(day))}</span><span class="num"><strong>${esc(dayDuration(day))}</strong></span>${day.objective ? `<span class="muted">${esc(withBpm(day.objective))}</span>` : ''}</div>`}
     </div>
     ${S.ui.editing === date ? sessionFormHTML(date, day) : (day.category !== 'race' ? sessionEditBar(date, day) : '')}
+    ${S.ui.editing === date ? '' : wxAdviceHTML(day)}
     ${S.ui.editing === date ? '' : day.free ? '<p class="muted">Aucun plan ne couvre ce jour.</p>' : day.rest ? '<p class="muted">Pas de séance prévue ce jour-là.</p>' : `<ul class="bigsteps">${steps}</ul>
     ${day.category === 'race' ? raceResultHTML(date, tr, ref.entry) : ''}
     <details class="raw"><summary>Texte du coach</summary><pre>${esc(rawTxt)}</pre></details>
@@ -2488,6 +2511,7 @@ function vmaView() {
       </div>
       ${S.plan ? '<div><button class="btn small" data-act="resetvals">Revenir aux valeurs du fichier du coach</button></div>' : ''}</section>
     ${predictionHTML(vma)}
+    ${vmaTestsHTML()}
     ${refs ? `<section class="card stack"><div><h2>Références du plan</h2><p class="sub">Les temps réalisés et les objectifs notés par le coach dans le fichier, recalculés avec ta VMA.</p></div>
       <div class="tablewrap"><table><thead><tr><th>Distance</th><th>Réalisé</th><th>% VMA</th><th>Objectif</th><th>% VMA</th></tr></thead><tbody>${refs}</tbody></table></div></section>` : ''}
   </div>
@@ -2515,6 +2539,55 @@ function cautiousFields(m) {
     <div class="field"><label for="caut-d">ou écart (s/km)</label><input type="text" id="caut-d" inputmode="decimal" value="${f1(m.d)}" autocomplete="off"></div></div>
     ${S.msg.caut ? `<p class="errtxt" role="alert">${esc(S.msg.caut)}</p>` : ''}
     <p class="sub">Les ${f1(m.K)} premiers km à ${fmtPace(m.pace + m.d)}/km, puis ${fmtPace(later)}/km jusqu'à l'arrivée pour tenir ${fmtHMS(S.settings.targetSec)}. Allure marathon : ${fmtPace(m.pace)}/km.</p>`;
+}
+
+/* ----- tests de VMA ----- */
+const VMA_TESTS = [
+  { id: 'demicooper', name: 'Demi-Cooper (6 min)', ask: 'Distance parcourue (m)', ph: 'ex. 1650', calc: (v) => v / 100, ok: (v) => v >= 800 && v <= 2500, help: 'Courir le plus loin possible en 6 minutes. VMA = distance ÷ 100.' },
+  { id: 'cooper', name: 'Cooper (12 min)', ask: 'Distance parcourue (m)', ph: 'ex. 3100', calc: (v) => v / 200 / 0.95, ok: (v) => v >= 1500 && v <= 4800, help: 'Courir le plus loin possible en 12 minutes, tenu à environ 95 % de la VMA.' },
+  { id: 'paliers', name: 'Test par paliers (VAMEVAL, Léger…)', ask: 'Vitesse du dernier palier terminé (km/h)', ph: 'ex. 16,5', calc: (v) => v, ok: (v) => v >= 8 && v <= 25, help: 'La vitesse du dernier palier complet est ta VMA.' },
+];
+function vmaTestsHTML() {
+  const list = (S.profile.vmaTests || []).slice().sort((a, b) => (a.date < b.date ? -1 : 1));
+  const cur = (S.settings || S.profile).vma;
+  const kind = VMA_TESTS.find((t) => t.id === (S.ui.vtKind || 'demicooper')) || VMA_TESTS[0];
+  const last = list[list.length - 1];
+  let chart = '';
+  if (list.length >= 2) {
+    const W = 320, H = 90, P = 10;
+    const vs = list.map((t) => t.vma), lo = Math.min(...vs) - 0.5, hi = Math.max(...vs) + 0.5;
+    const t0 = parseISO(list[0].date).getTime(), t1 = parseISO(list[list.length - 1].date).getTime() || t0 + 1;
+    const pts = list.map((t) => [P + (W - 2 * P) * ((parseISO(t.date).getTime() - t0) / ((t1 - t0) || 1)), H - P - (H - 2 * P) * ((t.vma - lo) / (hi - lo))]);
+    chart = `<svg class="vmachart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution de la VMA : ${list.map((t) => frDate(t.date) + ' ' + fmtVma(t.vma)).join(', ')}"><polyline points="${pts.map((p) => p.map((x) => x.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="var(--band-a)" stroke-width="2.5" stroke-linejoin="round"/>${pts.map((p, k) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="var(--band-b)"><title>${esc(frDate(list[k].date) + ' : ' + fmtVma(list[k].vma) + ' km/h')}</title></circle>`).join('')}</svg>`;
+  }
+  return `<section class="card stack"><div><h2>Tests de VMA</h2><p class="sub">Note tes tests pour suivre ta VMA dans le temps et mettre à jour tes allures.</p></div>
+    ${list.length ? `<ul class="vtlist">${list.slice().reverse().map((t) => `<li><div class="stack" style="gap:2px"><strong class="num">${fmtVma(t.vma)} km/h</strong><span class="sub">${esc(frDate(t.date, true))} · ${esc((VMA_TESTS.find((x) => x.id === t.type) || { name: 'Test' }).name)}${t.type === 'paliers' ? '' : ' · ' + t.value + ' m'}</span></div>
+      <div class="row">${Math.abs(t.vma - cur) >= 0.05 ? `<button class="btn small" data-act="vtuse" data-id="${esc(t.id)}">Utiliser ${fmtVma(t.vma)} km/h</button>` : '<span class="badge ok">VMA actuelle</span>'}<button class="btn small" data-act="vtdel" data-id="${esc(t.id)}">Supprimer</button></div></li>`).join('')}</ul>` : ''}
+    ${chart}
+    ${last && list.length >= 2 ? `<p class="sub">Depuis le premier test : ${(last.vma - list[0].vma >= 0 ? '+' : '') + fmtVma(Math.round((last.vma - list[0].vma) * 10) / 10)} km/h.</p>` : ''}
+    <div class="logform stack"><strong>Ajouter un test</strong>
+      <div class="fields3"><div class="field"><label for="vt-kind">Test</label><select id="vt-kind">${VMA_TESTS.map((t) => `<option value="${t.id}"${t.id === kind.id ? ' selected' : ''}>${t.name}</option>`).join('')}</select></div>
+        <div class="field"><label for="vt-value">${kind.ask}</label><input type="text" id="vt-value" inputmode="decimal" placeholder="${kind.ph}" autocomplete="off"></div>
+        <div class="field"><label for="vt-date">Date</label><input type="date" id="vt-date" value="${TODAY}"></div></div>
+      <p class="sub">${esc(kind.help)}</p>
+      ${S.msg.vt ? `<p class="errtxt" role="alert">${esc(S.msg.vt)}</p>` : ''}
+      <div><button class="btn small primary" data-act="vtadd">${ICON.check}Ajouter le test</button></div></div></section>`;
+}
+function addVmaTest() {
+  const kind = VMA_TESTS.find((t) => t.id === ((document.getElementById('vt-kind') || {}).value)) || VMA_TESTS[0];
+  const v = Number(((document.getElementById('vt-value') || {}).value || '').trim().replace(',', '.'));
+  const date = ((document.getElementById('vt-date') || {}).value || '');
+  if (!kind.ok(v)) { S.msg.vt = kind.id === 'paliers' ? 'Vitesse entre 8 et 25 km/h.' : 'Distance non plausible pour ce test.'; return null; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { S.msg.vt = 'Choisis la date du test.'; return null; }
+  const vma = Math.round(kind.calc(v) * 10) / 10;
+  const t = { id: 'v' + Date.now().toString(36), date, type: kind.id, value: v, vma };
+  S.profile.vmaTests = (S.profile.vmaTests || []).concat([t]);
+  S.msg.vt = ''; saveStore();
+  return t;
+}
+function useVma(v) {
+  S.settings.vma = v; if (S.settings !== S.profile) S.profile.vma = v;
+  saveStore();
 }
 
 /* ----- Plan de course (une page, imprimable) ----- */
@@ -3380,6 +3453,9 @@ document.addEventListener('click', (ev) => {
     case 'editcancel': S.ui.editing = null; S.msg.edit = ''; renderModal(); break;
     case 'editsave': { const d = el.dataset.date; const nrev = saveSession(d); if (nrev == null) { renderModal(); break; } S.ui.editing = null; rebuildIndex(); saveStore(); render(); toast(nrev ? 'Séance enregistrée · ' + nrev + ' ligne(s) à vérifier' : 'Séance enregistrée'); break; }
     case 'editreset': { const d = el.dataset.date; withUndo('Séance d\'origine remise', () => { delete S.edits[d]; rebuildIndex(); saveStore(); render(); }); break; }
+    case 'vtadd': { const t = addVmaTest(); render(); if (t) toast('Test enregistré : VMA ' + fmtVma(t.vma) + ' km/h', null); break; }
+    case 'vtuse': { const t = (S.profile.vmaTests || []).find((x) => x.id === el.dataset.id); if (t) { const old = S.settings.vma; useVma(t.vma); render(); toast('VMA mise à jour : ' + fmtVma(t.vma) + ' km/h', () => { useVma(old); render(); }); } break; }
+    case 'vtdel': { const id = el.dataset.id; withUndo('Test supprimé', () => { S.profile.vmaTests = (S.profile.vmaTests || []).filter((x) => x.id !== id); saveStore(); render(); }); break; }
     case 'lognew': S.ui.logEdit = { date: S.ui.modal, id: null, feel: 0 }; S.msg.log = ''; renderModal(); break;
     case 'logedit': { const l = logsOf(S.ui.modal).find((x) => x.id === el.dataset.id); if (l) { S.ui.logEdit = { date: S.ui.modal, id: l.id, feel: l.feel || 0 }; S.msg.log = ''; renderModal(); } break; }
     case 'logfeel': { const n = Number(el.dataset.n); if (S.ui.logEdit) { keepLogForm(); S.ui.logEdit.feel = S.ui.logEdit.feel === n ? 0 : n; renderModal(); restoreLogForm(); } break; }
@@ -3480,6 +3556,7 @@ document.addEventListener('change', (ev) => {
     r.result = sec || 0; saveStore(); if (sec) toast('Chrono enregistré : ' + fmtHMS(sec)); render(); return;
   }
   if (/^rpr-/.test(t.id)) { const r = S.races.find((x) => x.id === t.id.slice(4)); if (r) { r.pr = t.checked; saveStore(); render(); } return; }
+  if (t.id === 'vt-kind') { S.ui.vtKind = t.value; S.msg.vt = ''; render(); return; }
   if (t.id === 'pf-fcmax') {
     const raw = t.value.trim(); const n = Number(raw);
     if (!raw) { delete S.profile.fcmax; saveStore(); toast('FC max retirée'); render(); return; }
@@ -3594,12 +3671,13 @@ function toast(msg, undo) {
   clearTimeout(TOAST_TIMER); TOAST_TIMER = setTimeout(() => el.classList.remove('on'), undo ? 7000 : 2200);
 }
 // Suppression immédiate, avec « Annuler » pendant quelques secondes au lieu d'une confirmation.
-function snapshot() { return JSON.stringify({ plans: S.plans, tracking: S.tracking, moves: S.moves, logs: S.logs, races: S.races, edits: S.edits, activeId: S.activeId }); }
+function snapshot() { return JSON.stringify({ profile: S.profile, plans: S.plans, tracking: S.tracking, moves: S.moves, logs: S.logs, races: S.races, edits: S.edits, activeId: S.activeId }); }
 function withUndo(msg, action) {
   const snap = snapshot();
   action();
   toast(msg, () => {
     const d = JSON.parse(snap);
+    if (d.profile) S.profile = d.profile;
     Object.assign(S, { plans: d.plans, tracking: d.tracking, moves: d.moves, logs: d.logs, races: d.races, edits: d.edits || {} });
     S.activeId = null; S.plan = null; S.settings = null;
     if (S.plans.length) activate(entryOf(d.activeId) ? d.activeId : pickActive(S.plans)); else useProfile();

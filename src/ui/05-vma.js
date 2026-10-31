@@ -143,6 +143,7 @@ function vmaView() {
       </div>
       ${S.plan ? '<div><button class="btn small" data-act="resetvals">Revenir aux valeurs du fichier du coach</button></div>' : ''}</section>
     ${predictionHTML(vma)}
+    ${vmaTestsHTML()}
     ${refs ? `<section class="card stack"><div><h2>Références du plan</h2><p class="sub">Les temps réalisés et les objectifs notés par le coach dans le fichier, recalculés avec ta VMA.</p></div>
       <div class="tablewrap"><table><thead><tr><th>Distance</th><th>Réalisé</th><th>% VMA</th><th>Objectif</th><th>% VMA</th></tr></thead><tbody>${refs}</tbody></table></div></section>` : ''}
   </div>
@@ -170,4 +171,53 @@ function cautiousFields(m) {
     <div class="field"><label for="caut-d">ou écart (s/km)</label><input type="text" id="caut-d" inputmode="decimal" value="${f1(m.d)}" autocomplete="off"></div></div>
     ${S.msg.caut ? `<p class="errtxt" role="alert">${esc(S.msg.caut)}</p>` : ''}
     <p class="sub">Les ${f1(m.K)} premiers km à ${fmtPace(m.pace + m.d)}/km, puis ${fmtPace(later)}/km jusqu'à l'arrivée pour tenir ${fmtHMS(S.settings.targetSec)}. Allure marathon : ${fmtPace(m.pace)}/km.</p>`;
+}
+
+/* ----- tests de VMA ----- */
+const VMA_TESTS = [
+  { id: 'demicooper', name: 'Demi-Cooper (6 min)', ask: 'Distance parcourue (m)', ph: 'ex. 1650', calc: (v) => v / 100, ok: (v) => v >= 800 && v <= 2500, help: 'Courir le plus loin possible en 6 minutes. VMA = distance ÷ 100.' },
+  { id: 'cooper', name: 'Cooper (12 min)', ask: 'Distance parcourue (m)', ph: 'ex. 3100', calc: (v) => v / 200 / 0.95, ok: (v) => v >= 1500 && v <= 4800, help: 'Courir le plus loin possible en 12 minutes, tenu à environ 95 % de la VMA.' },
+  { id: 'paliers', name: 'Test par paliers (VAMEVAL, Léger…)', ask: 'Vitesse du dernier palier terminé (km/h)', ph: 'ex. 16,5', calc: (v) => v, ok: (v) => v >= 8 && v <= 25, help: 'La vitesse du dernier palier complet est ta VMA.' },
+];
+function vmaTestsHTML() {
+  const list = (S.profile.vmaTests || []).slice().sort((a, b) => (a.date < b.date ? -1 : 1));
+  const cur = (S.settings || S.profile).vma;
+  const kind = VMA_TESTS.find((t) => t.id === (S.ui.vtKind || 'demicooper')) || VMA_TESTS[0];
+  const last = list[list.length - 1];
+  let chart = '';
+  if (list.length >= 2) {
+    const W = 320, H = 90, P = 10;
+    const vs = list.map((t) => t.vma), lo = Math.min(...vs) - 0.5, hi = Math.max(...vs) + 0.5;
+    const t0 = parseISO(list[0].date).getTime(), t1 = parseISO(list[list.length - 1].date).getTime() || t0 + 1;
+    const pts = list.map((t) => [P + (W - 2 * P) * ((parseISO(t.date).getTime() - t0) / ((t1 - t0) || 1)), H - P - (H - 2 * P) * ((t.vma - lo) / (hi - lo))]);
+    chart = `<svg class="vmachart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution de la VMA : ${list.map((t) => frDate(t.date) + ' ' + fmtVma(t.vma)).join(', ')}"><polyline points="${pts.map((p) => p.map((x) => x.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="var(--band-a)" stroke-width="2.5" stroke-linejoin="round"/>${pts.map((p, k) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="var(--band-b)"><title>${esc(frDate(list[k].date) + ' : ' + fmtVma(list[k].vma) + ' km/h')}</title></circle>`).join('')}</svg>`;
+  }
+  return `<section class="card stack"><div><h2>Tests de VMA</h2><p class="sub">Note tes tests pour suivre ta VMA dans le temps et mettre à jour tes allures.</p></div>
+    ${list.length ? `<ul class="vtlist">${list.slice().reverse().map((t) => `<li><div class="stack" style="gap:2px"><strong class="num">${fmtVma(t.vma)} km/h</strong><span class="sub">${esc(frDate(t.date, true))} · ${esc((VMA_TESTS.find((x) => x.id === t.type) || { name: 'Test' }).name)}${t.type === 'paliers' ? '' : ' · ' + t.value + ' m'}</span></div>
+      <div class="row">${Math.abs(t.vma - cur) >= 0.05 ? `<button class="btn small" data-act="vtuse" data-id="${esc(t.id)}">Utiliser ${fmtVma(t.vma)} km/h</button>` : '<span class="badge ok">VMA actuelle</span>'}<button class="btn small" data-act="vtdel" data-id="${esc(t.id)}">Supprimer</button></div></li>`).join('')}</ul>` : ''}
+    ${chart}
+    ${last && list.length >= 2 ? `<p class="sub">Depuis le premier test : ${(last.vma - list[0].vma >= 0 ? '+' : '') + fmtVma(Math.round((last.vma - list[0].vma) * 10) / 10)} km/h.</p>` : ''}
+    <div class="logform stack"><strong>Ajouter un test</strong>
+      <div class="fields3"><div class="field"><label for="vt-kind">Test</label><select id="vt-kind">${VMA_TESTS.map((t) => `<option value="${t.id}"${t.id === kind.id ? ' selected' : ''}>${t.name}</option>`).join('')}</select></div>
+        <div class="field"><label for="vt-value">${kind.ask}</label><input type="text" id="vt-value" inputmode="decimal" placeholder="${kind.ph}" autocomplete="off"></div>
+        <div class="field"><label for="vt-date">Date</label><input type="date" id="vt-date" value="${TODAY}"></div></div>
+      <p class="sub">${esc(kind.help)}</p>
+      ${S.msg.vt ? `<p class="errtxt" role="alert">${esc(S.msg.vt)}</p>` : ''}
+      <div><button class="btn small primary" data-act="vtadd">${ICON.check}Ajouter le test</button></div></div></section>`;
+}
+function addVmaTest() {
+  const kind = VMA_TESTS.find((t) => t.id === ((document.getElementById('vt-kind') || {}).value)) || VMA_TESTS[0];
+  const v = Number(((document.getElementById('vt-value') || {}).value || '').trim().replace(',', '.'));
+  const date = ((document.getElementById('vt-date') || {}).value || '');
+  if (!kind.ok(v)) { S.msg.vt = kind.id === 'paliers' ? 'Vitesse entre 8 et 25 km/h.' : 'Distance non plausible pour ce test.'; return null; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { S.msg.vt = 'Choisis la date du test.'; return null; }
+  const vma = Math.round(kind.calc(v) * 10) / 10;
+  const t = { id: 'v' + Date.now().toString(36), date, type: kind.id, value: v, vma };
+  S.profile.vmaTests = (S.profile.vmaTests || []).concat([t]);
+  S.msg.vt = ''; saveStore();
+  return t;
+}
+function useVma(v) {
+  S.settings.vma = v; if (S.settings !== S.profile) S.profile.vma = v;
+  saveStore();
 }

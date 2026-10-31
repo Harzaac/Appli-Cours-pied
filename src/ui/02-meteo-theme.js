@@ -85,6 +85,22 @@ function weatherNotice(w) {
   if (!out.length) return '';
   return `<div class="movebar warn" role="status"><span><strong>Météo à surveiller.</strong> ${esc(out.slice(0, 3).join(' · '))}. Tu peux décaler la séance avec « Déplacer ».</span></div>`;
 }
+// Conseils pour une séance selon la météo prévue (séance intense ou facile, sortie longue).
+function wxAdvice(day, d) {
+  if (!d || !day || day.rest || day.category === 'race') return [];
+  const c = wxCfg(), hard = ['vma', 'hills', 'spe'].includes(day.category), long = day.category === 'long', out = [];
+  if (d.tmax >= c.hot) out.push(hard ? 'Chaleur : fais la séance tôt le matin ou en soirée, et accepte 5 à 10 s/km de plus sur les fractions : l\'effort compte plus que l\'allure.' : 'Chaleur : cours aux heures fraîches, bois avant et pendant' + (long ? ' (emporte de l\'eau sur la sortie longue)' : '') + ', et laisse le ressenti ou la FC guider plutôt que l\'allure.');
+  else if (d.tmax >= 20 && (hard || long)) out.push('Il fera doux : hydrate-toi avant, les allures cibles coûteront un peu plus que d\'habitude.');
+  if (d.tmin <= c.cold) out.push('Froid : échauffement 5 à 10 minutes plus long, mains et tête couvertes' + (hard ? ', et attention au sol glissant dans les virages' : '') + '.');
+  if (d.wind >= c.wind) out.push(hard ? 'Vent fort : fais les fractions à l\'abri ou sur piste, et vise l\'effort plutôt que l\'allure contre le vent.' : 'Vent fort : pars vent de face pour rentrer vent dans le dos.');
+  if (d.pp != null && d.pp >= c.rain) out.push(hard ? 'Pluie probable : choisis une piste ou un parcours connu, sans virages piégeux.' : 'Pluie probable : vêtement léger imperméable' + (long ? ', et protège les pieds (chaussettes, crème anti-frottements)' : '') + '.');
+  return out;
+}
+function wxAdviceHTML(day) {
+  const d = wxDay(day.date), tips = wxAdvice(day, d);
+  if (!tips.length) return '';
+  return `<div class="wxrace wxtip"><div class="wxrh"><span class="wxbig" aria-hidden="true">${wxIcon(d.code)}</span><div><strong>Conseil météo</strong><div class="num">${Math.round(d.tmin)}–${Math.round(d.tmax)}° · vent ${Math.round(d.wind)} km/h${d.pp != null ? ' · pluie ' + Math.round(d.pp) + ' %' : ''}</div></div></div><ul>${tips.map((t) => '<li>' + esc(t) + '</li>').join('')}</ul></div>`;
+}
 function raceWeatherHTML() {
   const d = S.plan.raceDate && wxDay(S.plan.raceDate);
   if (!d) return '';

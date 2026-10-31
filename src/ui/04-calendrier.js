@@ -240,6 +240,7 @@ function modalHTML() {
       <div class="row"><span class="chip c-${day.category}">${esc(dayChipLabel(day))}</span><span class="num"><strong>${esc(dayDuration(day))}</strong></span>${day.objective ? `<span class="muted">${esc(withBpm(day.objective))}</span>` : ''}</div>`}
     </div>
     ${S.ui.editing === date ? sessionFormHTML(date, day) : (day.category !== 'race' ? sessionEditBar(date, day) : '')}
+    ${S.ui.editing === date ? '' : wxAdviceHTML(day)}
     ${S.ui.editing === date ? '' : day.free ? '<p class="muted">Aucun plan ne couvre ce jour.</p>' : day.rest ? '<p class="muted">Pas de séance prévue ce jour-là.</p>' : `<ul class="bigsteps">${steps}</ul>
     ${day.category === 'race' ? raceResultHTML(date, tr, ref.entry) : ''}
     <details class="raw"><summary>Texte du coach</summary><pre>${esc(rawTxt)}</pre></details>
