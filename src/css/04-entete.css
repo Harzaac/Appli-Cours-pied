@@ -95,3 +95,11 @@ button.crest:hover .crestedit, button.crest:focus-visible .crestedit, button.cre
   .tools .pill[data-act="theme"] span, .profpill > span:not(.avatar) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .tools .pill[data-act="theme"], .profpill { padding: 0 8px; }
 }
+
+.avatar.photo { background: none; overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avbtn { position: relative; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; display: block; }
+.avbtn .crestedit { right: -4px; bottom: -4px; width: 26px; height: 26px; }
+.avbtn .crestedit svg { width: 13px; height: 13px; }
+.avbtn:hover .crestedit, .avbtn:focus-visible .crestedit, .avbtn[aria-expanded="true"] .crestedit { opacity: 1; }
+.avbtn:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }

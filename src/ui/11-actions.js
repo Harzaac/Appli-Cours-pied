@@ -202,6 +202,28 @@ function searchCity(q, forRace) {
     S.msg.wx = ''; fetchWeather(true); render();
   }).catch(() => { S.msg.wx = 'Recherche impossible sans connexion.'; render(); });
 }
+// Recadre une image en carré et la réduit ; appelle done(dataUrl) ou fail().
+function squareImage(file, size, done, fail) {
+  if (!/^image\//.test(file.type)) { fail(); return; }
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    try {
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const side = Math.min(img.width, img.height);
+      c.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
+      done(c.toDataURL('image/jpeg', 0.85));
+    } catch (e) { fail(); }
+    URL.revokeObjectURL(url);
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); fail(); };
+  img.src = url;
+}
+function loadAvatar(file) {
+  squareImage(file, 200, (data) => { S.profile.photo = data; S.ui.avMenu = false; S.msg.av = ''; saveStore(); toast('Photo de profil changée'); render(); },
+    () => { S.msg.av = "Cette image n'a pas pu être lue. Choisis une photo JPG ou PNG."; render(); });
+}
 function loadCrest(file) {
   const fail = () => { S.msg.crest = "Cette image n'a pas pu être lue. Choisis une photo JPG ou PNG."; render(); };
   if (!/^image\//.test(file.type)) { fail(); return; }

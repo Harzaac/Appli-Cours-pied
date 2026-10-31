@@ -120,7 +120,12 @@ function initials() {
   const n = (S.profile.name || '').trim();
   return n ? n.split(/\s+/).map((x) => x.charAt(0)).join('').slice(0, 2).toUpperCase() : '';
 }
-function avatarHTML(cls) { const t = initials(); return `<span class="avatar ${cls || ''}" aria-hidden="true">${t ? esc(t) : ICON.user}</span>`; }
+function avatarHTML(cls) { const t = initials(); return `<span class="avatar ${cls || ''}${S.profile.photo ? ' photo' : ''}" aria-hidden="true">${S.profile.photo ? `<img src="${S.profile.photo}" alt="">` : t ? esc(t) : ICON.user}</span>`; }
+// Avatar du profil : un clic ouvre le même petit menu que le rond du bandeau.
+function avatarEditHTML() {
+  const menu = S.ui.avMenu ? `<div class="crestmenu" role="menu"><button role="menuitem" data-act="pickav">${ICON.up}Choisir une photo</button>${S.profile.photo ? '<button role="menuitem" data-act="avreset">Revenir aux initiales</button>' : ''}<button role="menuitem" data-act="avclose">Annuler</button>${S.msg.av ? `<p class="errtxt" role="alert">${esc(S.msg.av)}</p>` : ''}</div>` : '';
+  return `<div class="crestwrap avwrap"><input type="file" id="file-av" accept="image/*" class="sr"><button class="avbtn" data-act="avmenu" aria-haspopup="menu" aria-expanded="${!!S.ui.avMenu}" aria-label="Changer la photo de profil">${avatarHTML('big')}<span class="crestedit" aria-hidden="true">${ICON.edit}</span></button>${menu}</div>`;
+}
 function bestTimes() {
   const all = S.plans.filter((e) => e.plan.raceDate && track(e.plan.raceDate).result).map((e) => ({ km: MARATHON_KM, sec: track(e.plan.raceDate).result, date: e.plan.raceDate, name: planName(e) }))
     .concat(S.races.filter((r) => r.result).map((r) => ({ km: r.km, sec: r.result, date: r.date, name: r.name })));
@@ -132,7 +137,7 @@ function profileView() {
   const best = bestTimes();
   const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
   return `<div class="stack">
-    <section class="card stack profilecard"><div class="row profhead">${avatarHTML('big')}<div class="stack" style="gap:2px"><h2>${esc(S.profile.name || 'Mon profil')}</h2><span class="sub">${esc(S.profile.club || CLUB_NAME)}</span></div>
+    <section class="card stack profilecard"><div class="row profhead">${avatarEditHTML()}<div class="stack" style="gap:2px"><h2>${esc(S.profile.name || 'Mon profil')}</h2><span class="sub">${esc(S.profile.club || CLUB_NAME)}</span></div>
         <button class="btn small" data-act="tab" data-view="plan" style="margin-left:auto">${ICON.left}Retour</button></div>
       <div class="fields"><div class="field"><label for="pf-name">Prénom</label><input type="text" id="pf-name" value="${esc(S.profile.name || '')}" placeholder="ex. Adrien" autocomplete="off"></div>
         <div class="field"><label for="pf-club">Club</label><input type="text" id="pf-club" value="${esc(S.profile.club || CLUB_NAME)}" autocomplete="off"></div></div>

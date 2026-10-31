@@ -286,6 +286,14 @@ button.crest:hover .crestedit, button.crest:focus-visible .crestedit, button.cre
   .tools .pill[data-act="theme"], .profpill { padding: 0 8px; }
 }
 
+.avatar.photo { background: none; overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avbtn { position: relative; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; display: block; }
+.avbtn .crestedit { right: -4px; bottom: -4px; width: 26px; height: 26px; }
+.avbtn .crestedit svg { width: 13px; height: 13px; }
+.avbtn:hover .crestedit, .avbtn:focus-visible .crestedit, .avbtn[aria-expanded="true"] .crestedit { opacity: 1; }
+.avbtn:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
 /* Calendrier : semaine, cartes de jour, mois, bandeaux au-dessus du calendrier */
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
 .navlabel { font-family: var(--f-display); font-weight: 700; font-size: 28px; line-height: 1; min-width: 0; }
@@ -1962,7 +1970,7 @@ function nextSession() {
   return null;
 }
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à exporter ton profil (bouton en haut à droite).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.9</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à exporter ton profil (bouton en haut à droite).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.10</p></div></footer>`;
 }
 
 /* ----- Plan : semaine ----- */
@@ -2764,7 +2772,12 @@ function initials() {
   const n = (S.profile.name || '').trim();
   return n ? n.split(/\s+/).map((x) => x.charAt(0)).join('').slice(0, 2).toUpperCase() : '';
 }
-function avatarHTML(cls) { const t = initials(); return `<span class="avatar ${cls || ''}" aria-hidden="true">${t ? esc(t) : ICON.user}</span>`; }
+function avatarHTML(cls) { const t = initials(); return `<span class="avatar ${cls || ''}${S.profile.photo ? ' photo' : ''}" aria-hidden="true">${S.profile.photo ? `<img src="${S.profile.photo}" alt="">` : t ? esc(t) : ICON.user}</span>`; }
+// Avatar du profil : un clic ouvre le même petit menu que le rond du bandeau.
+function avatarEditHTML() {
+  const menu = S.ui.avMenu ? `<div class="crestmenu" role="menu"><button role="menuitem" data-act="pickav">${ICON.up}Choisir une photo</button>${S.profile.photo ? '<button role="menuitem" data-act="avreset">Revenir aux initiales</button>' : ''}<button role="menuitem" data-act="avclose">Annuler</button>${S.msg.av ? `<p class="errtxt" role="alert">${esc(S.msg.av)}</p>` : ''}</div>` : '';
+  return `<div class="crestwrap avwrap"><input type="file" id="file-av" accept="image/*" class="sr"><button class="avbtn" data-act="avmenu" aria-haspopup="menu" aria-expanded="${!!S.ui.avMenu}" aria-label="Changer la photo de profil">${avatarHTML('big')}<span class="crestedit" aria-hidden="true">${ICON.edit}</span></button>${menu}</div>`;
+}
 function bestTimes() {
   const all = S.plans.filter((e) => e.plan.raceDate && track(e.plan.raceDate).result).map((e) => ({ km: MARATHON_KM, sec: track(e.plan.raceDate).result, date: e.plan.raceDate, name: planName(e) }))
     .concat(S.races.filter((r) => r.result).map((r) => ({ km: r.km, sec: r.result, date: r.date, name: r.name })));
@@ -2776,7 +2789,7 @@ function profileView() {
   const best = bestTimes();
   const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
   return `<div class="stack">
-    <section class="card stack profilecard"><div class="row profhead">${avatarHTML('big')}<div class="stack" style="gap:2px"><h2>${esc(S.profile.name || 'Mon profil')}</h2><span class="sub">${esc(S.profile.club || CLUB_NAME)}</span></div>
+    <section class="card stack profilecard"><div class="row profhead">${avatarEditHTML()}<div class="stack" style="gap:2px"><h2>${esc(S.profile.name || 'Mon profil')}</h2><span class="sub">${esc(S.profile.club || CLUB_NAME)}</span></div>
         <button class="btn small" data-act="tab" data-view="plan" style="margin-left:auto">${ICON.left}Retour</button></div>
       <div class="fields"><div class="field"><label for="pf-name">Prénom</label><input type="text" id="pf-name" value="${esc(S.profile.name || '')}" placeholder="ex. Adrien" autocomplete="off"></div>
         <div class="field"><label for="pf-club">Club</label><input type="text" id="pf-club" value="${esc(S.profile.club || CLUB_NAME)}" autocomplete="off"></div></div>
@@ -3216,6 +3229,28 @@ function searchCity(q, forRace) {
     S.msg.wx = ''; fetchWeather(true); render();
   }).catch(() => { S.msg.wx = 'Recherche impossible sans connexion.'; render(); });
 }
+// Recadre une image en carré et la réduit ; appelle done(dataUrl) ou fail().
+function squareImage(file, size, done, fail) {
+  if (!/^image\//.test(file.type)) { fail(); return; }
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    try {
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const side = Math.min(img.width, img.height);
+      c.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
+      done(c.toDataURL('image/jpeg', 0.85));
+    } catch (e) { fail(); }
+    URL.revokeObjectURL(url);
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); fail(); };
+  img.src = url;
+}
+function loadAvatar(file) {
+  squareImage(file, 200, (data) => { S.profile.photo = data; S.ui.avMenu = false; S.msg.av = ''; saveStore(); toast('Photo de profil changée'); render(); },
+    () => { S.msg.av = "Cette image n'a pas pu être lue. Choisis une photo JPG ou PNG."; render(); });
+}
 function loadCrest(file) {
   const fail = () => { S.msg.crest = "Cette image n'a pas pu être lue. Choisis une photo JPG ou PNG."; render(); };
   if (!/^image\//.test(file.type)) { fail(); return; }
@@ -3240,7 +3275,7 @@ function copyText(text, onOk, onFail) {
 }
 
 document.addEventListener('click', (ev) => {
-  if (S.ui.crestMenu && !ev.target.closest('.crestwrap')) { S.ui.crestMenu = false; render(); }
+  if ((S.ui.crestMenu || S.ui.avMenu) && !ev.target.closest('.crestwrap')) { S.ui.crestMenu = false; S.ui.avMenu = false; render(); }
   const el = ev.target.closest('[data-act]');
   if (!el) return;
   const act = el.dataset.act;
@@ -3304,6 +3339,10 @@ document.addEventListener('click', (ev) => {
     case 'wxrsearch': { const q = (document.getElementById('wx-rcity') || {}).value || ''; if (q.trim()) searchCity(q.trim(), true); break; }
     case 'pickcrest': { const inp = document.getElementById('file-crest'); if (inp) inp.click(); break; }
     case 'crestreset': S.crest = ''; S.msg.crest = ''; S.ui.crestMenu = false; saveStore(); toast('Logo du club remis'); render(); break;
+    case 'avmenu': S.ui.avMenu = !S.ui.avMenu; S.msg.av = ''; render(); break;
+    case 'avclose': S.ui.avMenu = false; render(); break;
+    case 'pickav': { const inp = document.getElementById('file-av'); if (inp) inp.click(); break; }
+    case 'avreset': delete S.profile.photo; S.ui.avMenu = false; saveStore(); toast('Photo de profil retirée'); render(); break;
     case 'crestmenu': S.ui.crestMenu = !S.ui.crestMenu; S.msg.crest = ''; render(); break;
     case 'crestclose': S.ui.crestMenu = false; render(); break;
     case 'pickjson': { const inp = document.getElementById('file-json'); if (inp) inp.click(); break; }
@@ -3360,6 +3399,7 @@ document.addEventListener('change', (ev) => {
     if (!(n >= 1 && n <= 30)) { S.msg.fitErr = true; S.msg.fit = 'Tolérance entre 1 et 30 s/km.'; } else { S.settings.fitTol = Math.round(n); S.msg.fit = ''; saveStore(); toast('Tolérance enregistrée : ±' + Math.round(n) + ' s/km'); }
     renderModal(); return;
   }
+  if (t.id === 'file-av' && t.files && t.files[0]) { const f = t.files[0]; t.value = ''; loadAvatar(f); return; }
   if (t.id === 'file-crest' && t.files && t.files[0]) { loadCrest(t.files[0]); return; }
   if (t.id === 'file-json' && t.files && t.files[0]) { const f = t.files[0]; f.text().then((txt) => restoreFrom(/\.html?$/i.test(f.name) || /^\s*<(!doctype|html)/i.test(txt) ? embeddedFromHtml(txt) : txt), () => { S.msg.restore = 'Fichier illisible.'; S.msg.restoreErr = true; render(); }); t.value = ''; return; }
   if (t.id === 'race-result' && S.ui.modal) {
@@ -3446,6 +3486,7 @@ document.addEventListener('drop', (ev) => {
 });
 document.addEventListener('dragend', () => { S.ui.drag = null; document.querySelectorAll('.dragging,.dropok').forEach((e) => e.classList.remove('dragging', 'dropok')); });
 document.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Escape' && (S.ui.crestMenu || S.ui.avMenu)) { S.ui.crestMenu = false; S.ui.avMenu = false; render(); return; }
   if (ev.key === 'Escape' && S.ui.moving) { S.ui.moving = null; render(); return; }
   if (ev.key === 'Escape' && S.ui.modal) { S.ui.modal = null; S.ui.logEdit = null; renderModal(); }
   if (ev.key === 'Enter' && (ev.target.id === 'vma-input' || ev.target.id === 'target-input' || ev.target.id === 'caut-km' || ev.target.id === 'caut-d' || ev.target.id === 'caut-pace')) ev.target.blur();

@@ -1,5 +1,5 @@
 document.addEventListener('click', (ev) => {
-  if (S.ui.crestMenu && !ev.target.closest('.crestwrap')) { S.ui.crestMenu = false; render(); }
+  if ((S.ui.crestMenu || S.ui.avMenu) && !ev.target.closest('.crestwrap')) { S.ui.crestMenu = false; S.ui.avMenu = false; render(); }
   const el = ev.target.closest('[data-act]');
   if (!el) return;
   const act = el.dataset.act;
@@ -63,6 +63,10 @@ document.addEventListener('click', (ev) => {
     case 'wxrsearch': { const q = (document.getElementById('wx-rcity') || {}).value || ''; if (q.trim()) searchCity(q.trim(), true); break; }
     case 'pickcrest': { const inp = document.getElementById('file-crest'); if (inp) inp.click(); break; }
     case 'crestreset': S.crest = ''; S.msg.crest = ''; S.ui.crestMenu = false; saveStore(); toast('Logo du club remis'); render(); break;
+    case 'avmenu': S.ui.avMenu = !S.ui.avMenu; S.msg.av = ''; render(); break;
+    case 'avclose': S.ui.avMenu = false; render(); break;
+    case 'pickav': { const inp = document.getElementById('file-av'); if (inp) inp.click(); break; }
+    case 'avreset': delete S.profile.photo; S.ui.avMenu = false; saveStore(); toast('Photo de profil retirée'); render(); break;
     case 'crestmenu': S.ui.crestMenu = !S.ui.crestMenu; S.msg.crest = ''; render(); break;
     case 'crestclose': S.ui.crestMenu = false; render(); break;
     case 'pickjson': { const inp = document.getElementById('file-json'); if (inp) inp.click(); break; }
@@ -119,6 +123,7 @@ document.addEventListener('change', (ev) => {
     if (!(n >= 1 && n <= 30)) { S.msg.fitErr = true; S.msg.fit = 'Tolérance entre 1 et 30 s/km.'; } else { S.settings.fitTol = Math.round(n); S.msg.fit = ''; saveStore(); toast('Tolérance enregistrée : ±' + Math.round(n) + ' s/km'); }
     renderModal(); return;
   }
+  if (t.id === 'file-av' && t.files && t.files[0]) { const f = t.files[0]; t.value = ''; loadAvatar(f); return; }
   if (t.id === 'file-crest' && t.files && t.files[0]) { loadCrest(t.files[0]); return; }
   if (t.id === 'file-json' && t.files && t.files[0]) { const f = t.files[0]; f.text().then((txt) => restoreFrom(/\.html?$/i.test(f.name) || /^\s*<(!doctype|html)/i.test(txt) ? embeddedFromHtml(txt) : txt), () => { S.msg.restore = 'Fichier illisible.'; S.msg.restoreErr = true; render(); }); t.value = ''; return; }
   if (t.id === 'race-result' && S.ui.modal) {
@@ -205,6 +210,7 @@ document.addEventListener('drop', (ev) => {
 });
 document.addEventListener('dragend', () => { S.ui.drag = null; document.querySelectorAll('.dragging,.dropok').forEach((e) => e.classList.remove('dragging', 'dropok')); });
 document.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Escape' && (S.ui.crestMenu || S.ui.avMenu)) { S.ui.crestMenu = false; S.ui.avMenu = false; render(); return; }
   if (ev.key === 'Escape' && S.ui.moving) { S.ui.moving = null; render(); return; }
   if (ev.key === 'Escape' && S.ui.modal) { S.ui.modal = null; S.ui.logEdit = null; renderModal(); }
   if (ev.key === 'Enter' && (ev.target.id === 'vma-input' || ev.target.id === 'target-input' || ev.target.id === 'caut-km' || ev.target.id === 'caut-d' || ev.target.id === 'caut-pace')) ev.target.blur();
