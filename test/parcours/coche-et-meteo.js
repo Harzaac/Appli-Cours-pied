@@ -1,0 +1,20 @@
+const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..','..');
+(async()=>{const b=await chromium.launch();const errs=[];const p=await b.newPage({viewport:{width:1280,height:900}});p.on('pageerror',e=>errs.push(e.message));
+await p.route(/open-meteo\.com/,r=>r.abort());
+await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-marathon.html');
+await p.setInputFiles('#file-xlsx',root+'/test/donnees/plan-test.xlsx');await p.click('[data-act=useplan]');await p.waitForSelector('.week');
+const sel='[data-act=quickdone][data-date="2026-10-08"]';
+console.log('boutons coche:',await p.$$eval('.qcheck',e=>e.length),'| sur jour de repos:',await p.$$eval('.dcard.rest .qcheck',e=>e.length));
+await p.click(sel);
+console.log('après clic → fait:',await p.evaluate(()=>!!track('2026-10-08').done),'| modale ouverte:',await p.evaluate(()=>!!S.ui.modal),'| carte .done:',await p.$eval(sel,e=>e.closest('.dcard').classList.contains('done')));
+await p.screenshot({path:root+'/shots/v25-desktop.png',clip:{x:0,y:560,width:1280,height:340}});
+await p.click(sel);console.log('re-clic → fait:',await p.evaluate(()=>!!track('2026-10-08').done));
+await p.click(sel);await p.reload();await p.waitForSelector('.week');console.log('après rechargement → fait:',await p.evaluate(()=>!!track('2026-10-08').done));
+// notif météo
+console.log('message météo (erreur réseau):',await p.$eval('.movebar',e=>e.textContent.trim()).catch(()=>'aucun'));
+await p.evaluate(()=>{wxSet({on:false});render();});
+console.log('météo coupée:',await p.$eval('.movebar',e=>e.textContent.trim()));
+await p.click('.movebar [data-act=wxtoggle]');console.log('après « Activer » →',await p.evaluate(()=>wxCfg().on));
+await p.setViewportSize({width:400,height:800});await p.screenshot({path:root+'/shots/v25-mobile.png'});
+console.log('débordement mobile:',await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
+console.log(errs.length?errs:'pas d\'erreur');await b.close();})();

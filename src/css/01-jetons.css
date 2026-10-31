@@ -1,0 +1,74 @@
+/* Direction : plan d'entraînement sportif, lumineux. Bandes diagonales bleu océan -> vert menthe en haut et en bas,
+   centre clair, cartes arrondies par jour. Orange réservé à l'effort (VMA). Thème clair par défaut, thème sombre au choix. */
+:root {
+  --bg: #F1F7FB;
+  --surface: #FFFFFF;
+  --surface-2: #E8F0F6;
+  --ink: #0B2236;
+  --muted: #55697D;
+  --line: #D2E0EA;
+  --focus: #1769E0;
+  --band-a: #1457C4;
+  --band-b: #0B8467;
+  --on-band: #FFFFFF;
+  --on-band-soft: rgba(255, 255, 255, .82);
+  --danger: #B3261E; --danger-line: #E7B9B5;
+  --shadow: 0 1px 2px rgba(11, 34, 54, .06), 0 10px 28px rgba(11, 34, 54, .07);
+
+  --blue: #2F80ED;   --blue-ink: #0F4FB5;   --blue-bg: #DEEBFD;
+  --mint: #1FBF8A;   --mint-ink: #076B4A;   --mint-bg: #D9F4E9;
+  --orange: #F28C28; --orange-ink: #9A4707; --orange-bg: #FDE9D4;
+  --violet: #7C5CE0; --violet-ink: #4A2FB0; --violet-bg: #E8E2FB;
+  --teal: #19A9B5;   --teal-ink: #0A6770;   --teal-bg: #D6F0F3;
+  --gold: #E3A400;   --gold-ink: #6F4D00;   --gold-bg: #FBEFC9;
+  --grey: #8CA0B3;   --grey-ink: #3F5266;   --grey-bg: #E4ECF2;
+
+  /* encadrés d'information : conseil (or), info (bleu), alerte (orange) */
+  --info-bg: #DEEBFD; --info-ink: #0F4FB5;
+  --tip-bg: #FBEFC9; --tip-ink: #6F4D00;
+  --alert-bg: #FDE9D4; --alert-ink: #9A4707;
+
+  --f-display: 'Barlow Condensed', 'Arial Narrow', 'Helvetica Neue', system-ui, sans-serif;
+  --f-body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #08141D; --surface: #0F2230; --surface-2: #15303F; --ink: #E7F0F6; --muted: #92A9BB; --line: #22394A;
+    --focus: #7DB6FF; --band-a: #164E9E; --band-b: #0A6B55; --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
+    --danger: #FF9C94; --danger-line: #6E2E2A;
+    --blue: #5AA4FF; --blue-ink: #A9CFFF; --blue-bg: #14355A;
+    --mint: #38D39F; --mint-ink: #8EE8C4; --mint-bg: #0F3B31;
+    --orange: #FFA04D; --orange-ink: #FFC890; --orange-bg: #4A2D12;
+    --violet: #A895FF; --violet-ink: #CDC1FF; --violet-bg: #2A2354;
+    --teal: #43C7D3; --teal-ink: #94E3EA; --teal-bg: #10383D;
+    --gold: #F2C24B; --gold-ink: #F8DD94; --gold-bg: #4B3A0C;
+    --grey: #6F889B; --grey-ink: #B5C6D3; --grey-bg: #1B3243;
+    --info-bg: #12304f; --info-ink: #bcd9ff; --tip-bg: #3a2e08; --tip-ink: #f6dc8a; --alert-bg: #4a2a0c; --alert-ink: #ffd2a1;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #08141D; --surface: #0F2230; --surface-2: #15303F; --ink: #E7F0F6; --muted: #92A9BB; --line: #22394A;
+  --focus: #7DB6FF; --band-a: #164E9E; --band-b: #0A6B55; --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
+  --danger: #FF9C94; --danger-line: #6E2E2A;
+  --blue: #5AA4FF; --blue-ink: #A9CFFF; --blue-bg: #14355A;
+  --mint: #38D39F; --mint-ink: #8EE8C4; --mint-bg: #0F3B31;
+  --orange: #FFA04D; --orange-ink: #FFC890; --orange-bg: #4A2D12;
+  --violet: #A895FF; --violet-ink: #CDC1FF; --violet-bg: #2A2354;
+  --teal: #43C7D3; --teal-ink: #94E3EA; --teal-bg: #10383D;
+  --gold: #F2C24B; --gold-ink: #F8DD94; --gold-bg: #4B3A0C;
+  --grey: #6F889B; --grey-ink: #B5C6D3; --grey-bg: #1B3243;
+  --info-bg: #12304f; --info-ink: #bcd9ff; --tip-bg: #3a2e08; --tip-ink: #f6dc8a; --alert-bg: #4a2a0c; --alert-ink: #ffd2a1;
+  color-scheme: dark;
+}
+
+/* couleurs d'accent : bandeau, boutons, liens et fond très légèrement teinté ; les couleurs de séance restent identiques */
+:root[data-accent="foret"]:not([data-theme="dark"]) { --bg: #F1F7F1; --surface-2: #E5F0E5; --line: #CFE0CF; --focus: #1D6A3A; --band-a: #1D6A3A; --band-b: #45841F; --accent: #1D6A3A; }
+:root[data-accent="braise"]:not([data-theme="dark"]) { --bg: #FBF4EE; --surface-2: #F5E9DE; --line: #E6D3C2; --focus: #C2490A; --band-a: #C2490A; --band-b: #A32A1B; --accent: #B03A06; }
+:root[data-accent="graphite"]:not([data-theme="dark"]) { --bg: #F3F4F6; --surface-2: #E7E9EC; --line: #D5D9DE; --focus: #26313C; --band-a: #26313C; --band-b: #4A5A68; --accent: #26313C; }
+@media (prefers-color-scheme: dark) { :root[data-accent="foret"]:not([data-theme="light"]) { --bg: #09160E; --surface: #0F2417; --surface-2: #153222; --line: #254434; --focus: #8FDB9A; --band-a: #1B5E36; --band-b: #3F7A1C; --accent: #8FDB9A; --ink: #E7F4EA; --muted: #9DB8A5; } }
+:root[data-accent="foret"][data-theme="dark"] { --bg: #09160E; --surface: #0F2417; --surface-2: #153222; --line: #254434; --focus: #8FDB9A; --band-a: #1B5E36; --band-b: #3F7A1C; --accent: #8FDB9A; --ink: #E7F4EA; --muted: #9DB8A5; }
+@media (prefers-color-scheme: dark) { :root[data-accent="braise"]:not([data-theme="light"]) { --bg: #1A0F09; --surface: #26160D; --surface-2: #33201A; --line: #4A3024; --focus: #FFB27A; --band-a: #A8420C; --band-b: #8A2417; --accent: #FFB27A; --ink: #F6ECE4; --muted: #BBA392; } }
+:root[data-accent="braise"][data-theme="dark"] { --bg: #1A0F09; --surface: #26160D; --surface-2: #33201A; --line: #4A3024; --focus: #FFB27A; --band-a: #A8420C; --band-b: #8A2417; --accent: #FFB27A; --ink: #F6ECE4; --muted: #BBA392; }
+@media (prefers-color-scheme: dark) { :root[data-accent="graphite"]:not([data-theme="light"]) { --bg: #0D1013; --surface: #171B20; --surface-2: #1F252B; --line: #2E363E; --focus: #A9C4DA; --band-a: #2B3640; --band-b: #46555F; --accent: #A9C4DA; --ink: #E8ECEF; --muted: #9AA6B0; } }
+:root[data-accent="graphite"][data-theme="dark"] { --bg: #0D1013; --surface: #171B20; --surface-2: #1F252B; --line: #2E363E; --focus: #A9C4DA; --band-a: #2B3640; --band-b: #46555F; --accent: #A9C4DA; --ink: #E8ECEF; --muted: #9AA6B0; }

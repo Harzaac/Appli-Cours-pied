@@ -1,0 +1,112 @@
+/* Calendrier : semaine, cartes de jour, mois, bandeaux au-dessus du calendrier */
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.navlabel { font-family: var(--f-display); font-weight: 700; font-size: 28px; line-height: 1; min-width: 0; }
+.navgroup { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.weekhead { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.week { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 10px; align-items: stretch; }
+@media (min-width: 1160px) { .week { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+@media (max-width: 559px) { .week { grid-template-columns: 1fr; } }
+.dcard {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 12px; display: flex; flex-direction: column; gap: 10px;
+  min-width: 0; box-shadow: var(--shadow); cursor: pointer;
+}
+.dcard.rest { background: transparent; border-style: dashed; box-shadow: none; }
+.dcard.today { border: 2px solid var(--mint); }
+.dcard.done { background: var(--surface-2); }
+.dhead { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.dow { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--muted); }
+.dnum { font-family: var(--f-display); font-weight: 700; font-size: 30px; line-height: 1; margin-left: 6px; }
+.dcard.today .dnum { color: var(--mint-ink); }
+.dur { font-family: var(--f-display); font-weight: 700; font-size: 30px; line-height: 1; }
+.obj { font-size: 13px; color: var(--muted); }
+.restlabel { color: var(--muted); padding-block: 22px; text-align: center; flex: 1; }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.steps li { display: flex; gap: 8px; align-items: stretch; background: var(--surface-2); border-radius: 10px; padding: 6px 8px; min-width: 0; }
+.dcard.done .steps li { background: var(--surface); }
+.steps .bar { flex: 0 0 4px; border-radius: 2px; background: var(--tone, var(--grey)); }
+.steps .tx { min-width: 0; display: flex; flex-direction: column; }
+.steps .t1 { font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+.steps .t2 { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.tick { color: var(--mint-ink); display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; }
+.tick svg { width: 16px; height: 16px; }
+.monthwrap { overflow-x: auto; }
+.month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.mhs { display: none; }
+.dot { display: none; }
+.d-footing { --tone: var(--blue); } .d-vma, .d-hills { --tone: var(--orange); } .d-spe { --tone: var(--mint); }
+.d-long { --tone: var(--violet); } .d-race { --tone: var(--gold); } .d-other, .d-rest { --tone: var(--grey); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 50%; background: var(--tone, var(--grey)); display: inline-block; }
+.mh { font-size: 12px; letter-spacing: .08em; font-weight: 700; color: var(--muted); padding: 0 4px 2px; }
+.mcell {
+  min-height: 96px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 6px; text-align: left; cursor: pointer; min-width: 0;
+}
+.mcell.out { opacity: .5; }
+.mcell.empty { background: transparent; border-style: dashed; cursor: default; }
+.mcell.today { border: 2px solid var(--mint); }
+.mcell .n { font-family: var(--f-display); font-weight: 700; font-size: 20px; line-height: 1; display: flex; justify-content: space-between; align-items: center; }
+.mcell .tn { font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+.mcell .dd { font-size: 12px; color: var(--muted); }
+.mcell .chip { font-size: 12px; padding: 1px 8px; min-height: 22px; white-space: normal; }
+button.mcell { width: 100%; }
+@media (max-width: 559px) {
+  .navlabel { font-size: 24px; }
+  .month { gap: 4px; }
+  .mcell { min-height: 66px; padding: 6px; border-radius: 10px; }
+  .mcell .chip { display: none; }
+  .mcell .dot { display: block; width: 10px; height: 10px; border-radius: 50%; background: var(--tone, var(--grey)); }
+  .mcell .n { font-size: 17px; }
+  .mcell .dd { font-size: 11px; }
+  .mhl { display: none; } .mhs { display: inline; }
+  .mh { font-size: 11px; padding: 0 2px; text-align: center; }
+}
+.taper { margin-top: 14px; padding: 14px 16px; border-radius: 16px; background: var(--tip-bg); color: var(--tip-ink); border: 1px solid var(--gold); }
+.taper .taperhead { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.taper .muted { color: var(--tip-ink); opacity: .85; }
+.taper ul { margin: 8px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.dcard[draggable="true"] { cursor: grab; }
+.dcard.dragging { opacity: .45; }
+.dcard.dropok { outline: 3px dashed var(--mint); outline-offset: 2px; }
+.dcard.moving { outline: 3px solid var(--orange); outline-offset: 2px; }
+.dcard.target { border-color: var(--mint); }
+.cardbtns { display: flex; gap: 6px; flex-wrap: wrap; }
+.cardbtns .btn { flex: 1 1 auto; }
+.badge.moved { align-self: flex-start; background: var(--blue-bg); color: var(--blue-ink); }
+.movebar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 14px; background: var(--info-bg); color: var(--info-ink); }
+.movebar.warn { background: var(--alert-bg); color: var(--alert-ink); }
+.dcard.skipped { opacity: .7; }
+.dcard.skipped .dur { text-decoration: line-through; }
+.tick.skip { color: var(--grey-ink); }
+.wx { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--muted); }
+.wx .wx1 { display: flex; gap: 6px; align-items: center; color: var(--ink); font-weight: 700; }
+.wx .badge { align-self: flex-start; margin-top: 2px; }
+.wxm { display: block; margin-top: 3px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.dcard > .wx { margin: -2px 0 2px; }
+.remind { margin: 14px 0 0; padding: 10px 14px; border-radius: 14px; background: var(--info-bg); color: var(--info-ink); display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+.remind .row { flex-wrap: nowrap; gap: 8px; }
+.dright { display: flex; align-items: center; gap: 8px; }
+.qcheck { min-width: 28px; height: 28px; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); color: var(--mint-ink); display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 0; font-size: 12px; font-weight: 700; cursor: pointer; flex: 0 0 auto; }
+.qcheck:hover { border-color: var(--mint-ink); }
+.qcheck.on { padding: 0 10px 0 6px; background: var(--mint-bg, var(--surface)); border-color: var(--mint-ink); }
+.qcheck svg { width: 16px; height: 16px; }
+.qcheck:focus-visible { outline: 3px solid var(--mint-ink); outline-offset: 2px; }
+.movebar .btn { flex: 0 0 auto; }
+@media (max-width: 520px) { .qcheck { min-width: 34px; height: 34px; } }
+.racecta-banner { background: var(--tip-bg); color: var(--tip-ink); border: 1px solid var(--gold); }
+.badge.plan { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+.dcard.free { opacity: .75; border-style: dashed; }
+.toolbar > .navgroup:first-child { flex-wrap: nowrap; min-width: 0; max-width: 100%; }
+.toolbar > .navgroup:first-child .iconbtn { flex: 0 0 44px; }
+@media (max-width: 520px) {
+  .toolbar > .navgroup:first-child { width: 100%; justify-content: space-between; }
+  .toolbar > .navgroup:first-child .navlabel { font-size: 20px; text-align: center; flex: 1 1 auto; }
+}
+.loglist { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.loglist .chip { white-space: normal; }
+.addlog { margin-top: auto; align-self: flex-start; border: 0; background: none; padding: 4px 0; font: inherit; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; opacity: 0; transition: opacity .15s; }
+.dcard:hover .addlog, .dcard:focus-within .addlog, .addlog:focus-visible { opacity: 1; }
+@media (hover: none) { .addlog { opacity: 1; } }
+.dcard.free, .dcard.rest { cursor: pointer; }
+.dcard.haslog { border-style: solid; }

@@ -1,0 +1,13 @@
+const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..');
+(async()=>{const b=await chromium.launch();const errs=[];const ctx=await b.newContext({viewport:{width:1000,height:900},permissions:['clipboard-read','clipboard-write']});const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));
+await p.route(/open-meteo\.com/,r=>r.abort());await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-marathon.html');
+await p.setInputFiles('#file-xlsx',root+'/test/plan-test.xlsx');await p.click('[data-act=useplan]');await p.waitForSelector('.week');
+await p.click('[data-act=tab][data-view=race]');
+console.log('Course : boutons imprimer/copier:',await p.$$eval('[data-act=printrace],[data-act=copyrace]',e=>e.length));
+await p.click('.racecta [data-act=racemode]');await p.waitForSelector('.racemode');
+console.log('Écran de course : boutons:',await p.$$eval('[data-act=printrace],[data-act=copyrace]',e=>e.map(x=>x.textContent)));
+await p.click('[data-act=copyrace]');await p.waitForTimeout(300);
+console.log('message:',await p.textContent('.racemode [role=status]').catch(()=>'-'));
+console.log('texte copié:',JSON.stringify((await p.evaluate(()=>navigator.clipboard.readText()).catch(()=>'?')).split('\n').slice(0,2)));
+await p.pdf({path:root+'/shots/v29-print.pdf',format:'A4',printBackground:true});
+console.log(errs.length?errs:'pas d\'erreur');await b.close();})();

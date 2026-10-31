@@ -1,0 +1,14 @@
+const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..');
+(async()=>{const b=await chromium.launch();const errs=[];const p=await b.newPage({viewport:{width:1280,height:900}});p.on('pageerror',e=>errs.push(e.message));
+await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-marathon.html');
+await p.setInputFiles('#file-xlsx',root+'/test/plan-test.xlsx');await p.click('[data-act=useplan]');await p.waitForSelector('.week');
+await p.click('[data-act=tab][data-view=race]');await p.click('[data-act=strategy][data-s=cautious]');
+await p.fill('#caut-pace',"4'20");await p.press('#caut-pace','Enter');
+console.log(await p.$eval('#caut-d',e=>e.value),'| km',await p.$eval('#caut-km',e=>e.value));
+await p.fill('#caut-km','15');await p.press('#caut-km','Enter');
+console.log((await p.textContent('.sub >> nth=-2')));
+console.log(await p.$$eval('.raceplan tbody tr',r=>r.map(x=>x.innerText.replace(/\s+/g,' ')).join('\n')));
+await p.fill('#caut-pace',"4'00");await p.press('#caut-pace','Enter');console.log('erreur:',await p.textContent('.errtxt'));
+await p.screenshot({path:root+'/shots/v16-course.png',fullPage:true});
+await p.click('[data-act=tab][data-view=passage]');console.log('passage fields:',await p.$$eval('.fields3 input',i=>i.map(x=>x.value).join(' / ')));
+console.log(errs.length?errs:'pas d\'erreur');await b.close();})();

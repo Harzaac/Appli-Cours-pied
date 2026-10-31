@@ -1,0 +1,21 @@
+const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..');
+(async()=>{const b=await chromium.launch();const errs=[];const p=await b.newPage({viewport:{width:1280,height:900}});p.on('pageerror',e=>errs.push(e.message));
+let calls=0, fail=false;
+await p.route('**/api.open-meteo.com/**',r=>{calls++; if(fail) return r.abort(); const days=[];const t=[],c=[],mx=[],mn=[],pp=[],rn=[],w=[],g=[];
+ for(let i=0;i<16;i++){const d=new Date(Date.UTC(2026,9,11+i));t.push(d.toISOString().slice(0,10));c.push(i%3==0?61:2);mx.push(12+i%5*2);mn.push(6);pp.push(i%3==0?80:20);rn.push(1);w.push(i==4?42:18);g.push(i==4?60:30);}
+ r.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({daily:{time:t,weather_code:c,temperature_2m_max:mx,temperature_2m_min:mn,precipitation_probability_max:pp,precipitation_sum:rn,wind_speed_10m_max:w,wind_gusts_10m_max:g}})});});
+await p.route('**/geocoding-api.open-meteo.com/**',r=>r.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({results:[{name:'Roubaix',latitude:50.69,longitude:3.17,country_code:'FR'}]})}));
+await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-marathon.html');
+await p.setInputFiles('#file-xlsx',root+'/test/plan-test.xlsx');await p.click('[data-act=useplan]');await p.waitForSelector('.week');
+await p.waitForSelector('.wx');console.log('appels réseau:',calls);
+await p.click('[data-act=next]');await p.waitForSelector('.week');
+console.log('avis:',await p.$eval('.movebar.warn',e=>e.innerText).catch(()=>'aucun'));
+await p.screenshot({path:root+'/shots/v17-semaine.png',fullPage:true});
+await p.click('[data-act=tab][data-view=race]');console.log('jour J:',(await p.$eval('.wxrace',e=>e.innerText.replace(/\s+/g,' '))));
+await p.click('[data-act=tab][data-view=data]');await p.fill('#wx-city','Roubaix');await p.click('[data-act=wxsearch]');await p.waitForTimeout(300);
+console.log('ville:',await p.textContent('label[for=wx-city]'),'| appels',calls);
+await p.fill('#wx-wind','25');await p.press('#wx-wind','Tab');
+await p.screenshot({path:root+'/shots/v17-donnees.png',fullPage:true});
+fail=true;await p.click('[data-act=wxrefresh]');await p.waitForTimeout(300);console.log('hors ligne:',await p.$eval('.card [role=status]',e=>e.innerText));
+await p.reload();await p.click('[data-act=next]').catch(()=>{});console.log('cache après rechargement hors ligne:',!!(await p.$('.wx')));
+console.log(errs.length?errs:'pas d\'erreur');await b.close();})();

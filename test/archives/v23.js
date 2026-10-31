@@ -1,0 +1,10 @@
+const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..');
+(async()=>{const b=await chromium.launch();const errs=[];const p=await b.newPage({viewport:{width:400,height:800}});p.on('pageerror',e=>errs.push(e.message));
+await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-marathon.html');
+await p.setInputFiles('#file-xlsx',root+'/test/plan-test.xlsx');await p.click('[data-act=useplan]');await p.waitForSelector('.week');
+console.log('onglets:',(await p.$$eval('nav [data-act=tab], .tabs [data-act=tab]',e=>e.map(x=>x.textContent.trim()))).join(' | '));
+await p.click('[data-act=tab][data-view=race]');await p.waitForSelector('.raceplan');
+await p.click('[data-act=strategy][data-s=cautious]');
+console.log('Course OK, lignes:',await p.$$eval('.raceplan tbody tr',r=>r.length));
+console.log(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth)?'débordement':'pas de débordement');
+console.log(errs.length?errs:'pas d\'erreur');await b.close();})();
