@@ -1,6 +1,6 @@
 // Vérifie le fichier .fit avec un décodeur écrit à part (structure, CRC, valeurs).
 const fs = require('fs'); const path = require('path');
-const core = require('../../src/core.js'); const fit = require('../../src/fit.js');
+const core = require('../outils/noyau.js'); const fit = require('../../src/fit.js');
 const { sheetsFromDump } = require('./parseur.js');
 const res = core.buildPlan(sheetsFromDump(fs.readFileSync(path.join(__dirname, '..', 'donnees', 'dump.txt'), 'utf8')), 'x');
 const plan = res.plan; const settings = core.makeSettings(plan); const ctx = core.paceCtx(plan, settings);

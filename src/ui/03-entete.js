@@ -18,8 +18,8 @@ function headerHTML() {
   let lbl = n == null ? '' : chrono
     ? '<strong>' + esc(raceNameOf()) + (res.pr ? ' · record personnel' : '') + '</strong><span>' + frDate(plan.raceDate, true) + (tgt ? ' · objectif ' + fmtHMS(tgt) : '') + '</span>'
     : n >= 0
-    ? '<strong>' + (n === 0 ? 'Aujourd\'hui, c\'est la course' : 'avant le marathon') + '</strong><span>' + frDate(plan.raceDate, true) + '</span>'
-    : '<strong>Marathon couru</strong><span>' + frDate(plan.raceDate, true) + ' · <button class="linkbtn onband" data-act="open" data-date="' + plan.raceDate + '">saisir mon chrono</button></span>';
+    ? '<strong>' + (n === 0 ? 'Aujourd\'hui, c\'est la course' : 'avant la course') + '</strong><span>' + esc(raceNameOf()) + ' · ' + frDate(plan.raceDate, true) + '</span>'
+    : '<strong>Course terminée</strong><span>' + esc(raceNameOf()) + ' · ' + frDate(plan.raceDate, true) + ' · <button class="linkbtn onband" data-act="open" data-date="' + plan.raceDate + '">saisir mon chrono</button></span>';
   // plan sans course (plan de reprise) : on montre la semaine en cours du plan
   if (!plan.raceDate) {
     const ws = plan.weeks, k = ws.findIndex((w) => TODAY >= w.start && TODAY <= w.end);
@@ -104,5 +104,5 @@ function nextSession() {
 // Pied de page : où sont les données, et un raccourci pour les sauvegarder.
 function footHTML() {
   const last = S.lastCopy ? 'Dernier export : ' + frDate(S.lastCopy) + '.' : 'Aucun export pour l\'instant.';
-  return `<footer class="foot"><div class="wrap"><p>Tes données restent sur cet appareil, rien n'est envoyé ailleurs. ${esc(last)} <button class="linkbtn onband" data-act="download">Exporter mon profil</button></p><p class="ver">${APP_NAME} · ${esc(S.profile.club || CLUB_NAME)} · version 3.14</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes données restent sur cet appareil, rien n'est envoyé ailleurs. ${esc(last)} <button class="linkbtn onband" data-act="download">Exporter mon profil</button></p><p class="ver">${APP_NAME} · ${esc(S.profile.club || CLUB_NAME)} · version ${APP_VERSION}</p></div></footer>`;
 }

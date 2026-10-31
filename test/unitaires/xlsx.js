@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
-const core = require('../../src/core.js');
+const core = require('../outils/noyau.js');
 const { sheetsFromDump } = require('./parseur.js');
 
 (async () => {
@@ -14,7 +14,7 @@ const { sheetsFromDump } = require('./parseur.js');
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.setContent('<html><body></body></html>');
-  await page.addScriptTag({ content: fs.readFileSync(path.join(root, 'src', 'core.js'), 'utf8') });
+  await page.addScriptTag({ content: core.source });
   const got = await page.evaluate(async (b64) => {
     const bin = atob(b64);
     const u8 = new Uint8Array(bin.length);

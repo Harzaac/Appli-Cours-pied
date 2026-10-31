@@ -1,17 +1,14 @@
 /* ---------- météo (option, via Open-Meteo) ---------- */
 const WX_DEFAULT = { on: true, lat: 48.1173, lon: -1.6778, name: 'Rennes', wind: 35, rain: 60, hot: 25, cold: 2 };
-const WX_RACE = { lat: 50.6292, lon: 3.0573, name: 'Lille' };
 function wxCfg() {
   const c = Object.assign({}, WX_DEFAULT, S.weather || {});
-  if (c.lat === WX_RACE.lat && c.lon === WX_RACE.lon && c.name === 'Lille') { c.lat = WX_DEFAULT.lat; c.lon = WX_DEFAULT.lon; c.name = WX_DEFAULT.name; }
   return c;
 }
 function wxSet(patch) { S.weather = Object.assign({}, wxCfg(), patch); saveStore(); }
-// Ville de la course : choisie pour ce plan, sinon Lille si le plan l'indique, sinon la ville d'entraînement.
+// Ville de la course : choisie pour ce plan, sinon la ville d'entraînement.
 function raceCity(e) {
   const rc = e && e.settings && e.settings.raceCity;
   if (rc && typeof rc.lat === 'number') return rc;
-  if (e && /lille/i.test(e.plan.title || '')) return WX_RACE;
   const c = wxCfg();
   return { lat: c.lat, lon: c.lon, name: c.name };
 }

@@ -95,7 +95,7 @@ document.addEventListener('click', (ev) => {
         a.download = profileFileName();
         S.lastCopy = TODAY; saveStore();
         document.body.appendChild(a); a.click(); a.remove();
-        S.msg.backup = 'Profil exporté : « ' + profileFileName() + ' ». Garde ce fichier, c\'est ta sauvegarde.'; toast('Profil exporté');
+        S.msg.backup = 'Profil exporté : « ' + profileFileName() + ' ». Garde ce fichier : il contient tout ton profil.'; toast('Profil exporté');
       } catch (e) { S.msg.backup = 'Le téléchargement est bloqué ici : ouvre l\'appli depuis ton disque.'; }
       render(); break;
     }

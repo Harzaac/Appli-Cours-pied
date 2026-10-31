@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const core = require('../../src/core.js');
+const core = require('../outils/noyau.js');
 
 function sheetsFromDump(txt) {
   const sheets = [];

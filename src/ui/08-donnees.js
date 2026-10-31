@@ -11,13 +11,23 @@ function raceCtaBanner() {
   return `<div class="remind racecta-banner" role="note"><span><strong>${n === 0 ? "C'est aujourd'hui !" : n === 1 ? 'La course, c\'est demain.' : 'La course approche (J-' + n + ').'}</strong> Ton écran de course est prêt : allure, passages, ravitaillements, météo.</span>
     <span class="row"><button class="btn small primary" data-act="racemode" data-id="${esc(up.id)}">Ouvrir l'écran de course</button><button class="iconbtn small" data-act="ctaoff" data-id="${esc(up.id)}" aria-label="Masquer ce rappel">✕</button></span></div>`;
 }
+// Le navigateur refuse d'enregistrer : on le dit clairement, sinon tout serait perdu à la fermeture sans prévenir.
+function storageWorks() {
+  try { localStorage.setItem(KEY + '-test', '1'); localStorage.removeItem(KEY + '-test'); return true; } catch (e) { return false; }
+}
+function storeBanner() {
+  if (S.storeFail == null) S.storeFail = !storageWorks();
+  if (!S.storeFail) return '';
+  return `<div class="remind alert" role="alert"><span><strong>Cet appareil n'enregistre pas tes données</strong> (navigation privée ou stockage bloqué). Exporte ton profil avant de fermer la page, sinon tes changements seront perdus.</span>
+    <span class="row"><button class="btn small" data-act="download">Exporter mon profil</button></span></div>`;
+}
 function backupBanner() {
   if (!S.plan || S.ui.view !== 'plan' || S.imp.stage !== 'idle') return '';
   const n = Object.keys(S.tracking).filter((k) => S.tracking[k].done || S.tracking[k].note).length;
   if (n < 3) return '';
   if (S.lastCopy && diffDays(TODAY, S.lastCopy) < 7) return '';
   if (S.remindUntil && S.remindUntil > TODAY) return '';
-  return `<div class="remind" role="note"><span>${S.lastCopy ? 'Ta dernière sauvegarde date du ' + esc(frDate(S.lastCopy)) + '.' : 'Tu as déjà ' + n + ' séances suivies.'} Pense à exporter ton profil.</span>
+  return `<div class="remind" role="note"><span>${S.lastCopy ? 'Ton dernier export date du ' + esc(frDate(S.lastCopy)) + '.' : 'Tu as déjà ' + n + ' séances suivies.'} Pense à exporter ton profil.</span>
     <span class="row"><button class="btn small" data-act="download">Exporter mon profil</button><button class="iconbtn small" data-act="remindlater" aria-label="Me le rappeler dans une semaine">✕</button></span></div>`;
 }
 function plansForSave() { saveStore(); return S.plans.map((e) => ({ id: e.id, plan: e.plan, settings: e.settings })); }
@@ -70,7 +80,7 @@ function dataView() {
 
       <div class="swatches" role="group" aria-label="Couleur de l'appli">${ACCENTS.map((a) => `<button class="swatch" data-act="accent" data-id="${a.id}" aria-pressed="${S.ui.accent === a.id}"><span class="dot" style="background:linear-gradient(135deg,${a.a},${a.b})"></span>${a.name}</button>`).join('')}</div>
       <p class="sub">Pour changer l'image du rond du bandeau (logo du club ou ta photo), clique simplement dessus.</p></div></details>
-      <details class="raw pref"${S.ui.pref === 'wipe' ? ' open' : ''} data-pref="wipe"><summary>Effacer mes données</summary><div class="stack prefbody"><p class="sub">Supprime les plans, les réglages, le suivi et les sorties de cet appareil. Pense à télécharger une sauvegarde avant.</p>
+      <details class="raw pref"${S.ui.pref === 'wipe' ? ' open' : ''} data-pref="wipe"><summary>Effacer mes données</summary><div class="stack prefbody"><p class="sub">Supprime les plans, les réglages, le suivi et les sorties de cet appareil. Pense à exporter ton profil avant.</p>
 
       <div class="row">${S.ui.confirmWipe ? '<button class="btn danger" data-act="wipe">Oui, tout effacer</button><button class="btn" data-act="wipecancel">Annuler</button>' : '<button class="btn danger" data-act="wipe">Effacer mes données</button>'}</div></div></details>
     </section>
@@ -102,12 +112,6 @@ function plansView() {
   </div>`;
 }
 
-function profileSummary() {
-  const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done || S.tracking[k].note || S.tracking[k].feel).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
-  const parts = [esc(S.profile.name || 'Coureur ou coureuse'), esc(S.profile.club || CLUB_NAME), 'VMA ' + fmtVma((S.settings || S.profile).vma) + ' km/h',
-    S.plans.length + ' plan' + (S.plans.length > 1 ? 's' : ''), S.races.length + ' course' + (S.races.length > 1 ? 's' : '') + ' sans plan', nTr + (nTr > 1 ? ' séances et sorties notées' : ' séance ou sortie notée')];
-  return parts.join(' · ');
-}
 function profileFileName() {
   const slug = (S.profile.name || 'coureur').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'coureur';
   return 'profil-' + slug + '-' + TODAY + '.json';
@@ -158,7 +162,7 @@ function profileView() {
         <div class="row nowrap"><button class="btn grow" data-act="htmlcopy">${ICON.down}<span>Enregistrer une copie avec mes données</span></button><button class="iconbtn" data-act="copyinfo" aria-label="À quoi sert cette copie ?" aria-expanded="${!!S.ui.copyInfo}">ⓘ</button></div>
         ${S.ui.copyInfo ? `<div class="fitinfo" role="note"><span>Un nouveau fichier de l'appli qui contient déjà ton plan, tes réglages et ton suivi. Remplace l'ancien fichier par celui-ci, ou envoie-le sur ton téléphone : il s'ouvre directement, sans rien restaurer.</span></div>` : ''}
         ${S.plans.length ? `<div><button class="btn small" data-act="htmlcoach">Version plan seul (pour le coach)</button><p class="sub" style="margin-top:6px">Sans ton suivi ni tes notes : à envoyer à Pierre.</p></div>` : ''}</div></details>
-      <details class="raw"><summary>Comment ça marche ?</summary><ul class="howto"><li>Tes données (suivi, notes, réglages) restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.</li><li>« Exporter mon profil » crée un petit fichier avec tout ce qui te concerne. Garde-le : c'est ta sauvegarde.</li><li>Pour changer d'appareil ou passer à une nouvelle version de l'appli, ouvre le nouveau fichier et utilise « Importer un profil ».</li></ul></details>
+      <details class="raw"><summary>Comment ça marche ?</summary><ul class="howto"><li>Tes données (suivi, notes, réglages) restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.</li><li>« Exporter mon profil » crée un petit fichier avec tout ce qui te concerne. Garde-le précieusement : c'est lui qui te permet de tout retrouver.</li><li>Pour changer d'appareil ou passer à une nouvelle version de l'appli, ouvre le nouveau fichier et utilise « Importer un profil ».</li></ul></details>
     </section>
   </div>`;
 }

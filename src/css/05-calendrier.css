@@ -85,6 +85,7 @@ button.mcell { width: 100%; }
 .wxm { display: block; margin-top: 3px; font-size: 12px; color: var(--muted); white-space: nowrap; }
 .dcard > .wx { margin: -2px 0 2px; }
 .remind { margin: 14px 0 0; padding: 10px 14px; border-radius: 14px; background: var(--info-bg); color: var(--info-ink); display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+.remind.alert { background: var(--alert-bg); color: var(--alert-ink); }
 .remind .row { flex-wrap: nowrap; gap: 8px; }
 .dright { display: flex; align-items: center; gap: 8px; }
 .qcheck { min-width: 28px; height: 28px; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); color: var(--mint-ink); display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 0; font-size: 12px; font-weight: 700; cursor: pointer; flex: 0 0 auto; }

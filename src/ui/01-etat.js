@@ -120,7 +120,7 @@ function saveStore() {
   if (cur) { cur.plan = S.plan; cur.settings = S.settings; }
   // le profil suit la dernière VMA saisie
   if (S.settings && S.settings !== S.profile && S.settings.vma) S.profile.vma = S.settings.vma;
-  try { localStorage.setItem(KEY, JSON.stringify({ savedAt: new Date().toISOString(), profile: S.profile, logs: S.logs, races: S.races, edits: S.edits, plans: S.plans.map((e) => ({ id: e.id, plan: e.plan, settings: e.settings })), activeId: S.activeId, tracking: S.tracking, moves: S.moves, weather: S.weather, crest: S.crest, wx: S.wx, theme: S.ui.theme, accent: S.ui.accent, lastCopy: S.lastCopy, remindUntil: S.remindUntil, ctaOff: S.ctaOff })); } catch (e) { /* stockage indisponible */ }
+  try { localStorage.setItem(KEY, JSON.stringify({ savedAt: new Date().toISOString(), profile: S.profile, logs: S.logs, races: S.races, edits: S.edits, plans: S.plans.map((e) => ({ id: e.id, plan: e.plan, settings: e.settings })), activeId: S.activeId, tracking: S.tracking, moves: S.moves, weather: S.weather, crest: S.crest, wx: S.wx, theme: S.ui.theme, accent: S.ui.accent, lastCopy: S.lastCopy, remindUntil: S.remindUntil, ctaOff: S.ctaOff })); S.storeFail = false; } catch (e) { S.storeFail = true; /* navigation privée, stockage plein ou bloqué : storeBanner() prévient */ }
 }
 function planName(e) {
   const y = (e.plan.raceDate || rangeOf(e).end).slice(0, 4);
@@ -215,7 +215,7 @@ function frDate(iso, withDow) {
   const d = parseISO(iso);
   return (withDow ? DOW[(d.getUTCDay() + 6) % 7] + ' ' : '') + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()];
 }
-function dayChipLabel(day) { return day.category === 'race' ? 'Marathon' : (day.typeText || 'Séance'); }
+function dayChipLabel(day) { return day.category === 'race' ? 'Course' : (day.typeText || 'Séance'); }
 function dayDuration(day) { return day.durationMin != null ? fmtMin(day.durationMin) : (day.category === 'race' ? 'Course' : ''); }
 function weekDays(w) { return w.days.map((d) => S.byDate[d.date].day); }
 function raceNameOf(e) { return raceLabel((e || curEntry() || {}).plan || {}); }

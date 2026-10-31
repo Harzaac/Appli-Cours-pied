@@ -89,7 +89,7 @@ function restoreFrom(text) {
     S.msg = {};
     rebuildIndex(); saveStore(); render();
   } catch (e) {
-    S.msg.restore = "Ce fichier ne contient pas de données de l'appli (une copie faite avant d'avoir chargé un plan est vide). Vérifie que tu as choisi la bonne copie ou sauvegarde.";
+    S.msg.restore = "Ce fichier ne contient pas de données de l'appli Choisis un profil exporté (fichier .json) ou une copie de l'appli faite après avoir chargé un plan.";
     S.msg.restoreErr = true;
     render();
   }

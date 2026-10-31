@@ -14,7 +14,7 @@ node build.js
 Produit `dist/appli-course-a-pied.html` (le fichier à ouvrir ou à transmettre) et `dist/artifact.html`
 (même contenu sans les balises `html/head/body`). `build.js` assemble, dans l'ordre :
 
-- `src/core.js` — lecture du `.xlsx` (zip + XML, sans dépendance), contrôle du fichier du coach,
+- `src/noyau/` — (01 dates et texte, 02 xlsx, 03 format du coach, 04 allures) lecture du `.xlsx` (zip + XML, sans dépendance), contrôle du fichier du coach,
   construction du plan, recalage par date de course, moteur d'allures, saisies (temps, allures, durées).
   Utilisable aussi sous Node (`module.exports`) pour les tests.
 - `src/fit.js` — encodage d'une séance en fichier `.fit` (structured workout Garmin).
