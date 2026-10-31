@@ -4,7 +4,7 @@
 function emptyHeaderHTML() {
   const dark = effectiveDark();
   if (!['plan', 'plans', 'vma', 'bilan', 'data'].includes(S.ui.view)) S.ui.view = 'plan';
-  return `<header><div class="band"><div class="wrap"><div class="brandrow"><div class="brand">Appli Marathon</div>
+  return `<header><div class="band"><div class="wrap"><div class="brandrow"><div class="brand">${APP_NAME}</div>
       <div class="tools"><button class="pill" data-act="tab" data-view="vma" aria-label="Mon niveau">${ICON.gauge}<span class="num">VMA ${fmtVma(S.settings.vma)}</span></button><button class="pill" data-act="theme">${dark ? ICON.sun + '<span>Clair</span>' : ICON.moon + '<span>Sombre</span>'}</button></div></div>
       <div class="hero"><div class="herol">${crestHTML()}<div class="count empty"><span class="lbl"><strong>Pas de course prévue</strong><span>Ajoute le plan de ton coach : il se place tout seul dans le calendrier selon ta date de course.</span></span>
         <div style="margin-top:12px"><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="pill" data-act="pickxlsx">${ICON.up}<span>Ajouter un plan</span></button></div></div></div></div></div></div>

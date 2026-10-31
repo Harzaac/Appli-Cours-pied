@@ -38,7 +38,7 @@ function saveHtmlCopy(forCoach) {
     if (!html) throw new Error('src');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-    a.download = forCoach ? 'appli-marathon-plan-coach.html' : 'appli-marathon-' + TODAY + '.html';
+    a.download = forCoach ? 'appli-course-plan-coach.html' : 'appli-course-' + TODAY + '.html';
     document.body.appendChild(a); a.click(); a.remove();
     S.msg.backup = forCoach ? 'Version « plan seul » générée : sans ton suivi ni tes notes.' : 'Copie générée. Remplace ton ancien fichier par celui-ci : ton plan et ton suivi sont dedans.';
   } catch (e) { S.msg.backup = 'Le téléchargement est bloqué ici : ouvre l\'appli depuis ton disque.'; }
@@ -81,7 +81,7 @@ function dataView() {
       <details class="raw pref"${S.ui.pref === 'look' ? ' open' : ''} data-pref="look"><summary>Apparence</summary><div class="stack prefbody"><p class="sub">Choisis la couleur du bandeau et des boutons. Les couleurs des types de séance ne changent pas. Le mode clair ou sombre se règle avec le bouton en haut de page.</p>
 
       <div class="swatches" role="group" aria-label="Couleur de l'appli">${ACCENTS.map((a) => `<button class="swatch" data-act="accent" data-id="${a.id}" aria-pressed="${S.ui.accent === a.id}"><span class="dot" style="background:linear-gradient(135deg,${a.a},${a.b})"></span>${a.name}</button>`).join('')}</div>
-      <div><h3 style="font-size:15px;margin-bottom:4px">Image du bandeau</h3><p class="sub">Un dessin de Lille est affiché par défaut. Tu peux mettre ta propre photo : elle reste sur cet appareil et fait partie de la sauvegarde.</p></div>
+      <div><h3 style="font-size:15px;margin-bottom:4px">Image du bandeau</h3><p class="sub">Le logo du club est affiché par défaut. Tu peux mettre ta propre photo : elle reste sur cet appareil et fait partie de la sauvegarde.</p></div>
       <div class="row"><input type="file" id="file-crest" accept="image/*" class="sr"><button class="btn" data-act="pickcrest">Choisir une photo</button>${S.crest ? '<button class="btn" data-act="crestreset">Revenir au dessin</button>' : ''}</div>
       ${S.msg.crest ? `<p class="errtxt" role="alert">${esc(S.msg.crest)}</p>` : ''}</div></details>
       <details class="raw pref"${S.ui.pref === 'wipe' ? ' open' : ''} data-pref="wipe"><summary>Effacer mes données</summary><div class="stack prefbody"><p class="sub">Supprime les plans, les réglages, le suivi et les sorties de cet appareil. Pense à télécharger une sauvegarde avant.</p>

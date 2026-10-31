@@ -68,3 +68,6 @@
   .tabs .tabgear { flex: 0 0 44px; justify-content: center; padding: 0; }
   .tabs .tabgear span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
+/* rond du bandeau avec le logo du club, sur le dégradé de la palette */
+.crest.club { background: linear-gradient(135deg, var(--band-a), var(--band-b)); display: flex; align-items: center; justify-content: center; }
+.crest.club img { width: 62%; height: auto; object-fit: contain; }

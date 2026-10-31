@@ -1,7 +1,7 @@
 const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..','..');
 (async()=>{const b=await chromium.launch();const errs=[];const p=await b.newPage({viewport:{width:1280,height:900}});p.on('pageerror',e=>errs.push(e.message));
 await p.route(/open-meteo\.com|fonts\.g/,r=>r.abort());await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});
-await p.goto('file://'+root+'/dist/appli-marathon.html');await p.waitForSelector('.week');
+await p.goto('file://'+root+'/dist/appli-course.html');await p.waitForSelector('.week');
 // sans plan : fourchette calculée
 await p.click('.tabs [data-view=vma]');
 console.log('sans plan :',await p.$$eval('.vmatable td[class^=vc-]',e=>e.length),'cases |',(await p.textContent('.vclegend')).trim().slice(0,60));

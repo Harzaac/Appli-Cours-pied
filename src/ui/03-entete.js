@@ -1,27 +1,8 @@
 /* ============================================================
    Écrans
    ============================================================ */
-const SKYLINE = `<svg viewBox="0 0 200 200" role="img" aria-label="Silhouettes de Lille : le beffroi, la Vieille Bourse et la Porte de Paris" preserveAspectRatio="xMidYMid slice">
-  <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1457C4"/><stop offset=".6" stop-color="#2E9AD0"/><stop offset="1" stop-color="#8FE3C6"/></linearGradient></defs>
-  <rect width="200" height="200" fill="url(#cg)"/>
-  <circle cx="150" cy="50" r="17" fill="#FFD25A"/>
-  <g fill="#0B4F7E" opacity=".5"><rect x="0" y="128" width="26" height="50"/><polygon points="0,128 6,118 13,128 20,118 26,128"/><rect x="174" y="122" width="26" height="56"/><polygon points="174,122 180,112 187,122 194,112 200,122"/></g>
-  <g fill="#0B2236">
-    <rect x="86" y="74" width="28" height="100"/><rect x="82" y="70" width="36" height="6"/>
-    <rect x="90" y="50" width="20" height="20"/><rect x="88" y="46" width="24" height="5"/>
-    <polygon points="91,46 109,46 100,12"/><rect x="99" y="4" width="2" height="12"/>
-    <circle cx="100" cy="60" r="5" fill="#FFD25A"/>
-    <rect x="94" y="90" width="4" height="10" fill="#FFD25A"/><rect x="102" y="90" width="4" height="10" fill="#FFD25A"/>
-    <rect x="94" y="112" width="4" height="10" fill="#FFD25A"/><rect x="102" y="112" width="4" height="10" fill="#FFD25A"/>
-    <path d="M18 172 V134 H26 V126 H34 V118 H42 V126 H50 V118 H58 V126 H66 V134 H74 V172 Z"/>
-    <rect x="26" y="146" width="6" height="12" fill="#FFD25A"/><rect x="40" y="146" width="6" height="12" fill="#FFD25A"/><rect x="54" y="146" width="6" height="12" fill="#FFD25A"/>
-    <path fill-rule="evenodd" d="M126 172 V122 H184 V172 H165 V146 A11 11 0 0 0 143 146 V172 Z"/>
-    <polygon points="126,122 155,104 184,122"/><rect x="150" y="108" width="10" height="8" fill="#FFD25A"/>
-  </g>
-  <rect y="170" width="200" height="30" fill="#0B2236"/><rect y="170" width="200" height="3" fill="#134A7A"/>
-</svg>`;
 function crestHTML() {
-  return `<div class="crest">${S.crest ? `<img src="${S.crest}" alt="Image du bandeau">` : SKYLINE}</div>`;
+  return `<div class="crest${S.crest ? '' : ' club'}">${S.crest ? `<img src="${S.crest}" alt="Image du bandeau">` : `<img src="${CLUB_LOGO}" alt="${CLUB_NAME}">`}</div>`;
 }
 function headerHTML() {
   const plan = S.plan;
@@ -109,5 +90,5 @@ function nextSession() {
   return null;
 }
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">Appli Marathon · version 3.5.1</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Paramètres).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.6</p></div></footer>`;
 }

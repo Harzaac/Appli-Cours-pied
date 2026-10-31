@@ -6,7 +6,7 @@ const out=process.argv[2]?path.join(root,'shots',process.argv[2]):path.join(__di
 for(const [w,h,dev] of [[1280,900,'pc'],[390,844,'mob']]) for(const scheme of ['light','dark']){
  const ctx=await b.newContext({viewport:{width:w,height:h},colorScheme:scheme,reducedMotion:'reduce'});const p=await ctx.newPage();
  p.on('pageerror',e=>errs.push(e.message));await p.route(/open-meteo\.com|fonts\.g/,r=>r.abort());
- await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-marathon.html');await p.waitForSelector('.week');
+ await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-course.html');await p.waitForSelector('.week');
  const shot=async(name,full=true)=>{await p.mouse.move(0,0);await p.waitForTimeout(60);await p.screenshot({path:path.join(out,`${dev}-${scheme}-${name}.png`),fullPage:full});n++;};
  await shot('vide');
  await p.click('[data-act=pickxlsx] >> nth=0').catch(()=>{});

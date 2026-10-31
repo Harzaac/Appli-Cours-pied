@@ -1,6 +1,6 @@
-# Appli Marathon
+# Appli Course
 
-Calendrier d'entraînement marathon livré en **un seul fichier HTML**, sans serveur ni compte :
+Calendrier d'entraînement de course à pied (AC Haute Vilaine) livré en **un seul fichier HTML**, sans serveur ni compte :
 plans du coach importés depuis Excel, allures calculées selon la VMA, suivi des séances et des
 sorties libres, plan et écran de course, export d'une séance en `.fit` pour une montre Garmin.
 Les données restent dans le navigateur ; une « copie avec mes données » les embarque dans le fichier.
@@ -11,7 +11,7 @@ Les données restent dans le navigateur ; une « copie avec mes données » les 
 node build.js
 ```
 
-Produit `dist/appli-marathon.html` (le fichier à ouvrir ou à transmettre) et `dist/artifact.html`
+Produit `dist/appli-course.html` (le fichier à ouvrir ou à transmettre) et `dist/artifact.html`
 (même contenu sans les balises `html/head/body`). `build.js` assemble, dans l'ordre :
 
 - `src/core.js` — lecture du `.xlsx` (zip + XML, sans dépendance), contrôle du fichier du coach,
