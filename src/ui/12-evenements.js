@@ -13,7 +13,7 @@ document.addEventListener('click', (ev) => {
     case 'next': go(1); render(); break;
     case 'today': goToday(); render(); break;
     case 'open': { const ref = S.byDate[el.dataset.date]; if (ref && ref.entry && ref.entry.id !== S.activeId) { activate(ref.entry.id); render(); } S.ui.modal = el.dataset.date; renderModal(); break; }
-    case 'close': S.ui.modal = null; S.ui.logEdit = null; S.msg.log = ''; S.msg.result = ''; renderModal(); break;
+    case 'close': S.ui.modal = null; S.ui.editing = null; S.ui.logEdit = null; S.msg.log = ''; S.msg.result = ''; renderModal(); break;
     case 'movestart': S.ui.moving = el.dataset.date; S.ui.moveNote = null; render(); break;
     case 'movecancel': S.ui.moving = null; render(); break;
     case 'moveto': doMove(S.ui.moving, el.dataset.date); break;
@@ -35,17 +35,20 @@ document.addEventListener('click', (ev) => {
     case 'printrace': try { window.print(); } catch (e) { S.msg.race = "L'impression n'est pas disponible ici : ouvre le fichier dans ton navigateur."; render(); } break;
     case 'copyrace': copyText(raceText(), () => { S.msg.race = 'Texte copié : colle-le dans tes notes ou un message.'; render(); }, () => { S.msg.race = 'La copie est bloquée ici. Ouvre le fichier dans ton navigateur.'; render(); }); break;
     case 'raceadd': if (addRace()) { toast('Course ajoutée'); } render(); break;
-    case 'racedel': if (S.ui.confirmRace !== el.dataset.id) { S.ui.confirmRace = el.dataset.id; render(); } else { S.races = S.races.filter((r) => r.id !== el.dataset.id); S.ui.confirmRace = null; rebuildIndex(); saveStore(); toast('Course supprimée'); render(); } break;
-    case 'racedelcancel': S.ui.confirmRace = null; render(); break;
+    case 'racedel': withUndo('Course supprimée', () => { S.races = S.races.filter((r) => r.id !== el.dataset.id); rebuildIndex(); saveStore(); render(); }); break;
     case 'racedraft': S.ui.raceDraft = el.dataset.date; S.ui.modal = null; S.ui.view = 'plans'; S.msg.race2 = ''; render(); { const c = document.getElementById('races-card'); if (c) c.scrollIntoView(); const n = document.getElementById('rc-name'); if (n) n.focus(); } break;
     case 'recadd': { const err = addRecoveryPlan(((document.getElementById('rec-date') || {}).value || '')); S.msg.rec = err; if (!err) { S.ui.view = 'plan'; S.ui.mode = 'week'; toast('Plan de reprise ajouté'); } render(); if (!err) window.scrollTo(0, 0); break; }
+    case 'edit': S.ui.editing = el.dataset.date; S.msg.edit = ''; renderModal(); break;
+    case 'editcancel': S.ui.editing = null; S.msg.edit = ''; renderModal(); break;
+    case 'editsave': { const d = el.dataset.date; const nrev = saveSession(d); if (nrev == null) { renderModal(); break; } S.ui.editing = null; rebuildIndex(); saveStore(); render(); toast(nrev ? 'Séance enregistrée · ' + nrev + ' ligne(s) à vérifier' : 'Séance enregistrée'); break; }
+    case 'editreset': { const d = el.dataset.date; withUndo('Séance d\'origine remise', () => { delete S.edits[d]; rebuildIndex(); saveStore(); render(); }); break; }
     case 'lognew': S.ui.logEdit = { date: S.ui.modal, id: null, feel: 0 }; S.msg.log = ''; renderModal(); break;
     case 'logedit': { const l = logsOf(S.ui.modal).find((x) => x.id === el.dataset.id); if (l) { S.ui.logEdit = { date: S.ui.modal, id: l.id, feel: l.feel || 0 }; S.msg.log = ''; renderModal(); } break; }
     case 'logfeel': { const n = Number(el.dataset.n); if (S.ui.logEdit) { keepLogForm(); S.ui.logEdit.feel = S.ui.logEdit.feel === n ? 0 : n; renderModal(); restoreLogForm(); } break; }
     case 'logcancel': S.ui.logEdit = null; S.msg.log = ''; renderModal(); break;
     case 'logsave': keepLogForm(); saveLog(); render(); if (S.ui.logEdit) restoreLogForm(); else toast('Sortie enregistrée'); break;
     case 'commit': commitFields(); break;
-    case 'logdel': deleteLog(S.ui.modal, el.dataset.id); if (S.ui.logEdit && S.ui.logEdit.id === el.dataset.id) S.ui.logEdit = null; render(); break;
+    case 'logdel': { const d = S.ui.modal, id = el.dataset.id; withUndo('Sortie supprimée', () => { deleteLog(d, id); if (S.ui.logEdit && S.ui.logEdit.id === id) S.ui.logEdit = null; render(); }); break; }
     case 'refset': {
       const km = Number((document.getElementById('ref-km') || {}).value);
       const raw = ((document.getElementById('ref-time') || {}).value || '').trim();
@@ -73,8 +76,7 @@ document.addEventListener('click', (ev) => {
     case 'useplan': usePlan(el.dataset.replace || null); break;
     case 'impcancel': S.imp = { stage: 'idle' }; render(); break;
     case 'planshow': showPlan(el.dataset.id); S.ui.view = 'plan'; S.ui.mode = 'week'; render(); window.scrollTo(0, 0); break;
-    case 'plandel': if (S.ui.confirmDel !== el.dataset.id) { S.ui.confirmDel = el.dataset.id; render(); } else deletePlan(el.dataset.id); break;
-    case 'plandelcancel': S.ui.confirmDel = null; render(); break;
+    case 'plandel': { const id = el.dataset.id, nm = entryOf(id) ? planName(entryOf(id)) : 'Plan'; withUndo('« ' + nm + ' » supprimé', () => deletePlan(id)); break; }
     case 'redate': S.ui.redate = el.dataset.id; S.msg.redate = ''; render(); break;
     case 'redatecancel': S.ui.redate = null; S.msg.redate = ''; render(); break;
     case 'redateok': { const inp = document.getElementById('redate-' + el.dataset.id); const err = redatePlan(el.dataset.id, inp ? inp.value : ''); S.msg.redate = err; if (!err) { S.ui.redate = null; S.msg.backup = ''; } render(); break; }
@@ -97,7 +99,7 @@ document.addEventListener('click', (ev) => {
     case 'wipe':
       if (!S.ui.confirmWipe) { S.ui.confirmWipe = true; render(); break; }
       try { localStorage.removeItem(KEY); } catch (e) { /* rien */ }
-      S.plans = []; S.weeks = []; S.tracking = {}; S.moves = {}; S.logs = {}; S.races = []; S.profile = defaultProfile(); useProfile(); S.crest = ''; S.byDate = {}; S.ui.confirmWipe = false; S.ui.view = 'plan'; S.ui.modal = null; S.imp = { stage: 'idle' };
+      S.plans = []; S.weeks = []; S.tracking = {}; S.moves = {}; S.logs = {}; S.races = []; S.edits = {}; S.profile = defaultProfile(); useProfile(); S.crest = ''; S.byDate = {}; S.ui.confirmWipe = false; S.ui.view = 'plan'; S.ui.modal = null; S.imp = { stage: 'idle' };
       S.ui.weekId = null; S.ui.monthKey = null; rebuildIndex();
       render(); break;
     case 'wipecancel': S.ui.confirmWipe = false; render(); break;
@@ -140,6 +142,12 @@ document.addEventListener('change', (ev) => {
     r.result = sec || 0; saveStore(); if (sec) toast('Chrono enregistré : ' + fmtHMS(sec)); render(); return;
   }
   if (/^rpr-/.test(t.id)) { const r = S.races.find((x) => x.id === t.id.slice(4)); if (r) { r.pr = t.checked; saveStore(); render(); } return; }
+  if (t.id === 'pf-fcmax') {
+    const raw = t.value.trim(); const n = Number(raw);
+    if (!raw) { delete S.profile.fcmax; saveStore(); toast('FC max retirée'); render(); return; }
+    if (!(n >= 120 && n <= 230)) { toast('FC max entre 120 et 230 bpm'); return; }
+    S.profile.fcmax = Math.round(n); saveStore(); toast('FC max enregistrée : ' + Math.round(n) + ' bpm'); render(); return;
+  }
   if (t.id === 'pf-name' || t.id === 'pf-club') { S.profile[t.id === 'pf-name' ? 'name' : 'club'] = t.value.trim(); saveStore(); toast('Profil enregistré'); render(); return; }
   if (t.id === 'note-input' && S.ui.modal) { toast('Note enregistrée'); return; }
   if (t.id === 'race-pr' && S.ui.modal) { setTrack(S.ui.modal, { pr: t.checked }); render(); return; }
@@ -238,12 +246,28 @@ document.addEventListener('toggle', (ev) => {
 
 // Confirmation discrète après chaque enregistrement.
 let TOAST_AT = 0, TOAST_TIMER = null;
-function toast(msg) {
+function toast(msg, undo) {
   let el = document.getElementById('toast');
   if (!el) { el = document.createElement('div'); el.id = 'toast'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
-  el.innerHTML = ICON.check + '<span>' + esc(msg) + '</span>';
+  el.innerHTML = ICON.check + '<span>' + esc(msg) + '</span>' + (undo ? '<button type="button" class="toastbtn">Annuler</button>' : '');
+  el.classList.toggle('act', !!undo);
+  if (undo) el.querySelector('.toastbtn').onclick = () => { undo(); el.classList.remove('on'); };
   el.classList.add('on'); TOAST_AT = Date.now();
-  clearTimeout(TOAST_TIMER); TOAST_TIMER = setTimeout(() => el.classList.remove('on'), 2200);
+  clearTimeout(TOAST_TIMER); TOAST_TIMER = setTimeout(() => el.classList.remove('on'), undo ? 7000 : 2200);
+}
+// Suppression immédiate, avec « Annuler » pendant quelques secondes au lieu d'une confirmation.
+function snapshot() { return JSON.stringify({ plans: S.plans, tracking: S.tracking, moves: S.moves, logs: S.logs, races: S.races, edits: S.edits, activeId: S.activeId }); }
+function withUndo(msg, action) {
+  const snap = snapshot();
+  action();
+  toast(msg, () => {
+    const d = JSON.parse(snap);
+    Object.assign(S, { plans: d.plans, tracking: d.tracking, moves: d.moves, logs: d.logs, races: d.races, edits: d.edits || {} });
+    S.activeId = null; S.plan = null; S.settings = null;
+    if (S.plans.length) activate(entryOf(d.activeId) ? d.activeId : pickActive(S.plans)); else useProfile();
+    S.ui.weekId = null; S.ui.monthKey = null;
+    rebuildIndex(); saveStore(); render(); toast('Suppression annulée');
+  });
 }
 // Bouton « Enregistrer » : valide le champ en cours de saisie ; sinon confirme que tout est déjà enregistré.
 function commitFields() {

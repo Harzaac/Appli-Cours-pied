@@ -72,6 +72,7 @@ function restoreFrom(text) {
     const hasRaces = Array.isArray(d.races) && d.races.length;
     if (!d.plans.length && !hasLogs && !hasRaces) throw new Error('format');
     S.races = hasRaces ? d.races : [];
+    S.edits = d.edits && typeof d.edits === 'object' ? d.edits : {};
     S.plans = d.plans;
     S.activeId = null; S.plan = null; S.settings = null;
     S.tracking = d.tracking || {};

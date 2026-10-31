@@ -57,6 +57,7 @@ npm run captures         # compare 56 captures (PC/mobile × clair/sombre) aux c
   sorties et chrono, restauration, Garmin, écran de course, rappels.
 - `test/visuel.js` + `test/compare.py` — non-régression visuelle ; après un changement voulu,
   régénérer la référence avec `node test/visuel.js` (sans argument).
+- `test/outils/hors-ligne.js` — coupe le réseau externe (polices, météo) dans les tests : sans ça, une police lente faisait échouer des tests au hasard.
 - `test/donnees/` — plan Excel de test, export texte du classeur, captures de référence.
 - `test/archives/` — anciens scripts de vérification, gardés pour mémoire.
 

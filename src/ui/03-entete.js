@@ -95,12 +95,12 @@ function nextSession() {
   for (const d of list) {
     if (d < TODAY) continue;
     const ref = S.byDate[d];
-    if (ref.day.rest || !ref.entry) continue;
+    if (ref.day.rest || (!ref.entry && !ref.day.custom)) continue;
     if (d === TODAY && (track(d).done || track(d).skipped)) continue;
     return ref;
   }
   return null;
 }
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à exporter ton profil (bouton en haut à droite).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.10</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à exporter ton profil (bouton en haut à droite).</p><p class="ver">${APP_NAME} · ${CLUB_NAME} · version 3.11</p></div></footer>`;
 }

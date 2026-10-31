@@ -1,5 +1,5 @@
 const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..','..');
-(async()=>{const b=await chromium.launch();const errs=[];
+(async()=>{const b=require('../outils/hors-ligne.js')(await chromium.launch());const errs=[];
 for(const [w,n] of [[1280,'pc'],[390,'mob']]){
 const p=await b.newPage({viewport:{width:w,height:820},colorScheme:'dark'});p.on('pageerror',e=>errs.push(e.message));
 await p.route(/open-meteo\.com/,r=>r.abort());await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-course-a-pied.html');

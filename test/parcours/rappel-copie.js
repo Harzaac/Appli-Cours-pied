@@ -1,5 +1,5 @@
 const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..','..');
-(async()=>{const b=await chromium.launch();const errs=[];
+(async()=>{const b=require('../outils/hors-ligne.js')(await chromium.launch());const errs=[];
 const ctx=await b.newContext({viewport:{width:1280,height:900},acceptDownloads:true});const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));
 await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-course-a-pied.html');
 await p.setInputFiles('#file-xlsx',root+'/test/donnees/plan-test.xlsx');await p.click('[data-act=useplan]');await p.waitForSelector('.week');

@@ -84,3 +84,5 @@ input[type="date"] { font: inherit; border: 1px solid var(--line); background: v
 #toast svg { width: 18px; height: 18px; flex: none; color: var(--mint); }
 @media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
 @media print { #toast { display: none; } }
+#toast.act { pointer-events: auto; }
+.toastbtn { margin-left: 6px; border: 0; background: none; color: var(--mint); font: inherit; font-weight: 800; text-decoration: underline; cursor: pointer; padding: 4px 2px; }

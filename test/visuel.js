@@ -2,7 +2,7 @@
 // node test/visuel.js <dossier>  -> une capture par état, thème et largeur
 const path=require('path');const fs=require('fs');const {chromium}=require('playwright');const root=path.join(__dirname,'..');
 const out=process.argv[2]?path.join(root,'shots',process.argv[2]):path.join(__dirname,'donnees','captures-reference');fs.mkdirSync(out,{recursive:true});
-(async()=>{const b=await chromium.launch();const errs=[];let n=0;
+(async()=>{const b=require('./outils/hors-ligne.js')(await chromium.launch());const errs=[];let n=0;
 for(const [w,h,dev] of [[1280,900,'pc'],[390,844,'mob']]) for(const scheme of ['light','dark']){
  const ctx=await b.newContext({viewport:{width:w,height:h},colorScheme:scheme,reducedMotion:'reduce'});const p=await ctx.newPage();
  p.on('pageerror',e=>errs.push(e.message));await p.route(/open-meteo\.com|fonts\.g/,r=>r.abort());

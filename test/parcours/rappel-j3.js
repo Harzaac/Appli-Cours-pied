@@ -1,5 +1,5 @@
 const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..','..');
-(async()=>{const b=await chromium.launch();const errs=[];
+(async()=>{const b=require('../outils/hors-ligne.js')(await chromium.launch());const errs=[];
 async function open(today,w){const ctx=await b.newContext({viewport:{width:w,height:900}});const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));await p.route(/open-meteo\.com/,r=>r.abort());
  await p.addInitScript((t)=>{window.__TODAY__=t},today);await p.goto('file://'+root+'/dist/appli-course-a-pied.html');
  await p.setInputFiles('#file-xlsx',root+'/test/donnees/plan-test.xlsx');await p.click('[data-act=useplan]');await p.waitForSelector('.week, .racemode');return p;}

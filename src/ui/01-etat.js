@@ -80,6 +80,7 @@ const S = {
   moves: saved.moves || {},
   logs: saved.logs && typeof saved.logs === 'object' ? saved.logs : {},
   races: Array.isArray(saved.races) ? saved.races : [],
+  edits: saved.edits && typeof saved.edits === 'object' ? saved.edits : {},
   profile: null,
   weather: saved.weather && typeof saved.weather === 'object' ? saved.weather : null,
   crest: typeof saved.crest === 'string' ? saved.crest : '',
@@ -119,7 +120,7 @@ function saveStore() {
   if (cur) { cur.plan = S.plan; cur.settings = S.settings; }
   // le profil suit la dernière VMA saisie
   if (S.settings && S.settings !== S.profile && S.settings.vma) S.profile.vma = S.settings.vma;
-  try { localStorage.setItem(KEY, JSON.stringify({ savedAt: new Date().toISOString(), profile: S.profile, logs: S.logs, races: S.races, plans: S.plans.map((e) => ({ id: e.id, plan: e.plan, settings: e.settings })), activeId: S.activeId, tracking: S.tracking, moves: S.moves, weather: S.weather, crest: S.crest, wx: S.wx, theme: S.ui.theme, accent: S.ui.accent, lastCopy: S.lastCopy, remindUntil: S.remindUntil, ctaOff: S.ctaOff })); } catch (e) { /* stockage indisponible */ }
+  try { localStorage.setItem(KEY, JSON.stringify({ savedAt: new Date().toISOString(), profile: S.profile, logs: S.logs, races: S.races, edits: S.edits, plans: S.plans.map((e) => ({ id: e.id, plan: e.plan, settings: e.settings })), activeId: S.activeId, tracking: S.tracking, moves: S.moves, weather: S.weather, crest: S.crest, wx: S.wx, theme: S.ui.theme, accent: S.ui.accent, lastCopy: S.lastCopy, remindUntil: S.remindUntil, ctaOff: S.ctaOff })); } catch (e) { /* stockage indisponible */ }
 }
 function planName(e) {
   const y = (e.plan.raceDate || rangeOf(e).end).slice(0, 4);
@@ -172,6 +173,13 @@ function rebuildIndex() {
     }
     free.push(fw);
   }
+  // séances modifiées ou ajoutées à la main : elles remplacent le jour (le plan d'origine reste intact)
+  Object.keys(S.edits).forEach((date) => {
+    const ref = S.byDate[date], ed = S.edits[date];
+    if (!ref || !ed || ref.day.category === 'race') return;
+    const steps = parseLines(ed.lines || []);
+    ref.day = Object.assign({}, ref.day, { rest: false, free: false, custom: !ref.entry, edited: true, category: ed.category || 'other', typeText: ed.typeText || '', objective: ed.objective || '', lines: ed.lines || [], steps, durationMin: ed.durationMin || null, durationText: ed.durationMin ? fmtMinPlain(ed.durationMin) : '' });
+  });
   S.weeks = real.concat(free).sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0));
   const keys = S.weeks.map((w) => w.key);
   if (!S.ui.weekId || !keys.includes(S.ui.weekId)) {
@@ -212,6 +220,13 @@ function dayDuration(day) { return day.durationMin != null ? fmtMin(day.duration
 function weekDays(w) { return w.days.map((d) => S.byDate[d.date].day); }
 function raceNameOf(e) { return raceLabel((e || curEntry() || {}).plan || {}); }
 function track(date) { return S.tracking[date] || {}; }
+// « 65-75% FCM » -> « 65-75% FCM (124–143 bpm) » quand la FC max est connue.
+function withBpm(text) {
+  const fc = S.profile && S.profile.fcmax;
+  if (!fc || !text) return text;
+  return text.replace(/(\d{2,3})\s*(?:-|–|à)\s*(\d{2,3})\s*%\s*(?:de la\s*)?FC\s*M(?:ax)?\b/gi, (m, a, b) => m + ' (' + Math.round(fc * a / 100) + '–' + Math.round(fc * b / 100) + ' bpm)');
+}
+const HR_ZONES = [[1, 'Récupération', 50, 60], [2, 'Endurance fondamentale', 60, 70], [3, 'Endurance active', 70, 80], [4, 'Seuil', 80, 90], [5, 'VMA', 90, 100]];
 function logsOf(date) { return (S.logs[date] || []).slice(); }
 const LOG_TYPES = [['footing', 'Footing'], ['fractionne', 'Fractionné'], ['long', 'Sortie longue'], ['course', 'Course'], ['trail', 'Trail'], ['velo', 'Vélo'], ['natation', 'Natation'], ['renfo', 'Renforcement'], ['autre', 'Autre']];
 function logTypeLabel(t) { const x = LOG_TYPES.find((y) => y[0] === t); return x ? x[1] : 'Sortie'; }

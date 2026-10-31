@@ -1,5 +1,5 @@
 const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..','..');
-(async()=>{const b=await chromium.launch();const errs=[];
+(async()=>{const b=require('../outils/hors-ligne.js')(await chromium.launch());const errs=[];
 for(const [w,n] of [[1280,'pc'],[390,'mob']]){
 const p=await b.newPage({viewport:{width:w,height:900}});p.on('pageerror',e=>{errs.push(n+': '+e.message);console.log('ERR',e.message)});await p.route(/open-meteo\.com|fonts\.g/,r=>r.abort());
 await p.addInitScript(()=>{window.__TODAY__='2026-10-31'});await p.goto('file://'+root+'/dist/appli-course-a-pied.html');
@@ -19,7 +19,7 @@ console.log('  après ajout:',await p.textContent('.navlabel'),'| onglets:',awai
 await p.click('[data-act=mode][data-mode=week]');await p.click('[data-act=today]');console.log('  aujourd\'hui:',await p.textContent('.navlabel'));
 // supprimer le seul plan -> retour au calendrier vide
 await p.click('.tabs [data-view=plan]');await p.click('[data-act=tab][data-view=plans] >> nth=0');const id=await p.evaluate(()=>S.plans[0].id);
-await p.click(`[data-act=plandel][data-id=${id}]`);await p.click(`[data-act=plandel][data-id=${id}]`);
+await p.click(`[data-act=plandel][data-id=${id}]`);
 console.log('  après suppression:',await p.evaluate(()=>S.plans.length),'plan(s) | vue',await p.evaluate(()=>S.ui.view),'| semaines',await p.evaluate(()=>S.weeks.length));
 await p.click('[data-act=tab][data-view=plan]');console.log('  calendrier:',await p.textContent('.navlabel'));
 console.log('  débordement:',await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth));

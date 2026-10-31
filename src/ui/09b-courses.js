@@ -19,10 +19,9 @@ function recoveryMonday() {
   return m < mondayOf(TODAY) ? mondayOf(TODAY) : m;
 }
 function racesCardHTML() {
-  const del = S.ui.confirmRace;
   const items = S.races.slice().sort((a, b) => (a.date < b.date ? 1 : -1)).map((r) => `<li class="planitem"><div class="stack" style="gap:2px"><strong>${esc(r.name)}</strong>
       <span class="sub">${esc(frDate(r.date, true))} · ${esc(raceKmLabel(r.km))}${r.targetSec ? ' · objectif ' + esc(fmtHMS(r.targetSec)) : ''}${r.result ? ' · <strong>chrono ' + esc(fmtHMS(r.result)) + '</strong>' + (r.pr ? ' · record' : '') : ''}</span></div>
-      <div class="row">${r.date <= TODAY ? `<button class="btn small" data-act="open" data-date="${r.date}">${r.result ? 'Modifier le chrono' : 'Saisir mon chrono'}</button>` : ''}${del === r.id ? `<button class="btn small danger" data-act="racedel" data-id="${esc(r.id)}">Oui, supprimer</button><button class="btn small" data-act="racedelcancel">Annuler</button>` : `<button class="btn small" data-act="racedel" data-id="${esc(r.id)}">Supprimer</button>`}</div></li>`).join('');
+      <div class="row">${r.date <= TODAY ? `<button class="btn small" data-act="open" data-date="${r.date}">${r.result ? 'Modifier le chrono' : 'Saisir mon chrono'}</button>` : ''}<button class="btn small" data-act="racedel" data-id="${esc(r.id)}">Supprimer</button></div></li>`).join('');
   const kms = [[5, '5 km'], [10, '10 km'], [21.0975, 'Semi-marathon'], [MARATHON_KM, 'Marathon'], ['autre', 'Autre distance']];
   return `<section class="card stack" id="races-card"><div><h2>Courses sans plan</h2><p class="sub">Un 10 km, un semi ou un trail du club, sans plan d'entraînement à part. La course apparaît dans le calendrier, dans Progression, et ton chrono sert aux prédictions.</p></div>
     ${items ? `<ul class="planlist">${items}</ul>` : ''}

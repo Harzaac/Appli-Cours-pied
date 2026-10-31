@@ -8,6 +8,10 @@ function stepsCompact(day) {
 }
 const HARD = ['vma', 'spe', 'long'];
 function swapSlots(a, b) {
+  const ea = S.edits[a], eb = S.edits[b];
+  delete S.edits[a]; delete S.edits[b];
+  if (eb) S.edits[a] = eb;
+  if (ea) S.edits[b] = ea;
   const ca = S.moves[a] || a, cb = S.moves[b] || b;
   S.moves[a] = cb; S.moves[b] = ca;
   if (S.moves[a] === a) delete S.moves[a];
@@ -35,7 +39,7 @@ function hardPairs(week) {
   }
   return out;
 }
-function canMove(day) { return !day.rest && day.category !== 'race'; }
+function canMove(day) { const ref = S.byDate[day.date]; return !day.rest && day.category !== 'race' && !!(ref && ref.entry); }
 function doMove(a, b) {
   const ra = S.byDate[a], rb = S.byDate[b];
   S.ui.moving = null;
@@ -92,7 +96,7 @@ function dayCard(day) {
     : `<div class="cardbtns"><button class="btn small" data-act="open" data-date="${day.date}" aria-label="Ouvrir la séance du ${DOW[day.i].toLowerCase()} ${parseISO(day.date).getUTCDate()}">Détail et suivi</button>${canMove(day) ? `<button class="btn small" data-act="movestart" data-date="${day.date}" aria-label="Déplacer cette séance">Déplacer</button>` : ''}</div>`;
   return `<article class="${cls.join(' ')}"${slot}${drag} data-act="open" data-date="${day.date}">${head}${wxMini(day.date, true)}
     <div class="stack" style="gap:6px"><span class="chip c-${day.category}" style="align-self:flex-start">${esc(dayChipLabel(day))}</span>${movedTag}
-    <div class="dur num">${esc(dayDuration(day))}</div>${day.objective ? `<div class="obj">${esc(day.objective)}</div>` : ''}</div>
+    <div class="dur num">${esc(dayDuration(day))}</div>${day.objective ? `<div class="obj">${esc(withBpm(day.objective))}</div>` : ''}</div>
     ${stepsCompact(day)}
     ${dayRaces.length ? `<ul class="loglist">${dayRaces.map((r) => `<li>${raceChip(r)}</li>`).join('')}</ul>` : ''}
     ${logs.length ? `<div class="sub">+ ${esc(logs.map(logLine).join(', '))}</div>` : ''}
@@ -130,7 +134,7 @@ function freeWeekView(w, idx) {
         <button class="iconbtn" data-act="next" aria-label="Semaine suivante" ${idx === weeks.length - 1 ? 'disabled' : ''}>${ICON.right}</button></div>
       <div class="navgroup">${modeSeg()}<button class="btn small" data-act="today">Aujourd'hui</button><button class="btn small" data-act="tab" data-view="plans">Mes plans</button></div></div>
     <div class="weekhead"><span class="badge">Pas de plan cette semaine</span>${S.plans.length ? `<span><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="btn small" data-act="pickxlsx">${ICON.up}Ajouter un plan</button></span>` : ''}</div>
-    <div class="week">${w.days.map((d) => dayCard(d)).join('')}</div>`;
+    <div class="week">${w.days.map((d) => dayCard(S.byDate[d.date].day)).join('')}</div>`;
 }
 function taperBanner(w) {
   if (!S.plan.raceDate || w.general) return '';
@@ -233,9 +237,10 @@ function modalHTML() {
     <div class="stack" style="gap:8px">
       <div class="muted">${esc(frDate(date, true))}${week.id ? ' · ' + week.id.replace('G', ' G') : ''}${S.plans.length > 1 && ref.entry ? ' · ' + esc(planName(ref.entry)) : ''}${week.assimilation ? ' · semaine d\'assimilation' : ''}</div>
       ${day.free ? '<h2>Jour libre</h2>' : day.rest ? '<h2>Repos</h2>' : `<h2>${esc(day.category === 'race' ? raceNameOf(ref.entry) : mainStepTitle(day, c, ref.entry))}</h2>
-      <div class="row"><span class="chip c-${day.category}">${esc(dayChipLabel(day))}</span><span class="num"><strong>${esc(dayDuration(day))}</strong></span>${day.objective ? `<span class="muted">${esc(day.objective)}</span>` : ''}</div>`}
+      <div class="row"><span class="chip c-${day.category}">${esc(dayChipLabel(day))}</span><span class="num"><strong>${esc(dayDuration(day))}</strong></span>${day.objective ? `<span class="muted">${esc(withBpm(day.objective))}</span>` : ''}</div>`}
     </div>
-    ${day.free ? '<p class="muted">Aucun plan ne couvre ce jour.</p>' : day.rest ? '<p class="muted">Pas de séance prévue ce jour-là.</p>' : `<ul class="bigsteps">${steps}</ul>
+    ${S.ui.editing === date ? sessionFormHTML(date, day) : (day.category !== 'race' ? sessionEditBar(date, day) : '')}
+    ${S.ui.editing === date ? '' : day.free ? '<p class="muted">Aucun plan ne couvre ce jour.</p>' : day.rest ? '<p class="muted">Pas de séance prévue ce jour-là.</p>' : `<ul class="bigsteps">${steps}</ul>
     ${day.category === 'race' ? raceResultHTML(date, tr, ref.entry) : ''}
     <details class="raw"><summary>Texte du coach</summary><pre>${esc(rawTxt)}</pre></details>
     ${garminHTML(day)}
@@ -305,4 +310,41 @@ function deleteLog(date, id) {
   const list = (S.logs[date] || []).filter((l) => l.id !== id);
   if (list.length) S.logs[date] = list; else delete S.logs[date];
   saveStore();
+}
+
+/* ----- modifier une séance ou en planifier une ----- */
+const SESSION_CATS = [['footing', 'Footing'], ['vma', 'VMA / fractionné'], ['spe', 'Spé marathon'], ['long', 'Sortie longue'], ['hills', 'Côtes'], ['other', 'Autre']];
+function sessionEditBar(date, day) {
+  if (day.rest) return `<div class="row"><button class="btn small" data-act="edit" data-date="${date}">${ICON.edit}Planifier une séance</button></div>`;
+  return `<div class="row">${day.edited ? `<span class="badge">${day.custom ? 'Séance ajoutée' : 'Séance modifiée'}</span>` : ''}<button class="btn small" data-act="edit" data-date="${date}">${ICON.edit}Modifier la séance</button>${day.edited ? `<button class="btn small" data-act="editreset" data-date="${date}">${day.custom ? 'Retirer la séance' : 'Revenir à la séance prévue'}</button>` : ''}</div>`;
+}
+function sessionFormHTML(date, day) {
+  const cur = day.rest ? { category: 'footing', typeText: '', objective: '', lines: [], durationMin: null } : day;
+  return `<div class="logform stack sessform">
+    <strong>${day.rest ? 'Planifier une séance' : 'Modifier la séance'}</strong>
+    <div class="fields3"><div class="field"><label for="ed-cat">Type</label><select id="ed-cat">${SESSION_CATS.map(([k, n]) => `<option value="${k}"${cur.category === k ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
+      <div class="field"><label for="ed-title">Intitulé</label><input type="text" id="ed-title" value="${esc(cur.typeText || '')}" placeholder="ex. Footing, VMA courte" autocomplete="off"></div>
+      <div class="field"><label for="ed-dur">Durée totale</label><input type="text" id="ed-dur" value="${cur.durationMin ? esc(fmtMin(cur.durationMin)) : ''}" placeholder="ex. 1h05" autocomplete="off"></div></div>
+    <div class="field"><label for="ed-obj">Objectif (facultatif)</label><input type="text" id="ed-obj" value="${esc(cur.objective || '')}" placeholder="ex. 65-75% FCM" autocomplete="off"></div>
+    <div class="field"><label for="ed-lines">Contenu, une étape par ligne (comme dans le fichier du coach)</label><textarea class="note" id="ed-lines" rows="6" placeholder="0h15 éch&#10;6 x 400m 95% VMA&#10;récup 1'&#10;retour au calme 0h10">${esc((cur.lines || []).join('\n'))}</textarea></div>
+    <p class="sub">Exemples compris : « 0h15 éch », « 1h05 65% VMA », « 6 x 400m 95% VMA », « récup 1' », « 3 x 8mn allure semi », « 6 LD », « retour au calme 0h10 ». Une ligne non comprise s'affiche telle quelle, avec la mention « à vérifier ».</p>
+    ${S.msg.edit ? `<p class="errtxt" role="alert">${esc(S.msg.edit)}</p>` : ''}
+    <div class="row"><button class="btn small primary" data-act="editsave" data-date="${date}">${ICON.check}Enregistrer la séance</button><button class="btn small" data-act="editcancel">Annuler</button></div></div>`;
+}
+function saveSession(date) {
+  const g = (id) => ((document.getElementById(id) || {}).value || '');
+  const lines = g('ed-lines').split('\n').map((x) => x.trim()).filter(Boolean);
+  const durTxt = g('ed-dur').trim();
+  if (!lines.length && !durTxt) { S.msg.edit = 'Indique au moins une durée ou une étape.'; return null; }
+  let durationMin = durTxt ? parseDurationMin(durTxt) : null;
+  if (durTxt && durationMin == null) { S.msg.edit = 'Durée non comprise : écris par exemple 45 ou 1h05.'; return null; }
+  const steps = parseLines(lines);
+  // durée estimée si elle n'est pas donnée : minutes écrites, fractions chronométrées, et répétitions courues à l'allure demandée (sans les récups)
+  const vma = (S.settings || S.profile).vma;
+  const repMin = (st) => (st.k === 'reps' && st.dist && st.pct ? (st.sets || 1) * st.n * st.dist / (vma * (st.pct[0] + st.pct[1]) / 2 / 100 * 1000 / 60) : 0);
+  if (!durationMin) durationMin = Math.round(steps.reduce((a, st) => a + (st.min || (st.k === 'timed' ? (st.sets || 1) * st.n * (st.on + st.off) / 60 : repMin(st))), 0)) || null;
+  const cat = g('ed-cat') || 'other';
+  S.edits[date] = { category: cat, typeText: g('ed-title').trim() || (SESSION_CATS.find((x) => x[0] === cat) || [0, 'Séance'])[1], objective: g('ed-obj').trim(), lines, durationMin };
+  S.msg.edit = '';
+  return steps.filter((st) => st.review).length;
 }

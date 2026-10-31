@@ -25,7 +25,7 @@ function htmlCopy(forCoach) {
   const cur = curEntry();
   const data = forCoach
     ? { savedAt: new Date().toISOString(), plans: [{ id: cur.id, plan: cur.plan, settings: cur.settings }], activeId: cur.id }
-    : { savedAt: new Date().toISOString(), plans: plansForSave(), activeId: S.activeId, tracking: S.tracking, moves: S.moves, weather: S.weather, crest: S.crest, wx: S.wx, theme: S.ui.theme, accent: S.ui.accent, lastCopy: TODAY, remindUntil: S.remindUntil, logs: S.logs, races: S.races, profile: S.profile, ctaOff: S.ctaOff };
+    : { savedAt: new Date().toISOString(), plans: plansForSave(), activeId: S.activeId, tracking: S.tracking, moves: S.moves, weather: S.weather, crest: S.crest, wx: S.wx, theme: S.ui.theme, accent: S.ui.accent, lastCopy: TODAY, remindUntil: S.remindUntil, logs: S.logs, races: S.races, edits: S.edits, profile: S.profile, ctaOff: S.ctaOff };
   const json = JSON.stringify(data).replace(/</g, '\\u003c');
   const re = /(<script type="application\/json" id="embedded-data">)[\s\S]*?(<\/script>)/;
   if (!re.test(SRC_HTML)) return null;
@@ -45,7 +45,7 @@ function saveHtmlCopy(forCoach) {
   render();
 }
 function backupText() {
-  return JSON.stringify({ app: 'appli-marathon', version: 2, exportedAt: new Date().toISOString(), plans: plansForSave(), activeId: S.activeId, plan: S.plan, settings: S.settings, tracking: S.tracking, moves: S.moves, logs: S.logs, races: S.races, profile: S.profile, weather: S.weather, crest: S.crest, accent: S.ui.accent, theme: S.ui.theme });
+  return JSON.stringify({ app: 'appli-marathon', version: 2, exportedAt: new Date().toISOString(), plans: plansForSave(), activeId: S.activeId, plan: S.plan, settings: S.settings, tracking: S.tracking, moves: S.moves, logs: S.logs, races: S.races, edits: S.edits, profile: S.profile, weather: S.weather, crest: S.crest, accent: S.ui.accent, theme: S.ui.theme });
 }
 function dataView() {
   const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done || S.tracking[k].skipped || S.tracking[k].note || S.tracking[k].feel).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
@@ -85,14 +85,12 @@ function plansView() {
       ${S.plans.length ? '' : '<p class="sub">Aucun plan pour l\'instant.</p>'}<ul class="planlist">${S.plans.slice().sort((a, b) => (rangeOf(a).start < rangeOf(b).start ? -1 : 1)).map((e) => {
         const r = rangeOf(e), nSess = e.plan.weeks.reduce((a, w) => a + w.days.filter((d) => !d.rest).length, 0);
         const done = Object.keys(S.tracking).filter((k) => S.tracking[k].done && S.byDate[k] && S.byDate[k].entry === e).length;
-        const del = S.ui.confirmDel === e.id;
         return `<li class="planitem${e.id === S.activeId ? ' on' : ''}"><div class="stack" style="gap:2px"><strong>${esc(planName(e))}</strong>
           <span class="sub">${esc(planState(e))} · ${esc(frDate(r.start))} → ${esc(frDate(r.end))}${e.plan.raceDate ? ' · course le ' + esc(frDate(e.plan.raceDate)) : ''}</span>
           ${e.plan.raceDate && track(e.plan.raceDate).result ? `<span class="sub"><strong>Chrono ${esc(fmtHMS(track(e.plan.raceDate).result))}</strong>${track(e.plan.raceDate).pr ? ' · record personnel' : ''}${e.settings && e.settings.targetSec ? ' · objectif ' + esc(fmtHMS(e.settings.targetSec)) : ''}</span>` : ''}
           <span class="sub">${e.plan.weeks.length} semaines · ${done}/${nSess} séances faites${e.plan.source ? ' · fichier « ' + esc(e.plan.source) + ' »' : ''}</span></div>
           <div class="row">${e.id === S.activeId ? '<span class="badge">Affiché</span>' : `<button class="btn small" data-act="planshow" data-id="${esc(e.id)}">Afficher</button>`}
-          ${del ? `<button class="btn small danger" data-act="plandel" data-id="${esc(e.id)}">Oui, supprimer</button><button class="btn small" data-act="plandelcancel">Annuler</button>` : `<button class="btn small" data-act="plandel" data-id="${esc(e.id)}" aria-label="Supprimer ${esc(planName(e))}">Supprimer</button>`}</div>
-          ${del ? '<p class="sub" style="flex-basis:100%">Le plan et le suivi de ses séances seront effacés de cet appareil.</p>' : ''}
+          <button class="btn small" data-act="plandel" data-id="${esc(e.id)}" aria-label="Supprimer ${esc(planName(e))}">Supprimer</button></div>
           ${e.plan.raceDate ? (S.ui.redate === e.id ? `<div class="redate"><div class="field"><label for="redate-${esc(e.id)}">Nouvelle date de course</label><input type="date" id="redate-${esc(e.id)}" value="${esc(e.plan.raceDate)}"></div>
             <div class="row"><button class="btn small primary" data-act="redateok" data-id="${esc(e.id)}">Recaler le plan</button><button class="btn small" data-act="redatecancel">Annuler</button></div>
             <p class="sub">Tout le plan se décale par semaines entières, avec tes séances cochées, tes notes et tes déplacements.</p>
@@ -146,6 +144,9 @@ function profileView() {
         <div class="kpi"><span class="v num">${nTr}</span><span class="l">séances faites et sorties notées</span></div>
         <div class="kpi"><span class="v num">${S.plans.length}</span><span class="l">plan${S.plans.length > 1 ? 's' : ''} · ${S.races.length} course${S.races.length > 1 ? 's' : ''} sans plan</span></div>
       </div>
+      <div class="stack" style="gap:8px"><strong>Fréquence cardiaque</strong>
+        <div class="fields"><div class="field"><label for="pf-fcmax">FC max (bpm)</label><input type="text" id="pf-fcmax" inputmode="numeric" value="${S.profile.fcmax || ''}" placeholder="ex. 190" autocomplete="off"></div></div>
+        ${S.profile.fcmax ? `<div class="tablewrap"><table class="zones"><thead><tr><th>Zone</th><th>% FC max</th><th>Pulsations</th></tr></thead><tbody>${HR_ZONES.map(([z, n, a, b]) => `<tr><td>Z${z} · ${n}</td><td>${a}–${b} %</td><td>${Math.round(S.profile.fcmax * a / 100)}–${Math.round(S.profile.fcmax * b / 100)} bpm</td></tr>`).join('')}</tbody></table></div><p class="sub">Les séances notées en « % FCM » par le coach affichent aussi tes pulsations.</p>` : '<p class="sub">Indique ta FC max (mesurée lors d\'un test ou d\'une course à fond) : les séances notées en « % FCM » afficheront tes pulsations, et tes zones apparaîtront ici.</p>'}</div>
       ${best.length ? `<div class="stack" style="gap:6px"><strong>Mes meilleurs chronos</strong><ul class="besttimes">${best.map((x) => `<li><span>${esc(x.label)}</span><strong class="num">${esc(fmtHMS(x.sec))}</strong><span class="sub">${esc(x.name)} · ${esc(frDate(x.date))}</span></li>`).join('')}</ul></div>` : '<p class="sub">Tes meilleurs chronos s\'afficheront ici dès que tu auras saisi un résultat de course.</p>'}
     </section>
     <section class="card stack"><div><h2>Sauvegarde du profil</h2><p class="sub">Tout ce qui te concerne : réglages, plans, suivi, sorties et courses. Exporte-le pour le garder ou le passer sur un autre appareil ; importe-le pour tout retrouver.</p></div>

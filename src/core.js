@@ -203,7 +203,9 @@ function parseLines(lines) {
   const RE_Q = '["\']{1,2}';
 
   for (const raw of lines) {
-    const l = norm(raw);
+    // « 45' 65% VMA », « 15 min éch », « retour au calme 10' » : minutes écrites sans heures -> « 0h45 … »
+    const toH = (n) => Math.floor(n / 60) + 'h' + String(n % 60).padStart(2, '0');
+    const l = norm(raw).replace(/^(retour au calme\s*)?(\d{1,3})\s*(?:'|min\b|mn\b)(?!\d)/i, (x, rc, n) => (rc || '') + toH(Number(n)));
     const lo = l.toLowerCase();
     let m;
 

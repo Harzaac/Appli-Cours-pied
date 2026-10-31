@@ -6,6 +6,7 @@ const uiFiles = fs.readdirSync(path.join(__dirname, 'src/ui')).filter((f) => f.e
 const js = [read('src/core.js'), read('src/fit.js')].concat(uiFiles.map((f) => read('src/ui/' + f))).join('\n');
 const fonts = 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap';
 const TITLE = 'Appli course à pied';
+// Fichier autonome : polices Google chargées sans bloquer l'affichage (hors ligne ou réseau lent, l'appli s'ouvre tout de suite avec les polices du système).
 const OUT = 'appli-course-a-pied.html';
 const dataUri = (p) => 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, p)).toString('base64');
 // le logo du club et l'icône sont embarqués dans le fichier
@@ -21,7 +22,8 @@ const standalone = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${TITLE}</title>
 ${icon}
-<link rel="stylesheet" href="${fonts}">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="${fonts}" media="print" onload="this.media='all'">
 <style>
 ${css}
 </style>

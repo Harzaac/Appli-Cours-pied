@@ -1,6 +1,6 @@
 const path=require('path');const fs=require('fs');const {chromium}=require('playwright');const root=path.join(__dirname,'..','..');
 const out=[];const log=(...a)=>{out.push(a.join(' '));console.log(...a)};
-(async()=>{const b=await chromium.launch();const errs=[];
+(async()=>{const b=require('../outils/hors-ligne.js')(await chromium.launch());const errs=[];
 const ctx=await b.newContext({viewport:{width:1280,height:900},acceptDownloads:true});const p=await ctx.newPage();
 p.on('pageerror',e=>errs.push(e.message));await p.route(/open-meteo\.com|fonts\.g/,r=>r.abort());
 await p.addInitScript(()=>{window.__TODAY__='2026-10-31'});
@@ -63,7 +63,7 @@ log('  mois après 8 clics:',await q.textContent('.navlabel'));
 await c2.close();
 // H. suppression du plan 2
 await p.click('.tabs [data-view=plan]');await p.click('[data-act=tab][data-view=plans] >> nth=0');
-await p.click(`[data-act=plandel][data-id=${p2}]`);await p.click(`[data-act=plandel][data-id=${p2}]`);
+await p.click(`[data-act=plandel][data-id=${p2}]`);
 log('H après suppression: plans',await p.evaluate(()=>S.plans.length),'| note plan 1',await p.evaluate(()=>track('2026-10-07').note),'| note plan 2',await p.evaluate((d)=>track(d).note||'effacée',d2b));
 // J. vue mois PC
 await p.click('[data-act=tab][data-view=plan]');await p.click('[data-act=mode][data-mode=month]');
