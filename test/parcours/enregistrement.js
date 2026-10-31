@@ -1,0 +1,16 @@
+const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..','..');
+(async()=>{const b=await chromium.launch();const errs=[];const p=await b.newPage({viewport:{width:1280,height:900}});p.on('pageerror',e=>errs.push(e.message));
+await p.route(/open-meteo\.com|fonts\.g/,r=>r.abort());await p.addInitScript(()=>{window.__TODAY__='2026-10-31'});
+await p.goto('file://'+root+'/dist/appli-course-a-pied.html');await p.waitForSelector('.week');
+console.log('titre:',await p.title(),'|',await p.textContent('.brand'));
+const toast=async()=>{await p.waitForTimeout(150);return p.$eval('#toast',e=>e.classList.contains('on')?e.textContent:'(caché)').catch(()=>'(aucun)');};
+await p.click('.tabs [data-view=vma]');
+await p.fill('#vma-input','17,5');await p.click('[data-act=commit]');console.log('VMA + Enregistrer :',await toast(),'| valeur',await p.evaluate(()=>S.settings.vma));
+await p.waitForTimeout(2500);await p.click('[data-act=commit]');console.log('sans changement :',await toast());
+await p.fill('#target-input',"3h20'00");await p.press('#target-input','Enter');console.log('objectif + Entrée :',await toast());
+await p.reload();await p.waitForSelector('.week');console.log('après rechargement : VMA',await p.evaluate(()=>S.settings.vma),'| objectif',await p.evaluate(()=>S.settings.targetSec));
+await p.click('[data-act=open][data-date="2026-10-31"] >> nth=0');await p.click('[data-act=lognew]');await p.fill('#log-dur','30');await p.click('[data-act=logsave]');console.log('sortie :',await toast());
+await p.click('[data-act=close]');
+await p.click('.tabs [data-view=data]');await p.click('details[data-pref=wx] summary');await p.fill('#wx-hot','27');await p.click('[data-act=commit]');console.log('météo :',await toast(),'| seuil',await p.evaluate(()=>wxCfg().hot));
+console.log('bouton restaurer sur l\'écran vide:',!!(await p.$('.hero [data-view=data]')));
+console.log(errs.length?errs:'pas d\'erreur');await b.close();})().catch(e=>{console.log('ÉCHEC',e.message.split('\n')[0]);process.exit(1)});

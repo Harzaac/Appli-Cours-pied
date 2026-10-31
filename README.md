@@ -1,4 +1,4 @@
-# Appli Course
+# Appli course à pied
 
 Calendrier d'entraînement de course à pied (AC Haute Vilaine) livré en **un seul fichier HTML**, sans serveur ni compte :
 plans du coach importés depuis Excel, allures calculées selon la VMA, suivi des séances et des
@@ -11,7 +11,7 @@ Les données restent dans le navigateur ; une « copie avec mes données » les 
 node build.js
 ```
 
-Produit `dist/appli-course.html` (le fichier à ouvrir ou à transmettre) et `dist/artifact.html`
+Produit `dist/appli-course-a-pied.html` (le fichier à ouvrir ou à transmettre) et `dist/artifact.html`
 (même contenu sans les balises `html/head/body`). `build.js` assemble, dans l'ordre :
 
 - `src/core.js` — lecture du `.xlsx` (zip + XML, sans dépendance), contrôle du fichier du coach,

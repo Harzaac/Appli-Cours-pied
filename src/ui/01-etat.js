@@ -1,5 +1,5 @@
 /* ============================================================
-   Appli Course — interface
+   Appli course à pied — interface
    ============================================================ */
 const KEY = 'appli-marathon-v1';
 const ACCENTS = [{ id: 'ocean', name: 'Océan', a: '#1457C4', b: '#0B8467' }, { id: 'foret', name: 'Forêt', a: '#1D6A3A', b: '#45841F' }, { id: 'braise', name: 'Braise', a: '#C2490A', b: '#A32A1B' }, { id: 'graphite', name: 'Graphite', a: '#26313C', b: '#4A5A68' }];

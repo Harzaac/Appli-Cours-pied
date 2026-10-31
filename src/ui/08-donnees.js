@@ -38,7 +38,7 @@ function saveHtmlCopy(forCoach) {
     if (!html) throw new Error('src');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-    a.download = forCoach ? 'appli-course-plan-coach.html' : 'appli-course-' + TODAY + '.html';
+    a.download = forCoach ? 'appli-course-a-pied-plan-coach.html' : 'appli-course-a-pied-' + TODAY + '.html';
     document.body.appendChild(a); a.click(); a.remove();
     S.msg.backup = forCoach ? 'Version « plan seul » générée : sans ton suivi ni tes notes.' : 'Copie générée. Remplace ton ancien fichier par celui-ci : ton plan et ton suivi sont dedans.';
   } catch (e) { S.msg.backup = 'Le téléchargement est bloqué ici : ouvre l\'appli depuis ton disque.'; }
@@ -77,6 +77,7 @@ function dataView() {
         <div class="field"><label for="wx-rain">Pluie probable dès (%)</label><input type="text" id="wx-rain" inputmode="numeric" value="${wxCfg().rain}"></div>
         <div class="field"><label for="wx-hot">Chaleur dès (°)</label><input type="text" id="wx-hot" inputmode="numeric" value="${wxCfg().hot}"></div>
         <div class="field"><label for="wx-cold">Froid jusqu'à (°)</label><input type="text" id="wx-cold" inputmode="numeric" value="${wxCfg().cold}"></div></div>
+      <div><button class="btn small primary" data-act="commit">${ICON.check}Enregistrer</button></div>
       <p class="sub" role="status">${S.msg.wx ? esc(S.msg.wx) : S.wxState.loading ? 'Chargement…' : S.wxState.err ? (S.wx ? 'Pas de connexion : dernière météo du ' + esc(frDate(S.wx.fetchedAt.slice(0, 10))) + ' affichée. ' : 'Météo indisponible. ') + 'Détail : ' + esc(S.wxState.why || 'inconnu') + (location.protocol === 'file:' ? ' · fichier ouvert depuis le disque.' : ' · page web (l\'aperçu dans Claude bloque la météo : ouvre le fichier depuis ton disque).') : S.wx ? 'Dernière mise à jour : ' + esc(frDate(S.wx.fetchedAt.slice(0, 10))) + ' à ' + esc(new Date(S.wx.fetchedAt).toTimeString().slice(0, 5)) + '.' : ''}</p></div></details>
       <details class="raw pref"${S.ui.pref === 'look' ? ' open' : ''} data-pref="look"><summary>Apparence</summary><div class="stack prefbody"><p class="sub">Choisis la couleur du bandeau et des boutons. Les couleurs des types de séance ne changent pas. Le mode clair ou sombre se règle avec le bouton en haut de page.</p>
 

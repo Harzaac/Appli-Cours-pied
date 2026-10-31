@@ -2,7 +2,7 @@ const path=require('path');const {chromium}=require('playwright');const root=pat
 (async()=>{const b=await chromium.launch();const errs=[];
 for(const [w,n] of [[1280,'pc'],[390,'mob']]){
 const p=await b.newPage({viewport:{width:w,height:900}});p.on('pageerror',e=>{errs.push(n+': '+e.message);console.log('ERR',e.message)});await p.route(/open-meteo\.com|fonts\.g/,r=>r.abort());
-await p.addInitScript(()=>{window.__TODAY__='2026-10-31'});await p.goto('file://'+root+'/dist/appli-course.html');
+await p.addInitScript(()=>{window.__TODAY__='2026-10-31'});await p.goto('file://'+root+'/dist/appli-course-a-pied.html');
 await p.waitForSelector('.week');
 console.log(n,'accueil sans plan:',await p.textContent('.navlabel'),'| onglets:',await p.$$eval('.tabs button',e=>e.map(x=>x.textContent).join('/')),'| cartes:',await p.$$eval('.week .dcard',e=>e.length));
 await p.screenshot({path:root+`/shots/v34-vide-${n}.png`,fullPage:n==='pc'});

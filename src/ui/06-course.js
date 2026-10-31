@@ -51,6 +51,7 @@ function raceView() {
         <div class="field"><label for="rav-every">${byMin ? 'Toutes les (minutes)' : 'Tous les (km)'}</label><input type="text" id="rav-every" inputmode="decimal" value="${String(rv.every).replace('.', ',')}" autocomplete="off"></div></div>
       ${S.msg.rav ? `<p class="errtxt" role="alert">${esc(S.msg.rav)}</p>` : ''}
       <div class="field"><label for="race-note">Notes de course (gels, boissons, repères…)</label><textarea class="note" id="race-note" rows="3" placeholder="Ex. gel aux km 10, 20, 30 · eau à chaque ravito">${esc(S.settings.raceNote || '')}</textarea></div>
+      <div class="row"><button class="btn small primary" data-act="commit">${ICON.check}Enregistrer</button><span class="sub">Stratégie, ravitaillement et notes.</span></div>
     </section>
     <section class="card stack raceplan"><div class="row between"><div><h2>${esc(raceNameOf())}${S.plan.raceDate ? ' · ' + esc(frDate(S.plan.raceDate, true)) : ''}</h2><p class="sub">${m.cautious ? 'Départ prudent : ' + String(m.K).replace('.', ',') + ' premiers km à +' + String(m.d).replace('.', ',') + ' s/km, puis un peu plus vite.' : 'Allure régulière.'}</p></div></div>
       <div class="kpis"><div class="kpi"><span class="v num">${fmtHMS(S.settings.targetSec)}</span><span class="l">objectif</span></div>

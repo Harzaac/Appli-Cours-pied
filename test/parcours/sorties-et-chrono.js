@@ -3,7 +3,7 @@ const log=(...a)=>console.log(...a);
 (async()=>{const b=await chromium.launch();const errs=[];
 const ctx=await b.newContext({viewport:{width:1280,height:900},acceptDownloads:true});const p=await ctx.newPage();
 p.on('pageerror',e=>{errs.push(e.message);log('ERR',e.message)});await p.route(/open-meteo\.com|fonts\.g/,r=>r.abort());
-await p.addInitScript(()=>{window.__TODAY__='2026-10-31'});await p.goto('file://'+root+'/dist/appli-course.html');await p.waitForSelector('.week');
+await p.addInitScript(()=>{window.__TODAY__='2026-10-31'});await p.goto('file://'+root+'/dist/appli-course-a-pied.html');await p.waitForSelector('.week');
 log('1 onglets sans plan:',await p.$$eval('.tabs button',e=>e.map(x=>x.textContent).join('/')));
 await p.click('.tabs [data-view=vma]');
 log('  VMA sans plan: titres',await p.$$eval('main h2',e=>e.map(x=>x.textContent).join(' | ')));

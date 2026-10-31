@@ -1,7 +1,7 @@
 const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..','..');
 (async()=>{const b=await chromium.launch();const errs=[];
 const ctx=await b.newContext({viewport:{width:1280,height:900},acceptDownloads:true});const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));
-await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-course.html');
+await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-course-a-pied.html');
 await p.setInputFiles('#file-xlsx',root+'/test/donnees/plan-test.xlsx');await p.click('[data-act=useplan]');await p.waitForSelector('.week');
 const has=async()=>!!(await p.$('.remind'));
 console.log('0 séance suivie → bannière:',await has());
@@ -16,7 +16,7 @@ console.log('copie depuis la bannière:',d.suggestedFilename(),'| bannière ensu
 await p.click('[data-act=tab][data-view=data]');await p.click('[data-act=copyinfo]');await p.click('details.raw summary');
 await p.screenshot({path:root+'/shots/v22-donnees.png',fullPage:true});
 const m=await ctx.newPage();await m.setViewportSize({width:400,height:800});m.on('pageerror',e=>errs.push(e.message));
-await m.addInitScript(()=>{window.__TODAY__='2026-10-20'});await m.goto('file://'+root+'/dist/appli-course.html');await m.waitForSelector('.week');
+await m.addInitScript(()=>{window.__TODAY__='2026-10-20'});await m.goto('file://'+root+'/dist/appli-course-a-pied.html');await m.waitForSelector('.week');
 console.log('mobile, 9 jours après la copie → bannière:',await m.$('.remind')?true:false);
 await m.screenshot({path:root+'/shots/v22-mobile.png'});
 console.log('débordement horizontal mobile:',await m.evaluate(()=>document.documentElement.scrollWidth>innerWidth));

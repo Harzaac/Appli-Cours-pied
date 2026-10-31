@@ -1,6 +1,6 @@
 const path=require('path');const fs=require('fs');const {chromium}=require('playwright');const root=path.join(__dirname,'..','..');
 (async()=>{const b=await chromium.launch();const errs=[];const ctx=await b.newContext({viewport:{width:1280,height:900},acceptDownloads:true});const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));
-await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-course.html');
+await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-course-a-pied.html');
 await p.setInputFiles('#file-xlsx',root+'/test/donnees/plan-test.xlsx');await p.click('[data-act=useplan]');await p.waitForSelector('.week');
 await p.click('[data-act=open][data-date="2026-10-07"] >> nth=0');await p.waitForSelector('.garmin');
 await p.fill('#fit-tol','3');await p.press('#fit-tol','Tab');

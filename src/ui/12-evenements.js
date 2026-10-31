@@ -37,7 +37,8 @@ document.addEventListener('click', (ev) => {
     case 'logedit': { const l = logsOf(S.ui.modal).find((x) => x.id === el.dataset.id); if (l) { S.ui.logEdit = { date: S.ui.modal, id: l.id, feel: l.feel || 0 }; S.msg.log = ''; renderModal(); } break; }
     case 'logfeel': { const n = Number(el.dataset.n); if (S.ui.logEdit) { keepLogForm(); S.ui.logEdit.feel = S.ui.logEdit.feel === n ? 0 : n; renderModal(); restoreLogForm(); } break; }
     case 'logcancel': S.ui.logEdit = null; S.msg.log = ''; renderModal(); break;
-    case 'logsave': keepLogForm(); saveLog(); render(); if (S.ui.logEdit) restoreLogForm(); break;
+    case 'logsave': keepLogForm(); saveLog(); render(); if (S.ui.logEdit) restoreLogForm(); else toast('Sortie enregistrée'); break;
+    case 'commit': commitFields(); break;
     case 'logdel': deleteLog(S.ui.modal, el.dataset.id); if (S.ui.logEdit && S.ui.logEdit.id === el.dataset.id) S.ui.logEdit = null; render(); break;
     case 'refset': {
       const km = Number((document.getElementById('ref-km') || {}).value);
@@ -102,12 +103,12 @@ document.addEventListener('change', (ev) => {
     const k = t.id.slice(3), n = Number(norm(t.value).replace(',', '.'));
     const lim = { wind: [10, 100], rain: [10, 100], hot: [10, 40], cold: [-15, 10] }[k];
     if (!(n >= lim[0] && n <= lim[1]) || t.value.trim() === '') S.msg.wx = 'Valeur entre ' + lim[0] + ' et ' + lim[1] + '.';
-    else { S.msg.wx = ''; wxSet({ [k]: Math.round(n) }); }
+    else { S.msg.wx = ''; wxSet({ [k]: Math.round(n) }); toast('Seuil météo enregistré'); }
     render(); return;
   }
   if (t.id === 'fit-tol') {
     const n = Number(norm(t.value).replace(',', '.'));
-    if (!(n >= 1 && n <= 30)) { S.msg.fitErr = true; S.msg.fit = 'Tolérance entre 1 et 30 s/km.'; } else { S.settings.fitTol = Math.round(n); S.msg.fit = ''; saveStore(); }
+    if (!(n >= 1 && n <= 30)) { S.msg.fitErr = true; S.msg.fit = 'Tolérance entre 1 et 30 s/km.'; } else { S.settings.fitTol = Math.round(n); S.msg.fit = ''; saveStore(); toast('Tolérance enregistrée : ±' + Math.round(n) + ' s/km'); }
     renderModal(); return;
   }
   if (t.id === 'file-crest' && t.files && t.files[0]) { loadCrest(t.files[0]); return; }
@@ -117,47 +118,48 @@ document.addEventListener('change', (ev) => {
     if (!raw) { setTrack(S.ui.modal, { result: 0 }); S.msg.result = ''; render(); return; }
     const sec = parseChrono(raw);
     if (sec == null) { S.msg.result = "Chrono non compris : écris par exemple 3h25'12 ou 3:25:12."; renderModal(); return; }
-    setTrack(S.ui.modal, { result: sec, done: true, skipped: false }); S.msg.result = ''; render(); return;
+    setTrack(S.ui.modal, { result: sec, done: true, skipped: false }); S.msg.result = ''; toast('Chrono enregistré : ' + fmtHMS(sec)); render(); return;
   }
+  if (t.id === 'note-input' && S.ui.modal) { toast('Note enregistrée'); return; }
   if (t.id === 'race-pr' && S.ui.modal) { setTrack(S.ui.modal, { pr: t.checked }); render(); return; }
   if (t.id === 'vma-input') {
     const v = parseVmaInput(t.value);
     if (v == null) S.msg.level = 'La VMA doit être comprise entre 8 et 25 km/h (par exemple 16,5).';
-    else { S.settings.vma = v; S.msg.level = ''; saveStore(); }
+    else { S.settings.vma = v; S.msg.level = ''; saveStore(); toast('VMA enregistrée : ' + fmtVma(v) + ' km/h'); }
     render(); return;
   }
   if (t.id === 'target-input') {
     if (S.settings.targetMode === 'pace') {
       const p = parsePaceInput(t.value);
       if (p == null) S.msg.level = "L'allure doit ressembler à 4'40 ou 4:40 (par km, entre 3'03 et 9'57).";
-      else { S.settings.targetSec = Math.round(p * MARATHON_KM); S.msg.level = ''; saveStore(); }
+      else { S.settings.targetSec = Math.round(p * MARATHON_KM); S.msg.level = ''; saveStore(); toast('Objectif enregistré : ' + fmtPace(p) + '/km'); }
     } else {
       const v = parseTarget(t.value);
       if (v == null) S.msg.level = "Le temps visé doit ressembler à 3h15'00 ou 3:15:00 (entre 1h30 et 7h).";
-      else { S.settings.targetSec = v; S.msg.level = ''; saveStore(); }
+      else { S.settings.targetSec = v; S.msg.level = ''; saveStore(); toast('Objectif enregistré : ' + fmtHMS(v)); }
     }
     render(); return;
   }
-  if (t.id === 'race-note') { S.settings.raceNote = t.value; saveStore(); render(); return; }
+  if (t.id === 'race-note') { S.settings.raceNote = t.value; saveStore(); toast('Notes de course enregistrées'); render(); return; }
   if (t.id === 'rav-every') {
     const r = ravSettings(); const n = Number(norm(t.value).replace(',', '.'));
     const [lo, hi] = r.mode === 'min' ? [5, 60] : [1, 20];
     if (!(n >= lo && n <= hi) || t.value.trim() === '') S.msg.rav = 'Valeur entre ' + lo + ' et ' + hi + (r.mode === 'min' ? ' minutes.' : ' km.');
-    else { S.settings.rav = { mode: r.mode, every: n }; S.msg.rav = ''; saveStore(); }
+    else { S.settings.rav = { mode: r.mode, every: n }; S.msg.rav = ''; saveStore(); toast('Ravitaillement enregistré'); }
     render(); return;
   }
   if (t.id === 'caut-pace') {
     const p = parsePaceInput(t.value), pace = passageModel().pace;
     const d = p == null ? null : Math.round((p - pace) * 10) / 10;
     if (d == null || d < 0 || d > 15) S.msg.caut = "L'allure du départ doit être entre " + fmtPace(pace) + ' et ' + fmtPace(pace + 15) + "/km (plus lente que l'allure marathon).";
-    else { S.settings.cautD = d; S.msg.caut = ''; saveStore(); }
+    else { S.settings.cautD = d; S.msg.caut = ''; saveStore(); toast('Départ prudent enregistré'); }
     render(); return;
   }
   if (t.id === 'caut-km' || t.id === 'caut-d') {
     const n = Number(norm(t.value).replace(',', '.'));
     const km = t.id === 'caut-km';
     if (!(n >= (km ? 1 : 0) && n <= (km ? 35 : 15)) || t.value.trim() === '') S.msg.caut = km ? 'Distance entre 1 et 35 km.' : 'Écart entre 0 et 15 s/km.';
-    else { S.settings[km ? 'cautKm' : 'cautD'] = n; S.msg.caut = ''; saveStore(); }
+    else { S.settings[km ? 'cautKm' : 'cautD'] = n; S.msg.caut = ''; saveStore(); toast('Départ prudent enregistré'); }
     render(); return;
   }
 });
@@ -211,3 +213,19 @@ document.addEventListener('toggle', (ev) => {
   if (!d || !d.dataset || !d.dataset.pref) return;
   if (d.open) S.ui.pref = d.dataset.pref; else if (S.ui.pref === d.dataset.pref) S.ui.pref = null;
 }, true);
+
+// Confirmation discrète après chaque enregistrement.
+let TOAST_AT = 0, TOAST_TIMER = null;
+function toast(msg) {
+  let el = document.getElementById('toast');
+  if (!el) { el = document.createElement('div'); el.id = 'toast'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
+  el.innerHTML = ICON.check + '<span>' + esc(msg) + '</span>';
+  el.classList.add('on'); TOAST_AT = Date.now();
+  clearTimeout(TOAST_TIMER); TOAST_TIMER = setTimeout(() => el.classList.remove('on'), 2200);
+}
+// Bouton « Enregistrer » : valide le champ en cours de saisie ; sinon confirme que tout est déjà enregistré.
+function commitFields() {
+  const a = document.activeElement;
+  if (a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) a.blur();
+  setTimeout(() => { if (Date.now() - TOAST_AT > 400) toast('Tout est déjà enregistré'); }, 60);
+}

@@ -134,7 +134,7 @@ function vmaView() {
           <input type="text" id="target-input" value="${esc(byPace ? fmtPace(c.marathon) : Math.floor(targetSec / 3600) + "h" + pad2(Math.floor(targetSec % 3600 / 60)) + "'" + pad2(Math.round(targetSec % 60)))}" autocomplete="off" placeholder="${byPace ? "4'10" : "2h55'49"}">
           <span class="sub">${byPace ? '= ' + fmtHMS(targetSec) + ' au marathon' : '= ' + fmtPace(c.marathon) + '/km'}</span></div>
       </div>
-      ${err ? `<p class="errtxt" role="alert">${esc(err)}</p>` : '<p class="sub">Modifie une valeur puis valide avec Entrée ou en quittant le champ.</p>'}
+      ${err ? `<p class="errtxt" role="alert">${esc(err)}</p>` : `<div class="row"><button class="btn small primary" data-act="commit">${ICON.check}Enregistrer</button><span class="sub">ou appuie sur Entrée : c'est enregistré tout de suite.</span></div>`}
       <div class="kpis">
         <div class="kpi"><span class="v num">${fmtPace(c.marathon)}</span><span class="l">allure marathon · ${Math.round(marPct * 10) / 10} % de la VMA</span></div>
         <div class="kpi"><span class="v num">${fmtPace(c.pct(100))}</span><span class="l">100 % VMA · ${fmtVma(vma)} km/h</span></div>

@@ -1,6 +1,6 @@
 {
   "name": "appli-course",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "description": "Calendrier d'entraînement marathon en un seul fichier HTML hors ligne : plans du coach, allures selon la VMA, suivi, export Garmin.",
   "private": true,
   "scripts": {

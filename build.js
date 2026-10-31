@@ -5,8 +5,8 @@ const css = fs.readdirSync(path.join(__dirname, 'src/css')).filter((f) => f.ends
 const uiFiles = fs.readdirSync(path.join(__dirname, 'src/ui')).filter((f) => f.endsWith('.js')).sort();
 const js = [read('src/core.js'), read('src/fit.js')].concat(uiFiles.map((f) => read('src/ui/' + f))).join('\n');
 const fonts = 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap';
-const TITLE = 'Appli Course';
-const OUT = 'appli-course.html';
+const TITLE = 'Appli course à pied';
+const OUT = 'appli-course-a-pied.html';
 const dataUri = (p) => 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, p)).toString('base64');
 // le logo du club et l'icône sont embarqués dans le fichier
 const assetsJs = `const APP_NAME = ${JSON.stringify(TITLE)};\nconst CLUB_NAME = 'AC Haute Vilaine';\nconst CLUB_LOGO = '${dataUri('assets/logo-achv.png')}';\n`;

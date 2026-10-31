@@ -4,7 +4,7 @@ const out=[];const log=(...a)=>{out.push(a.join(' '));console.log(...a)};
 const ctx=await b.newContext({viewport:{width:1280,height:900},acceptDownloads:true});const p=await ctx.newPage();
 p.on('pageerror',e=>errs.push(e.message));await p.route(/open-meteo\.com|fonts\.g/,r=>r.abort());
 await p.addInitScript(()=>{window.__TODAY__='2026-10-31'});
-const url='file://'+root+'/dist/appli-course.html';
+const url='file://'+root+'/dist/appli-course-a-pied.html';
 await p.goto(url);
 // A. ancien format (v2) -> migration
 await p.setInputFiles('#file-xlsx',root+'/test/donnees/plan-test.xlsx');await p.waitForSelector('#imp-race');

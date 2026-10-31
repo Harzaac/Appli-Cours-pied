@@ -1,7 +1,7 @@
 const path=require('path');const {chromium}=require('playwright');const root=path.join(__dirname,'..','..');
 (async()=>{const b=await chromium.launch();const errs=[];const p=await b.newPage({viewport:{width:1280,height:900}});p.on('pageerror',e=>errs.push(e.message));
 await p.route(/open-meteo\.com/,r=>r.abort());
-await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-course.html');
+await p.addInitScript(()=>{window.__TODAY__='2026-10-11'});await p.goto('file://'+root+'/dist/appli-course-a-pied.html');
 await p.setInputFiles('#file-xlsx',root+'/test/donnees/plan-test.xlsx');await p.click('[data-act=useplan]');await p.waitForSelector('.week');
 const sel='[data-act=quickdone][data-date="2026-10-08"]';
 console.log('boutons coche:',await p.$$eval('.qcheck',e=>e.length),'| sur jour de repos:',await p.$$eval('.dcard.rest .qcheck',e=>e.length));
