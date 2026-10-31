@@ -50,3 +50,16 @@ details.pref summary { padding: 4px 0; }
 details.pref .prefbody { margin-top: 10px; gap: 12px; }
 .cellsub { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
 .planitem > .linkbtn { flex-basis: 100%; text-align: left; }
+
+/* cases mises en avant dans le tableau VMA */
+.vmatable td.vc-green { background: var(--mint-bg); color: var(--mint-ink); font-weight: 700; }
+.vmatable td.vc-yellow { background: var(--gold-bg); color: var(--gold-ink); font-weight: 700; }
+.vmatable td.vc-orange { background: var(--orange-bg); color: var(--orange-ink); font-weight: 700; }
+.vmatable td.vc-red { background: var(--red-bg); color: var(--red-ink); font-weight: 700; }
+.vmatable td.vc-blue { background: var(--blue-bg); color: var(--blue-ink); font-weight: 700; }
+.vmatable td.vc-violet { background: var(--violet-bg); color: var(--violet-ink); font-weight: 700; }
+.vmatable td.vc-dark { background: var(--ink); color: var(--bg); font-weight: 700; }
+.vclegend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.vcsw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-left: 2px; }
+.vcsw.vc-green { background: var(--mint); } .vcsw.vc-yellow { background: var(--gold); } .vcsw.vc-orange { background: var(--orange); }
+.vcsw.vc-red { background: var(--red-ink); } .vcsw.vc-blue { background: var(--blue); } .vcsw.vc-violet { background: var(--violet); } .vcsw.vc-dark { background: var(--ink); }

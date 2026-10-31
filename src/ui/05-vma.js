@@ -7,7 +7,10 @@ function tableRows(vt) {
   const rows = vt.rows.filter((r) => r.dist < 1000 && r.dist !== 50 && r.dist !== 100).concat(LONG_DISTS.map((d) => {
     let best = null;
     longSrc.forEach((r) => { if (!best || Math.abs(r.dist - d) < Math.abs(best.dist - d)) best = r; });
-    return { dist: d, avail: best ? best.avail : vt.pcts.map(() => true) };
+    const out = { dist: d, avail: best ? best.avail : vt.pcts.map(() => true) };
+    // la couleur du coach n'est reprise que si la distance est la même (à 1 % près)
+    if (best && best.fill && Math.abs(best.dist - d) / d < 0.01) out.fill = best.fill;
+    return out;
   }));
   return { pcts: vt.pcts, rows };
 }
@@ -57,6 +60,45 @@ function predictionHTML(vma) {
       <div class="row"><button class="btn small" data-act="refset">Utiliser ce chrono</button>${ref && ref.manual ? '<button class="btn small" data-act="refclear">Revenir à mon dernier résultat de course</button>' : ''}</div>
       ${S.msg.ref ? `<p class="errtxt" role="alert">${esc(S.msg.ref)}</p>` : ''}</div></section>`;
 }
+/* ----- cases mises en avant dans le tableau VMA ----- */
+const VC_NAMES = { 'vc-green': 'vert', 'vc-yellow': 'jaune', 'vc-orange': 'orange', 'vc-red': 'rouge', 'vc-blue': 'bleu', 'vc-violet': 'violet', 'vc-dark': 'gris foncé' };
+// Classe une couleur Excel dans une famille de couleurs de l'appli (les gris clairs, fond habituel du tableau, sont ignorés).
+function fillClass(hex) {
+  if (!hex) return '';
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  const sat = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  if (sat < 0.18) return l < 0.55 ? 'vc-dark' : '';
+  if (l > 0.95) return '';
+  let h = d === 0 ? 0 : mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h = (h * 60 + 360) % 360;
+  if (h < 18 || h >= 340) return 'vc-red';
+  if (h < 42) return 'vc-orange';
+  if (h < 68) return 'vc-yellow';
+  if (h < 170) return 'vc-green';
+  if (h < 260) return 'vc-blue';
+  return 'vc-violet';
+}
+function vmaHighlights(vt) {
+  const coach = vt.rows.some((r) => r.fill && r.fill.some((f) => fillClass(f)));
+  const cls = vt.rows.map((r) => vt.pcts.map((p, k) => {
+    if (coach) return r.fill ? fillClass(r.fill[k]) : '';
+    // sans couleurs du coach : la fourchette réalisable en course (la même que pour les prédictions)
+    const pd = PRED_DISTS.find((x) => Math.abs(x.km * 1000 - r.dist) / r.dist < 0.01);
+    if (!pd) return '';
+    const inside = vt.pcts.filter((q) => q >= pd.lo && q <= pd.hi);
+    const ok = inside.length ? inside.includes(p) : p === vt.pcts.reduce((a, q) => (Math.abs(q - (pd.lo + pd.hi) / 2) < Math.abs(a - (pd.lo + pd.hi) / 2) ? q : a), vt.pcts[0]);
+    return ok ? 'vc-green' : '';
+  }));
+  let legend;
+  if (coach) {
+    const used = Object.keys(VC_NAMES).filter((c) => cls.some((row) => row.includes(c)));
+    legend = `<p class="sub vclegend">Cases mises en avant comme dans le fichier du coach : ${used.map((c) => `<span class="vcsw ${c}"></span>${VC_NAMES[c]}`).join(' · ')}.</p>`;
+  } else {
+    legend = `<p class="sub vclegend"><span class="vcsw vc-green"></span>Temps réalisables en course avec ta VMA sur 5 km, 10 km, semi et marathon (même fourchette que les prédictions).</p>`;
+  }
+  return { cls, legend };
+}
 function vmaView() {
   const c = ctx();
   const { vma, targetSec } = S.settings;
@@ -66,9 +108,10 @@ function vmaView() {
   const vt = tableRows(S.plan && S.plan.vmaTable && S.plan.vmaTable.rows ? S.plan.vmaTable : DEFAULT_VT);
   let table = '';
   if (vt && vt.rows.length) {
-    table = `<div class="tablewrap" style="max-height:560px"><table><thead><tr><th>Distance</th>${vt.pcts.map((p) => `<th>${p} %</th>`).join('')}</tr>
+    const hl = vmaHighlights(vt);
+    table = `${hl.legend}<div class="tablewrap" style="max-height:560px"><table class="vmatable"><thead><tr><th>Distance</th>${vt.pcts.map((p) => `<th>${p} %</th>`).join('')}</tr>
       <tr><th>Allure / km</th>${vt.pcts.map((p) => `<th>${fmtPace(paceSecPerKm(vma, p))}</th>`).join('')}</tr></thead><tbody>
-      ${vt.rows.map((r) => `<tr><td>${distLabel(r.dist)}</td>${vt.pcts.map((p, k) => r.avail[k] ? `<td>${fmtTableTime(r.dist / (vma / 3.6 * p / 100))}</td>` : '<td class="na">·</td>').join('')}</tr>`).join('')}
+      ${vt.rows.map((r, i) => `<tr><td>${distLabel(r.dist)}</td>${vt.pcts.map((p, k) => r.avail[k] ? `<td${hl.cls[i][k] ? ` class="${hl.cls[i][k]}"` : ''}>${fmtTableTime(r.dist / (vma / 3.6 * p / 100))}</td>` : '<td class="na">·</td>').join('')}</tr>`).join('')}
       </tbody></table></div>`;
   }
   const refs = ((S.plan && S.plan.refs) || []).map((r) => {

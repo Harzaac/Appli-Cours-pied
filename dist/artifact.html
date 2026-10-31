@@ -30,6 +30,7 @@
   --info-bg: #DEEBFD; --info-ink: #0F4FB5;
   --tip-bg: #FBEFC9; --tip-ink: #6F4D00;
   --alert-bg: #FDE9D4; --alert-ink: #9A4707;
+  --red-bg: #FBDAD6; --red-ink: #A3261B;
 
   --f-display: 'Barlow Condensed', 'Arial Narrow', 'Helvetica Neue', system-ui, sans-serif;
   --f-body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -46,7 +47,7 @@
     --teal: #43C7D3; --teal-ink: #94E3EA; --teal-bg: #10383D;
     --gold: #F2C24B; --gold-ink: #F8DD94; --gold-bg: #4B3A0C;
     --grey: #6F889B; --grey-ink: #B5C6D3; --grey-bg: #1B3243;
-    --info-bg: #12304f; --info-ink: #bcd9ff; --tip-bg: #3a2e08; --tip-ink: #f6dc8a; --alert-bg: #4a2a0c; --alert-ink: #ffd2a1;
+    --info-bg: #12304f; --info-ink: #bcd9ff; --tip-bg: #3a2e08; --tip-ink: #f6dc8a; --alert-bg: #4a2a0c; --alert-ink: #ffd2a1; --red-bg: #4D1A15; --red-ink: #FFB0A6;
     color-scheme: dark;
   }
 }
@@ -61,7 +62,7 @@
   --teal: #43C7D3; --teal-ink: #94E3EA; --teal-bg: #10383D;
   --gold: #F2C24B; --gold-ink: #F8DD94; --gold-bg: #4B3A0C;
   --grey: #6F889B; --grey-ink: #B5C6D3; --grey-bg: #1B3243;
-  --info-bg: #12304f; --info-ink: #bcd9ff; --tip-bg: #3a2e08; --tip-ink: #f6dc8a; --alert-bg: #4a2a0c; --alert-ink: #ffd2a1;
+  --info-bg: #12304f; --info-ink: #bcd9ff; --tip-bg: #3a2e08; --tip-ink: #f6dc8a; --alert-bg: #4a2a0c; --alert-ink: #ffd2a1; --red-bg: #4D1A15; --red-ink: #FFB0A6;
   color-scheme: dark;
 }
 
@@ -443,6 +444,19 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 .cellsub { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
 .planitem > .linkbtn { flex-basis: 100%; text-align: left; }
 
+/* cases mises en avant dans le tableau VMA */
+.vmatable td.vc-green { background: var(--mint-bg); color: var(--mint-ink); font-weight: 700; }
+.vmatable td.vc-yellow { background: var(--gold-bg); color: var(--gold-ink); font-weight: 700; }
+.vmatable td.vc-orange { background: var(--orange-bg); color: var(--orange-ink); font-weight: 700; }
+.vmatable td.vc-red { background: var(--red-bg); color: var(--red-ink); font-weight: 700; }
+.vmatable td.vc-blue { background: var(--blue-bg); color: var(--blue-ink); font-weight: 700; }
+.vmatable td.vc-violet { background: var(--violet-bg); color: var(--violet-ink); font-weight: 700; }
+.vmatable td.vc-dark { background: var(--ink); color: var(--bg); font-weight: 700; }
+.vclegend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.vcsw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-left: 2px; }
+.vcsw.vc-green { background: var(--mint); } .vcsw.vc-yellow { background: var(--gold); } .vcsw.vc-orange { background: var(--orange); }
+.vcsw.vc-red { background: var(--red-ink); } .vcsw.vc-blue { background: var(--blue); } .vcsw.vc-violet { background: var(--violet); } .vcsw.vc-dark { background: var(--ink); }
+
 /* Impression (plan de course, écran de course) */
 @media print {
   header, .foot, .noprint, .toolbar { display: none !important; }
@@ -554,6 +568,7 @@ function colIndex(ref) {
   return n - 1;
 }
 function rowIndex(ref) { return Number(/(\d+)$/.exec(ref)[1]) - 1; }
+function colLetters(c) { let s = ''; c += 1; while (c > 0) { const m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = Math.floor((c - 1) / 26); } return s; }
 
 async function readXlsx(buf) {
   const z = await unzip(buf);
@@ -579,6 +594,7 @@ async function readXlsx(buf) {
       shared.push(t);
     }
   }
+  const fillOfStyle = readFills(xml(await text('xl/styles.xml') || '<x/>'), xml(await text('xl/theme/theme1.xml') || '<x/>'));
   const sheets = [];
   let n = 0;
   for (const s of xml(wbXml).getElementsByTagName('sheet')) {
@@ -590,9 +606,12 @@ async function readXlsx(buf) {
     const sx = await text(target);
     if (!sx) continue;
     const rows = [];
+    const fills = {};
     for (const c of xml(sx).getElementsByTagName('c')) {
       const ref = c.getAttribute('r');
       if (!ref) continue;
+      const st = c.getAttribute('s');
+      if (st && fillOfStyle[Number(st)]) fills[ref] = fillOfStyle[Number(st)];
       const t = c.getAttribute('t');
       const vEl = c.getElementsByTagName('v')[0];
       let val = null;
@@ -611,9 +630,47 @@ async function readXlsx(buf) {
       (rows[r] = rows[r] || [])[colIndex(ref)] = val;
     }
     for (let i = 0; i < rows.length; i++) rows[i] = rows[i] ? Array.from(rows[i], (v) => (v === undefined ? null : v)) : [];
-    sheets.push({ name, rows });
+    sheets.push({ name, rows, fills });
   }
   return sheets;
+}
+
+// Couleur de fond (« #RRGGBB ») de chaque style de cellule, ou null. Gère les couleurs RVB, indexées et du thème (avec nuance).
+const XL_INDEXED = ['000000','FFFFFF','FF0000','00FF00','0000FF','FFFF00','FF00FF','00FFFF','000000','FFFFFF','FF0000','00FF00','0000FF','FFFF00','FF00FF','00FFFF','800000','008000','000080','808000','800080','008080','C0C0C0','808080','9999FF','993366','FFFFCC','CCFFFF','660066','FF8080','0066CC','CCCCFF','000080','FF00FF','FFFF00','00FFFF','800080','800000','008080','0000FF','00CCFF','CCFFFF','CCFFCC','FFFF99','99CCFF','FF99CC','CC99FF','FFCC99','3366FF','33CCCC','99CC00','FFCC00','FF9900','FF6600','666699','969696','003366','339966','003300','333300','993300','993366','333399','333333'];
+function tintHex(hex, tint) {
+  if (!tint) return hex;
+  const c = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const out = c.map((v) => Math.round(tint < 0 ? v * (1 + tint) : v + (255 - v) * tint));
+  return out.map((v) => Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+function readFills(stylesDoc, themeDoc) {
+  const theme = [];
+  const scheme = themeDoc.getElementsByTagName('a:clrScheme')[0] || themeDoc.getElementsByTagNameNS('*', 'clrScheme')[0];
+  if (scheme) {
+    const kids = Array.from(scheme.children);
+    const val = (el) => { const x = el && el.children[0]; return x ? (x.getAttribute('lastClr') || x.getAttribute('val') || '') : ''; };
+    const byName = {}; kids.forEach((k) => { byName[k.localName] = val(k); });
+    // ordre des index de thème dans Excel : fond 1, texte 1, fond 2, texte 2, accents 1 à 6
+    ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6', 'hlink', 'folHlink'].forEach((k) => theme.push(byName[k] || ''));
+  }
+  const colorOf = (el) => {
+    if (!el) return null;
+    let hex = null;
+    if (el.getAttribute('rgb')) hex = el.getAttribute('rgb').slice(-6);
+    else if (el.getAttribute('indexed') != null) hex = XL_INDEXED[Number(el.getAttribute('indexed'))] || null;
+    else if (el.getAttribute('theme') != null) hex = theme[Number(el.getAttribute('theme'))] || null;
+    if (!hex || !/^[0-9A-Fa-f]{6}$/.test(hex)) return null;
+    return tintHex(hex.toUpperCase(), Number(el.getAttribute('tint') || 0));
+  };
+  const fills = Array.from(stylesDoc.getElementsByTagName('fill')).map((f) => {
+    const pf = f.getElementsByTagName('patternFill')[0];
+    if (!pf || pf.getAttribute('patternType') !== 'solid') return null;
+    const hex = colorOf(pf.getElementsByTagName('fgColor')[0]);
+    return hex ? '#' + hex : null;
+  });
+  const xfs = stylesDoc.getElementsByTagName('cellXfs')[0];
+  if (!xfs) return [];
+  return Array.from(xfs.getElementsByTagName('xf')).map((x) => fills[Number(x.getAttribute('fillId') || 0)] || null);
 }
 
 /* ============================================================
@@ -848,7 +905,10 @@ function parseVmaSheet(sheet) {
   for (let i = hdr + 1; i < R.length; i++) {
     const r = R[i];
     if (typeof r[0] !== 'number') { if (rows.length) break; else continue; }
-    rows.push({ dist: r[0], avail: cols.map((c) => typeof r[c] === 'number') });
+    const fill = cols.map((c) => (sheet.fills && sheet.fills[colLetters(c) + (i + 1)]) || null);
+    const row = { dist: r[0], avail: cols.map((c) => typeof r[c] === 'number') };
+    if (fill.some(Boolean)) row.fill = fill;
+    rows.push(row);
   }
   return { pcts, rows };
 }
@@ -1802,7 +1862,7 @@ function nextSession() {
   return null;
 }
 function footHTML() {
-  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Données).</p><p class="ver">Appli Marathon · version 3.3</p></div></footer>`;
+  return `<footer class="foot"><div class="wrap"><p>Tes plans d'entraînement et tes sorties dans un même calendrier. Les allures sont calculées à partir de ta VMA et de ton objectif. Tes données restent sur cet appareil : pense à enregistrer une copie (onglet Données).</p><p class="ver">Appli Marathon · version 3.4</p></div></footer>`;
 }
 
 /* ----- Plan : semaine ----- */
@@ -2119,7 +2179,10 @@ function tableRows(vt) {
   const rows = vt.rows.filter((r) => r.dist < 1000 && r.dist !== 50 && r.dist !== 100).concat(LONG_DISTS.map((d) => {
     let best = null;
     longSrc.forEach((r) => { if (!best || Math.abs(r.dist - d) < Math.abs(best.dist - d)) best = r; });
-    return { dist: d, avail: best ? best.avail : vt.pcts.map(() => true) };
+    const out = { dist: d, avail: best ? best.avail : vt.pcts.map(() => true) };
+    // la couleur du coach n'est reprise que si la distance est la même (à 1 % près)
+    if (best && best.fill && Math.abs(best.dist - d) / d < 0.01) out.fill = best.fill;
+    return out;
   }));
   return { pcts: vt.pcts, rows };
 }
@@ -2169,6 +2232,45 @@ function predictionHTML(vma) {
       <div class="row"><button class="btn small" data-act="refset">Utiliser ce chrono</button>${ref && ref.manual ? '<button class="btn small" data-act="refclear">Revenir à mon dernier résultat de course</button>' : ''}</div>
       ${S.msg.ref ? `<p class="errtxt" role="alert">${esc(S.msg.ref)}</p>` : ''}</div></section>`;
 }
+/* ----- cases mises en avant dans le tableau VMA ----- */
+const VC_NAMES = { 'vc-green': 'vert', 'vc-yellow': 'jaune', 'vc-orange': 'orange', 'vc-red': 'rouge', 'vc-blue': 'bleu', 'vc-violet': 'violet', 'vc-dark': 'gris foncé' };
+// Classe une couleur Excel dans une famille de couleurs de l'appli (les gris clairs, fond habituel du tableau, sont ignorés).
+function fillClass(hex) {
+  if (!hex) return '';
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  const sat = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  if (sat < 0.18) return l < 0.55 ? 'vc-dark' : '';
+  if (l > 0.95) return '';
+  let h = d === 0 ? 0 : mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h = (h * 60 + 360) % 360;
+  if (h < 18 || h >= 340) return 'vc-red';
+  if (h < 42) return 'vc-orange';
+  if (h < 68) return 'vc-yellow';
+  if (h < 170) return 'vc-green';
+  if (h < 260) return 'vc-blue';
+  return 'vc-violet';
+}
+function vmaHighlights(vt) {
+  const coach = vt.rows.some((r) => r.fill && r.fill.some((f) => fillClass(f)));
+  const cls = vt.rows.map((r) => vt.pcts.map((p, k) => {
+    if (coach) return r.fill ? fillClass(r.fill[k]) : '';
+    // sans couleurs du coach : la fourchette réalisable en course (la même que pour les prédictions)
+    const pd = PRED_DISTS.find((x) => Math.abs(x.km * 1000 - r.dist) / r.dist < 0.01);
+    if (!pd) return '';
+    const inside = vt.pcts.filter((q) => q >= pd.lo && q <= pd.hi);
+    const ok = inside.length ? inside.includes(p) : p === vt.pcts.reduce((a, q) => (Math.abs(q - (pd.lo + pd.hi) / 2) < Math.abs(a - (pd.lo + pd.hi) / 2) ? q : a), vt.pcts[0]);
+    return ok ? 'vc-green' : '';
+  }));
+  let legend;
+  if (coach) {
+    const used = Object.keys(VC_NAMES).filter((c) => cls.some((row) => row.includes(c)));
+    legend = `<p class="sub vclegend">Cases mises en avant comme dans le fichier du coach : ${used.map((c) => `<span class="vcsw ${c}"></span>${VC_NAMES[c]}`).join(' · ')}.</p>`;
+  } else {
+    legend = `<p class="sub vclegend"><span class="vcsw vc-green"></span>Temps réalisables en course avec ta VMA sur 5 km, 10 km, semi et marathon (même fourchette que les prédictions).</p>`;
+  }
+  return { cls, legend };
+}
 function vmaView() {
   const c = ctx();
   const { vma, targetSec } = S.settings;
@@ -2178,9 +2280,10 @@ function vmaView() {
   const vt = tableRows(S.plan && S.plan.vmaTable && S.plan.vmaTable.rows ? S.plan.vmaTable : DEFAULT_VT);
   let table = '';
   if (vt && vt.rows.length) {
-    table = `<div class="tablewrap" style="max-height:560px"><table><thead><tr><th>Distance</th>${vt.pcts.map((p) => `<th>${p} %</th>`).join('')}</tr>
+    const hl = vmaHighlights(vt);
+    table = `${hl.legend}<div class="tablewrap" style="max-height:560px"><table class="vmatable"><thead><tr><th>Distance</th>${vt.pcts.map((p) => `<th>${p} %</th>`).join('')}</tr>
       <tr><th>Allure / km</th>${vt.pcts.map((p) => `<th>${fmtPace(paceSecPerKm(vma, p))}</th>`).join('')}</tr></thead><tbody>
-      ${vt.rows.map((r) => `<tr><td>${distLabel(r.dist)}</td>${vt.pcts.map((p, k) => r.avail[k] ? `<td>${fmtTableTime(r.dist / (vma / 3.6 * p / 100))}</td>` : '<td class="na">·</td>').join('')}</tr>`).join('')}
+      ${vt.rows.map((r, i) => `<tr><td>${distLabel(r.dist)}</td>${vt.pcts.map((p, k) => r.avail[k] ? `<td${hl.cls[i][k] ? ` class="${hl.cls[i][k]}"` : ''}>${fmtTableTime(r.dist / (vma / 3.6 * p / 100))}</td>` : '<td class="na">·</td>').join('')}</tr>`).join('')}
       </tbody></table></div>`;
   }
   const refs = ((S.plan && S.plan.refs) || []).map((r) => {
