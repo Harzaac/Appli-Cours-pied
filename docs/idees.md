@@ -31,6 +31,7 @@ Liste tenue à jour avec Adrien. Ce qui est fait est rayé, avec la version.
 - Météo bloquée dans Edge chez Adrien (cause locale non trouvée).
 
 ## Fait
+- 3.20.1 : onglet Allures, carte Prédictions sur deux colonnes en grand écran, tableau compact sans défilement sur téléphone.
 - 3.20 : synchro Strava par l'API dans la version en ligne (relais Cloudflare Worker pour le secret client).
 - 3.19 : version en ligne installable sur Android (GitHub Pages), mise à jour proposée par un bandeau, fichier HTML toujours là.
 - 3.18.2 : bouton « Cette semaine » / « Ce mois-ci » mis en avant quand on regarde une autre période.

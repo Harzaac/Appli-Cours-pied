@@ -163,8 +163,6 @@ thead th { background: var(--surface-2); font-weight: 700; position: sticky; top
 thead th:first-child { background: var(--surface-2); z-index: 1; }
 tbody tr:last-child td { border-bottom: 0; }
 tr.hl td { background: var(--mint-bg); color: var(--mint-ink); font-weight: 700; }
-td.rlo { padding-right: 0; }
-td.rhi { padding-left: 6px; }
 td.na { color: var(--line); }
 .checks { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
 .checks li { display: flex; gap: 10px; align-items: flex-start; }
@@ -568,6 +566,23 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 .resultbox .racelink { color: inherit; }
 .field input[type="url"] { min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); padding: 0 12px; font-size: 15px; width: 100%; color: var(--ink); }
 
+/* Onglet Allures : la carte Prédictions prend deux colonnes quand la grille en a trois (grand écran) */
+.vmagrid { container: vmagrid / inline-size; }
+@container vmagrid (min-width: 1060px) { .predcard { grid-column: span 2; } }
+/* Tableau des prédictions : fourchette dans une seule case ; sur carte étroite (téléphone), tout tient sans défiler */
+.predcard { container: predcard / inline-size; }
+.predtable td.range span { white-space: nowrap; }
+.predtable .narrow { display: none; }
+@container predcard (max-width: 440px) {
+  .predtable { font-size: 13px; }
+  .predtable th, .predtable td { padding: 7px 6px; }
+  .predtable .real { display: block; font-size: 12px; color: var(--muted); }
+  .predtable th { white-space: normal; vertical-align: bottom; }
+  .predtable td.range span { display: block; }
+  .predtable .wide { display: none; }
+  .predtable .narrow { display: inline; }
+}
+
 /* Impression (plan de course, écran de course) */
 @media print {
   header, .foot, .noprint, .toolbar { display: none !important; }
@@ -592,7 +607,7 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 <script type="application/json" id="embedded-data"></script>
 <script>
 const APP_NAME = "Appli course à pied";
-const APP_VERSION = "3.20";
+const APP_VERSION = "3.20.1";
 const APP_URL = "https://harzaac.github.io/Appli-Cours-pied/";
 const STRAVA_CLIENT_ID = "";
 const STRAVA_RELAY = "";
@@ -2467,7 +2482,7 @@ function predictionHTML(vma) {
     const fast = d.km / (vma * d.hi / 100) * 3600, slow = d.km / (vma * d.lo / 100) * 3600;
     const rg = ref ? riegel(ref.sec, ref.km, d.km) : null;
     const same = ref && Math.abs(ref.km - d.km) < 0.01;
-    return `<tr${d.km === MARATHON_KM ? ' class="hl"' : ''}><td>${d.name}</td><td class="num rlo">${fmtHMS(fast)} –</td><td class="num rhi">${fmtHMS(slow)}</td><td class="num">${rg ? (same ? '<strong>' + fmtHMS(ref.sec) + '</strong> réalisé' : fmtHMS(rg)) + '<span class="cellsub">' + fmtPace(rg / d.km) + '/km</span>' : '–'}</td></tr>`;
+    return `<tr${d.km === MARATHON_KM ? ' class="hl"' : ''}><td>${d.km === 21.0975 ? '<span class="wide">Semi-marathon</span><span class="narrow">Semi</span>' : d.name}</td><td class="num range"><span>${fmtHMS(fast)} –</span> <span>${fmtHMS(slow)}</span></td><td class="num">${rg ? (same ? '<strong>' + fmtHMS(ref.sec) + '</strong> <span class="real">réalisé</span>' : fmtHMS(rg)) + '<span class="cellsub">' + fmtPace(rg / d.km) + '/km</span>' : '–'}</td></tr>`;
   }).join('');
   let vmaEq = '';
   if (ref) {
@@ -2476,8 +2491,8 @@ function predictionHTML(vma) {
     vmaEq = `<p class="sub">Ce chrono correspond à une VMA d'environ <strong>${fmtVma(Math.round(v * 2) / 2)} km/h</strong> (ta VMA réglée : ${fmtVma(vma)} km/h).</p>`;
   }
   const curKm = ref ? ref.km : MARATHON_KM;
-  return `<section class="card stack"><div><h2>Prédictions de course</h2><p class="sub">Des estimations, pas des promesses : la forme du jour, le parcours et la météo comptent beaucoup.</p></div>
-    <div class="tablewrap"><table><thead><tr><th>Distance</th><th colspan="2">Selon ta VMA</th><th>Selon ${ref ? 'ta course' : 'une course'}</th></tr></thead><tbody>${rows}</tbody></table></div>
+  return `<section class="card stack predcard"><div><h2>Prédictions de course</h2><p class="sub">Des estimations, pas des promesses : la forme du jour, le parcours et la météo comptent beaucoup.</p></div>
+    <div class="tablewrap"><table class="predtable"><thead><tr><th>Distance</th><th>Selon ta VMA</th><th>Selon ${ref ? 'ta course' : 'une course'}</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="sub"><strong>Selon ta VMA</strong> : la part de VMA que tiennent en général les coureurs entraînés sur chaque distance. <strong>Selon ta course</strong> : la formule de Riegel, qui extrapole un chrono réel vers les autres distances (plus fiable quand la distance est proche).</p>
     <div class="stack" style="gap:8px"><strong>Course de référence</strong>
       <p class="sub">${ref ? esc(refName) + ' en ' + esc(fmtHMS(ref.sec)) + (ref.label ? ' · ' + esc(ref.label) : '') : 'Aucune pour l\'instant : saisis un chrono récent, ou ton résultat le jour de ta course.'}</p>
@@ -2583,7 +2598,7 @@ function vmaView() {
   }).join('');
   const lv = (re, fb) => levelPct(S.plan, re, fb);
   const scope = S.plan ? (S.plans.length > 1 ? `Réglages du plan « ${esc(planName(curEntry()))} ». ` : '') : 'Aucun plan affiché : ce sont tes réglages par défaut, repris quand tu ajoutes un plan. ';
-  return `<div class="grid2">
+  return `<div class="grid2 vmagrid">
     <section class="card stack"><div><h2>Mon niveau</h2><p class="sub">${scope}La VMA règle les allures en pourcentage (footing, séances de vitesse). Le temps visé règle les allures marathon. Les deux se complètent.</p></div>
       <div class="fields">
         <div class="field"><label for="vma-input">VMA (km/h)</label><input type="text" id="vma-input" inputmode="decimal" value="${fmtVma(vma)}" autocomplete="off"></div>
