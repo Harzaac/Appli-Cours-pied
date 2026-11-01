@@ -44,7 +44,7 @@ function raceView() {
   return `<div class="stack">
     <section class="card racecta noprint"><div class="stack" style="gap:4px"><h2>Écran de course</h2><p class="sub">Un écran simplifié pour le jour J : allure, passages, ravitaillements et météo de ${esc(raceCity(curEntry()).name.replace(/ \(\w+\)$/, ''))}, lisible d'un coup d'œil. Il s'ouvre tout seul le ${esc(S.plan.raceDate ? frDate(S.plan.raceDate) : 'jour de la course')}. Tu peux l'ouvrir dès maintenant pour le tester et en sortir quand tu veux.</p></div>
       <button class="btn primary big" data-act="racemode">Ouvrir l'écran de course</button></section>
-    <section class="card stack noprint"><div><h2>Plan de course</h2><p class="sub">Une page à imprimer ou à garder sur ton téléphone. Les allures viennent de ton objectif (<button class="linkbtn" data-act="tab" data-view="vma">onglet VMA</button>).</p></div>
+    <section class="card stack noprint"><div><h2>Plan de course</h2><p class="sub">Une page à imprimer ou à garder sur ton téléphone. Les allures viennent de ton objectif (<button class="linkbtn" data-act="tab" data-view="vma">onglet Allures</button>).</p></div>
       <div class="seg" role="group" aria-label="Stratégie"><button data-act="strategy" data-s="even" aria-pressed="${!m.cautious}">Allure régulière</button><button data-act="strategy" data-s="cautious" aria-pressed="${m.cautious}">Départ prudent</button></div>
       ${m.cautious ? cautiousFields(m) : ''}
       <div class="fields"><div class="field"><label>Ravitaillement</label><div class="seg" role="group" aria-label="Mode ravitaillement"><button data-act="ravmode" data-m="km" aria-pressed="${!byMin}">Tous les km</button><button data-act="ravmode" data-m="min" aria-pressed="${byMin}">Toutes les minutes</button></div></div>

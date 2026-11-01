@@ -108,7 +108,7 @@ function racesHTML() {
   }).join('');
   return `<section class="card stack"><div><h2>Mes courses</h2><p class="sub">Tes chronos, tes records, et la VMA qu'ils laissent supposer.</p></div>
     <ul class="races">${items}</ul>
-    ${ref ? `<p class="sub">Course de référence des prédictions : ${esc(fmtHMS(ref.sec))} sur ${esc(raceKmLabel(ref.km))} (onglet VMA).</p>` : ''}</section>`;
+    ${ref ? `<p class="sub">Course de référence des prédictions : ${esc(fmtHMS(ref.sec))} sur ${esc(raceKmLabel(ref.km))} (onglet Allures).</p>` : ''}</section>`;
 }
 function notesHTML() {
   const items = [];

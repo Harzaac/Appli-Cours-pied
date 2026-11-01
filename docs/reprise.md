@@ -1,7 +1,7 @@
 # Reprise du projet : à lire en premier
 
 Note de passation pour reprendre l'appli dans une nouvelle conversation (avec Claude ou un autre outil).
-Point d'arrivée : **version 3.16**, 1er novembre 2026.
+Point d'arrivée : **version 3.17**, 1er novembre 2026.
 
 ## En deux phrases
 
@@ -53,8 +53,7 @@ Le détail fichier par fichier est dans le `README.md`. En bref, `build.js` conc
 - Adrien a couru le Marathon de Lille le 25/10/2026 en 3h25 (record).
 - Fait récemment : 3.14 pied de page ; 3.15 relecture (textes, alerte si le stockage est bloqué,
   noyau découpé) ; 3.16 prédictions alignées + carte « Temps de passage » pour toute distance.
-- **En discussion** : renommer l'onglet « VMA », devenu trop étroit (il contient VMA et objectif,
-  prédictions, passages, tests de VMA, tableau du coach). Pistes : « Allures », « Mon niveau ».
+- 3.17 : l'onglet « VMA » s'appelle « Allures » (VMA et objectif, prédictions, passages, tests, tableau du coach).
 - **À vérifier par Adrien** : le `.fit` sur sa Forerunner 945 (jamais testé sur la montre) ;
   les accents dans les noms de séance Garmin (retirés par prudence) ; la météo bloquée dans Edge.
 

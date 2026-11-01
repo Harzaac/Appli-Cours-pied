@@ -44,7 +44,7 @@ function headerHTML() {
     <div class="band"><div class="wrap">
       <div class="brandrow"><div class="brand">${S.plans.length > 1 ? `<label class="sr" for="plan-select">Plan affiché</label><select class="plansel" id="plan-select">${S.plans.slice().sort((a, b) => (rangeOf(a).start < rangeOf(b).start ? -1 : 1)).map((e) => `<option value="${esc(e.id)}"${e.id === S.activeId ? ' selected' : ''}>${esc(planName(e))} · ${planState(e)}</option>`).join('')}</select>` : esc(plan.title)}</div>
         <div class="tools">
-          <button class="pill" data-act="tab" data-view="vma" aria-label="Mon niveau">${ICON.gauge}<span class="num">VMA ${fmtVma(S.settings.vma)} · ${fmtPace(c.marathon)}/km</span></button>
+          <button class="pill" data-act="tab" data-view="vma" aria-label="Mes allures">${ICON.gauge}<span class="num">VMA ${fmtVma(S.settings.vma)} · ${fmtPace(c.marathon)}/km</span></button>
           <button class="pill" data-act="theme" aria-label="${dark ? 'Passer au thème clair' : 'Passer au thème sombre'}">${dark ? ICON.sun : ICON.moon}<span>${dark ? 'Clair' : 'Sombre'}</span></button>
           ${profilePill()}
         </div></div>
@@ -58,7 +58,7 @@ function headerHTML() {
 // Onglets : « Mes plans » dépend du Calendrier ; Paramètres se réduit à une roue dentée sur petit écran.
 function profilePill() { return `<button class="pill profpill" data-act="tab" data-view="profile" aria-label="Mon profil"${S.ui.view === 'profile' ? ' aria-current="page"' : ''}>${avatarHTML()}<span>${esc(S.profile.name || 'Mon profil')}</span></button>`; }
 function tabsHTML(withPlan) {
-  const list = [['plan', 'Calendrier'], ['vma', 'VMA']].concat(withPlan ? [['race', 'Course']] : [], [['bilan', 'Progression'], ['data', 'Paramètres']]);
+  const list = [['plan', 'Calendrier'], ['vma', 'Allures']].concat(withPlan ? [['race', 'Course']] : [], [['bilan', 'Progression'], ['data', 'Paramètres']]);
   const cur = S.ui.view === 'plans' ? 'plan' : S.ui.view;
   return list.map(([v, l]) => `<button data-act="tab" data-view="${v}" ${cur === v ? 'aria-current="page"' : ''}${v === 'data' ? ' class="tabgear" aria-label="Paramètres"' : ''}>${v === 'data' ? ICON.gear + '<span>' + l + '</span>' : l}</button>`).join('');
 }

@@ -264,7 +264,7 @@ function raceResultHTML(date, tr, entry) {
   return `<div class="stack resultbox"><div style="font-weight:700">Ton résultat</div>
     <div class="fields"><div class="field"><label for="race-result">Chrono officiel</label><input type="text" id="race-result" value="${tr.result ? esc(fmtHMS(tr.result)) : ''}" placeholder="3h25'00" autocomplete="off"></div>
       <div class="field"><label>&nbsp;</label><label class="check"><input type="checkbox" id="race-pr"${tr.pr ? ' checked' : ''}> Record personnel</label></div></div>
-    ${S.msg.result ? `<p class="errtxt" role="alert">${esc(S.msg.result)}</p>` : tr.result ? `<p class="sub">${tgt ? 'Objectif ' + esc(fmtHMS(tgt)) + ' · ' + (diff <= 0 ? esc(fmtHMS(-diff)) + ' de mieux' : esc(fmtHMS(diff)) + ' de plus') + ' · ' : ''}${esc(fmtPace(tr.result / MARATHON_KM))}/km de moyenne. Il sert aussi de référence pour les prédictions (onglet VMA).</p>` : '<p class="sub">Saisis ton chrono après la course : il s\'affiche en haut de l\'appli et sert de référence pour les prédictions.</p>'}</div>`;
+    ${S.msg.result ? `<p class="errtxt" role="alert">${esc(S.msg.result)}</p>` : tr.result ? `<p class="sub">${tgt ? 'Objectif ' + esc(fmtHMS(tgt)) + ' · ' + (diff <= 0 ? esc(fmtHMS(-diff)) + ' de mieux' : esc(fmtHMS(diff)) + ' de plus') + ' · ' : ''}${esc(fmtPace(tr.result / MARATHON_KM))}/km de moyenne. Il sert aussi de référence pour les prédictions (onglet Allures).</p>` : '<p class="sub">Saisis ton chrono après la course : il s\'affiche en haut de l\'appli et sert de référence pour les prédictions.</p>'}</div>`;
 }
 
 /* ----- sorties libres ----- */

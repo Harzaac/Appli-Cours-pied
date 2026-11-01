@@ -27,7 +27,7 @@ Produit `dist/appli-course-a-pied.html` (le fichier à ouvrir ou à transmettre)
   | `02-meteo-theme.js` | météo Open-Meteo, thème clair/sombre, couleur d'accent |
   | `03-entete.js` | bandeau, compte à rebours ou chrono, prochaine séance, pied de page |
   | `04-calendrier.js` | semaine, mois, cartes de jour, fenêtre de détail, sorties libres, résultat |
-  | `05-vma.js` | onglet VMA : niveau, prédictions, temps de passage, tests de VMA, tableau du coach |
+  | `05-vma.js` | onglet Allures : niveau, prédictions, temps de passage, tests de VMA, tableau du coach |
   | `06-course.js` | plan de course, ravitaillements, écran de course |
   | `07-bilan.js` | onglet Progression : où j'en suis, suivi du plan, mes courses, sensations, l'année |
   | `08-donnees.js` | onglet Paramètres, Mon profil (export / import), vue Mes plans, alerte de stockage |
