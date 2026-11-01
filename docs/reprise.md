@@ -1,12 +1,13 @@
 # Reprise du projet : à lire en premier
 
 Note de passation pour reprendre l'appli dans une nouvelle conversation (avec Claude ou un autre outil).
-Point d'arrivée : **version 3.18.2**, 1er novembre 2026.
+Point d'arrivée : **version 3.19**, 1er novembre 2026.
 
 ## En deux phrases
 
 « Appli course à pied » est un calendrier d'entraînement de course à pied pour Adrien et le club
-AC Haute Vilaine (ACHV), livré en **un seul fichier HTML hors ligne** (sans serveur ni compte).
+AC Haute Vilaine (ACHV), livré en **un seul fichier HTML hors ligne** (sans serveur ni compte), et depuis la 3.19 aussi en
+**version en ligne installable sur Android** (PWA sur GitHub Pages : https://harzaac.github.io/Appli-Cours-pied/).
 Les plans viennent des fichiers Excel du coach, Pierre (le père d'Adrien) ; les allures sont calculées
 à partir de la VMA et du temps visé.
 
@@ -16,7 +17,7 @@ Le code vit sur GitHub : **https://github.com/Harzaac/Appli-Cours-pied** (branch
 
 ```
 git clone https://github.com/Harzaac/Appli-Cours-pied.git appli && cd appli
-node build.js                                   # -> dist/appli-course-a-pied.html et dist/artifact.html
+node build.js                                   # -> dist/appli-course-a-pied.html, dist/artifact.html et dist/web/ (version en ligne)
 NODE_PATH=/opt/node22/lib/node_modules node test/tout.js     # 20 tests (unitaires + parcours Playwright)
 NODE_PATH=/opt/node22/lib/node_modules node test/visuel.js   # régénère les 64 captures de référence
 ```
@@ -60,6 +61,23 @@ Le détail fichier par fichier est dans le `README.md`. En bref, `build.js` conc
 - **À vérifier par Adrien** : le `.fit` sur sa Forerunner 945 (jamais testé sur la montre) ;
   les accents dans les noms de séance Garmin (retirés par prudence) ; la météo bloquée dans Edge.
 
+## Version en ligne (depuis la 3.19)
+
+- `build.js` produit aussi `dist/web/` : `index.html` (même page que le fichier + manifeste, `theme-color`,
+  balises marquées `data-web`), `manifest.webmanifest`, `sw.js` (depuis `src/web/sw.js`), icônes (dont
+  `icone-maskable-*.png` pour Android). `dist/web/` n'est pas versionné : GitHub Actions le reconstruit.
+- Publication : `.github/workflows/pages.yml`, à chaque push sur `main` (Settings › Pages › Source : GitHub Actions).
+- `src/ui/13-web.js` : `isWeb()` (http(s) + manifeste), enregistrement du service worker, bandeau
+  « Nouvelle version de l'appli prête › Mettre à jour » (la nouvelle version ne prend la main qu'au clic),
+  bandeau et bouton « Installer », stockage durable (`navigator.storage.persist`), carte des Paramètres
+  (« Sur ton téléphone » en ligne, « Version en ligne » dans le fichier).
+- Service worker : cache nommé d'après la version + empreinte de la page (toute publication = mise à jour),
+  page servie depuis le cache (hors ligne), polices gardées, météo et le reste en direct.
+- Données : même clé `localStorage`, sur l'origine `harzaac.github.io`. Le fichier et la version en ligne
+  ne partagent pas leurs données : passage par Exporter / Importer mon profil. La copie « avec mes données »
+  faite en ligne retire les balises `data-web` et redevient un fichier autonome.
+- Test : `test/parcours/pwa.js` (petit serveur local, hors ligne, mise à jour simulée, copie).
+
 ## Sorties Strava (depuis la 3.18)
 
 Adrien a branché le **connecteur Strava** de Claude (lecture seule, abonnement Strava requis).
@@ -79,7 +97,6 @@ Premier import : 149 activités de 2026 (135 courses à pied, ~1 585 km).
 
 ## Prochain gros chantier
 
-Version en ligne installable sur Android (PWA, par exemple GitHub Pages) : manifeste, service worker,
-icônes (déjà dans `assets/`), données gardées d'une version à l'autre. Ensuite la synchro Strava
-(OAuth : demande la version en ligne et un petit relais pour le secret client).
+Synchro Strava par API depuis la version en ligne (OAuth : un petit relais garde le secret client).
+**À vérifier par Adrien** : installation sur son téléphone Android, passage de son profil du fichier vers la version en ligne.
 Le reste des idées est dans `docs/idees.md`.

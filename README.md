@@ -6,6 +6,7 @@ Calendrier d'entraînement de course à pied (AC Haute Vilaine) livré en **un s
 plans du coach importés depuis Excel, allures calculées selon la VMA, suivi des séances et des
 sorties libres, plan et écran de course, export d'une séance en `.fit` pour une montre Garmin.
 Les données restent dans le navigateur ; une « copie avec mes données » les embarque dans le fichier.
+Aussi en **version en ligne installable sur Android** : https://harzaac.github.io/Appli-Cours-pied/
 
 ## Construire
 
@@ -14,7 +15,8 @@ node build.js
 ```
 
 Produit `dist/appli-course-a-pied.html` (le fichier à ouvrir ou à transmettre) et `dist/artifact.html`
-(même contenu sans les balises `html/head/body`). `build.js` assemble, dans l'ordre :
+(même contenu sans les balises `html/head/body`), et `dist/web/` : la version en ligne (page, manifeste,
+service worker `src/web/sw.js`, icônes), publiée sur GitHub Pages par `.github/workflows/pages.yml`. `build.js` assemble, dans l'ordre :
 
 - `src/noyau/` — (01 dates et texte, 02 xlsx, 03 format du coach, 04 allures) lecture du `.xlsx` (zip + XML, sans dépendance), contrôle du fichier du coach,
   construction du plan, recalage par date de course, moteur d'allures, saisies (temps, allures, durées).
@@ -37,6 +39,7 @@ Produit `dist/appli-course-a-pied.html` (le fichier à ouvrir ou à transmettre)
   | `10-rendu.js` | assemblage de la page, rendu |
   | `11-actions.js` | actions métier (ajout, mise à jour, recalage, suppression de plan, restauration) |
   | `12-evenements.js` | clics, saisies, glisser-déposer, clavier |
+  | `13-web.js` | version en ligne : service worker, mise à jour, installation, carte des Paramètres |
 - `src/css/*.css` — styles par ordre de nom : jetons de couleur (clair, sombre, accents), base,
   briques, en-tête, calendrier, fenêtre de détail, vues, impression. Toutes les couleurs passent par
   les jetons de `01-jetons.css`.
@@ -58,7 +61,7 @@ npm run captures         # compare 64 captures (PC/mobile × clair/sombre) aux c
 
 - `test/unitaires/` — parseur, lecture `.xlsx`, encodage `.fit`.
 - `test/parcours/` — parcours complets dans Chromium (Playwright) : calendrier vide, plusieurs plans,
-  sorties et chrono, restauration, Garmin, écran de course, rappels.
+  sorties et chrono, restauration, Garmin, écran de course, rappels, version en ligne (`pwa.js`).
 - `test/visuel.js` + `test/compare.py` — non-régression visuelle ; après un changement voulu,
   régénérer la référence avec `node test/visuel.js` (sans argument).
 - `test/outils/hors-ligne.js` — coupe le réseau externe (polices, météo) dans les tests : sans ça, une police lente faisait échouer des tests au hasard.

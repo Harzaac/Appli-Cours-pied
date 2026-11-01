@@ -118,6 +118,9 @@ function applyTheme() {
   const r = document.documentElement;
   if (S.ui.theme === 'light' || S.ui.theme === 'dark') r.setAttribute('data-theme', S.ui.theme); else r.removeAttribute('data-theme');
   if (S.ui.accent && S.ui.accent !== 'ocean') r.setAttribute('data-accent', S.ui.accent); else r.removeAttribute('data-accent');
+  // version en ligne : la barre du téléphone prend la couleur du bandeau
+  const m = document.querySelector('meta[name=theme-color]');
+  if (m) { const c = getComputedStyle(r).getPropertyValue('--band-a').trim(); if (c) m.setAttribute('content', c); }
 }
 function effectiveDark() {
   return S.ui.theme === 'dark' || (S.ui.theme === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);

@@ -3,7 +3,7 @@
 Liste tenue à jour avec Adrien. Ce qui est fait est rayé, avec la version.
 
 ## Gros chantiers (version en ligne)
-- Appli en ligne, installable sur Android (PWA : icône, hors ligne, météo partout, données gardées d'une version à l'autre).
+- ~~Appli en ligne, installable sur Android (PWA : icône, hors ligne, météo partout, données gardées d'une version à l'autre)~~ (3.19)
 - Fréquence cardiaque et tours au km dans l'import Strava (un appel par activité : à faire pour les séances clés).
 - Synchro Strava par API (sorties de la montre rangées automatiquement), après la version en ligne : bouton « Connecter Strava » dans la carte « Sorties de la montre », même import que la 3.18.
 - Comptes et club : partager un plan avec le groupe, le coach voit qui a fait quelle séance.
@@ -31,6 +31,7 @@ Liste tenue à jour avec Adrien. Ce qui est fait est rayé, avec la version.
 - Météo bloquée dans Edge chez Adrien (cause locale non trouvée).
 
 ## Fait
+- 3.19 : version en ligne installable sur Android (GitHub Pages), mise à jour proposée par un bandeau, fichier HTML toujours là.
 - 3.18.2 : bouton « Cette semaine » / « Ce mois-ci » mis en avant quand on regarde une autre période.
 - 3.18.1 : le calendrier remonte jusqu'à la première donnée (au moins 8 semaines).
 - 3.18 : import des sorties Strava (via le connecteur Strava de Claude), réalisé affiché dans les séances.

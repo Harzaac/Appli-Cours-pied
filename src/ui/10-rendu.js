@@ -14,7 +14,7 @@ function shellHTML() {
   if (!S.plan) {
     const head = emptyHeaderHTML();
     const body = S.imp.stage !== 'idle' ? importView() : S.ui.view === 'data' ? dataView() : S.ui.view === 'profile' ? profileView() : S.ui.view === 'plans' ? plansView() : S.ui.view === 'vma' ? vmaView() : S.ui.view === 'bilan' ? bilanView() : S.ui.mode === 'week' ? weekView() : monthView();
-    return head + `<main class="wrap">${storeBanner()}${body}</main>${footHTML()}`;
+    return head + `<main class="wrap">${storeBanner()}${updateBanner()}${installBanner()}${body}</main>${footHTML()}`;
   }
   let body;
   if (S.ui.raceMode && S.imp.stage === 'idle') return raceModeHTML();
@@ -27,7 +27,7 @@ function shellHTML() {
   else if (S.ui.view === 'plans') body = plansView();
   else if (S.ui.view === 'profile') body = profileView();
   else body = dataView();
-  return headerHTML() + `<main class="wrap">${storeBanner()}${raceCtaBanner()}${backupBanner()}${body}</main>` + footHTML();
+  return headerHTML() + `<main class="wrap">${storeBanner()}${updateBanner()}${raceCtaBanner()}${installBanner()}${backupBanner()}${body}</main>` + footHTML();
 }
 function raceModeHTML() {
   const { m, rows } = raceRows();

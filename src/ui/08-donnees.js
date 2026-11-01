@@ -39,7 +39,8 @@ function htmlCopy(forCoach) {
   const json = JSON.stringify(data).replace(/</g, '\\u003c');
   const re = /(<script type="application\/json" id="embedded-data">)[\s\S]*?(<\/script>)/;
   if (!re.test(SRC_HTML)) return null;
-  return SRC_HTML.replace(re, (m, a, b) => a + json + b);
+  // depuis la version en ligne : sans le manifeste ni les balises web, la copie redevient un fichier autonome
+  return SRC_HTML.replace(/\n?<[^>]*\sdata-web[^>]*>/g, '').replace(re, (m, a, b) => a + json + b);
 }
 function saveHtmlCopy(forCoach) {
   try {
@@ -75,7 +76,7 @@ function dataView() {
         <div class="field"><label for="wx-hot">Chaleur dès (°)</label><input type="text" id="wx-hot" inputmode="numeric" value="${wxCfg().hot}"></div>
         <div class="field"><label for="wx-cold">Froid jusqu'à (°)</label><input type="text" id="wx-cold" inputmode="numeric" value="${wxCfg().cold}"></div></div>
       <div><button class="btn small primary" data-act="commit">${ICON.check}Enregistrer</button></div>
-      <p class="sub" role="status">${S.msg.wx ? esc(S.msg.wx) : S.wxState.loading ? 'Chargement…' : S.wxState.err ? (S.wx ? 'Pas de connexion : dernière météo du ' + esc(frDate(S.wx.fetchedAt.slice(0, 10))) + ' affichée. ' : 'Météo indisponible. ') + 'Détail : ' + esc(S.wxState.why || 'inconnu') + (location.protocol === 'file:' ? ' · fichier ouvert depuis le disque.' : ' · page web (l\'aperçu dans Claude bloque la météo : ouvre le fichier depuis ton disque).') : S.wx ? 'Dernière mise à jour : ' + esc(frDate(S.wx.fetchedAt.slice(0, 10))) + ' à ' + esc(new Date(S.wx.fetchedAt).toTimeString().slice(0, 5)) + '.' : ''}</p></div></details>
+      <p class="sub" role="status">${S.msg.wx ? esc(S.msg.wx) : S.wxState.loading ? 'Chargement…' : S.wxState.err ? (S.wx ? 'Pas de connexion : dernière météo du ' + esc(frDate(S.wx.fetchedAt.slice(0, 10))) + ' affichée. ' : 'Météo indisponible. ') + 'Détail : ' + esc(S.wxState.why || 'inconnu') + (location.protocol === 'file:' ? ' · fichier ouvert depuis le disque.' : isWeb() ? ' · version en ligne.' : ' · page web (l\'aperçu dans Claude bloque la météo : ouvre le fichier depuis ton disque).') : S.wx ? 'Dernière mise à jour : ' + esc(frDate(S.wx.fetchedAt.slice(0, 10))) + ' à ' + esc(new Date(S.wx.fetchedAt).toTimeString().slice(0, 5)) + '.' : ''}</p></div></details>
       <details class="raw pref"${S.ui.pref === 'look' ? ' open' : ''} data-pref="look"><summary>Apparence</summary><div class="stack prefbody"><p class="sub">Choisis la couleur du bandeau et des boutons. Les couleurs des types de séance ne changent pas. Le mode clair ou sombre se règle avec le bouton en haut de page.</p>
 
       <div class="swatches" role="group" aria-label="Couleur de l'appli">${ACCENTS.map((a) => `<button class="swatch" data-act="accent" data-id="${a.id}" aria-pressed="${S.ui.accent === a.id}"><span class="dot" style="background:linear-gradient(135deg,${a.a},${a.b})"></span>${a.name}</button>`).join('')}</div>
@@ -85,6 +86,7 @@ function dataView() {
       <div class="row">${S.ui.confirmWipe ? '<button class="btn danger" data-act="wipe">Oui, tout effacer</button><button class="btn" data-act="wipecancel">Annuler</button>' : '<button class="btn danger" data-act="wipe">Effacer mes données</button>'}</div></div></details>
     </section>
     </div>
+    ${appCardHTML()}
   </div>`;
 }
 
@@ -163,7 +165,7 @@ function profileView() {
         <div class="row nowrap"><button class="btn grow" data-act="htmlcopy">${ICON.down}<span>Enregistrer une copie avec mes données</span></button><button class="iconbtn" data-act="copyinfo" aria-label="À quoi sert cette copie ?" aria-expanded="${!!S.ui.copyInfo}">ⓘ</button></div>
         ${S.ui.copyInfo ? `<div class="fitinfo" role="note"><span>Un nouveau fichier de l'appli qui contient déjà ton plan, tes réglages et ton suivi. Remplace l'ancien fichier par celui-ci, ou envoie-le sur ton téléphone : il s'ouvre directement, sans rien restaurer.</span></div>` : ''}
         ${S.plans.length ? `<div><button class="btn small" data-act="htmlcoach">Version plan seul (pour le coach)</button><p class="sub" style="margin-top:6px">Sans ton suivi ni tes notes : à envoyer à Pierre.</p></div>` : ''}</div></details>
-      <details class="raw"><summary>Comment ça marche ?</summary><ul class="howto"><li>Tes données (suivi, notes, réglages) restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.</li><li>« Exporter mon profil » crée un petit fichier avec tout ce qui te concerne. Garde-le précieusement : c'est lui qui te permet de tout retrouver.</li><li>Pour changer d'appareil ou passer à une nouvelle version de l'appli, ouvre le nouveau fichier et utilise « Importer un profil ».</li></ul></details>
+      <details class="raw"><summary>Comment ça marche ?</summary><ul class="howto"><li>Tes données (suivi, notes, réglages) restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.</li><li>« Exporter mon profil » crée un petit fichier avec tout ce qui te concerne. Garde-le précieusement : c'est lui qui te permet de tout retrouver.</li><li>${isWeb() ? 'La version en ligne se met à jour toute seule et garde tes données. Pour changer d\'appareil, exporte ton profil ici et importe-le sur l\'autre.' : 'Pour changer d\'appareil ou passer à une nouvelle version de l\'appli, ouvre le nouveau fichier et utilise « Importer un profil ».'}</li></ul></details>
     </section>
   </div>`;
 }
