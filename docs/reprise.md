@@ -1,7 +1,7 @@
 # Reprise du projet : à lire en premier
 
 Note de passation pour reprendre l'appli dans une nouvelle conversation (avec Claude ou un autre outil).
-Point d'arrivée : **version 3.18**, 1er novembre 2026.
+Point d'arrivée : **version 3.18.2**, 1er novembre 2026.
 
 ## En deux phrases
 
@@ -12,15 +12,17 @@ Les plans viennent des fichiers Excel du coach, Pierre (le père d'Adrien) ; les
 
 ## Démarrer
 
+Le code vit sur GitHub : **https://github.com/Harzaac/Appli-Cours-pied** (branche `main`, historique complet).
+
 ```
-unzip appli-course-a-pied-source.zip -d appli && cd appli
+git clone https://github.com/Harzaac/Appli-Cours-pied.git appli && cd appli
 node build.js                                   # -> dist/appli-course-a-pied.html et dist/artifact.html
 NODE_PATH=/opt/node22/lib/node_modules node test/tout.js     # 20 tests (unitaires + parcours Playwright)
 NODE_PATH=/opt/node22/lib/node_modules node test/visuel.js   # régénère les 64 captures de référence
 ```
 
 Aucune dépendance à installer pour l'appli. Les tests demandent Playwright + Chromium
-(cherchés via `NODE_PATH`). Le dossier `.git` n'est pas dans le zip : faire `git init` pour repartir.
+(cherchés via `NODE_PATH`). En fin de travail : commit (au nom d'Adrien) puis `git push`.
 
 ## Organisation du code
 
