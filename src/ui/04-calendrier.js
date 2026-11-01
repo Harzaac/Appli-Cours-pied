@@ -117,7 +117,7 @@ function weekView() {
       <div class="navgroup"><button class="iconbtn" data-act="prev" aria-label="Semaine précédente" ${idx === 0 ? 'disabled' : ''}>${ICON.left}</button>
         <h2 class="navlabel">${w.id.replace('G', ' G')} · ${frDate(w.start)} → ${frDate(w.end)}</h2>
         <button class="iconbtn" data-act="next" aria-label="Semaine suivante" ${idx === weeks.length - 1 ? 'disabled' : ''}>${ICON.right}</button></div>
-      <div class="navgroup">${modeSeg()}<button class="btn small" data-act="today">Aujourd'hui</button><button class="btn small" data-act="tab" data-view="plans">Mes plans</button></div></div>
+      <div class="navgroup">${modeSeg()}${todayBtn(w.start <= TODAY && TODAY <= w.end, 'semaine')}<button class="btn small" data-act="tab" data-view="plans">Mes plans</button></div></div>
     <div class="weekhead">${S.plans.length > 1 ? `<span class="badge plan">${esc(planName(curEntry()))}</span>` : ''}<span class="badge">${w.general ? 'Préparation générale' : 'Plan spécifique'}</span>
       ${w.assimilation ? '<span class="badge warn">Semaine d\'assimilation</span>' : ''}
       <span class="muted num">${fmtMin(planned)} prévues · ${nDone}/${nSess} séances faites${nSkip ? ' · ' + nSkip + ' sautée' + (nSkip > 1 ? 's' : '') : ''}</span>${nPast ? `<button class="linkbtn" data-act="bulkdone">Marquer les séances passées comme faites (${nPast})</button>` : ''}</div>
@@ -132,7 +132,7 @@ function freeWeekView(w, idx) {
       <div class="navgroup"><button class="iconbtn" data-act="prev" aria-label="Semaine précédente" ${idx === 0 ? 'disabled' : ''}>${ICON.left}</button>
         <h2 class="navlabel">${frDate(w.start)} → ${frDate(w.end)}</h2>
         <button class="iconbtn" data-act="next" aria-label="Semaine suivante" ${idx === weeks.length - 1 ? 'disabled' : ''}>${ICON.right}</button></div>
-      <div class="navgroup">${modeSeg()}<button class="btn small" data-act="today">Aujourd'hui</button><button class="btn small" data-act="tab" data-view="plans">Mes plans</button></div></div>
+      <div class="navgroup">${modeSeg()}${todayBtn(w.start <= TODAY && TODAY <= w.end, 'semaine')}<button class="btn small" data-act="tab" data-view="plans">Mes plans</button></div></div>
     <div class="weekhead"><span class="badge">Pas de plan cette semaine</span>${S.plans.length ? `<span><input type="file" id="file-xlsx" accept=".xlsx" class="sr"><button class="btn small" data-act="pickxlsx">${ICON.up}Ajouter un plan</button></span>` : ''}</div>
     <div class="week">${w.days.map((d) => dayCard(S.byDate[d.date].day)).join('')}</div>`;
 }
@@ -192,7 +192,7 @@ function monthView() {
       <div class="navgroup"><button class="iconbtn" data-act="prev" aria-label="Mois précédent" ${i <= 0 ? 'disabled' : ''}>${ICON.left}</button>
         <h2 class="navlabel">${MONTHS[m - 1].charAt(0).toUpperCase() + MONTHS[m - 1].slice(1)} ${y}</h2>
         <button class="iconbtn" data-act="next" aria-label="Mois suivant" ${i >= keys.length - 1 ? 'disabled' : ''}>${ICON.right}</button></div>
-      <div class="navgroup">${modeSeg()}<button class="btn small" data-act="today">Aujourd'hui</button><button class="btn small" data-act="tab" data-view="plans">Mes plans</button></div></div>
+      <div class="navgroup">${modeSeg()}${todayBtn(y + '-' + pad2(m) === TODAY.slice(0, 7), 'mois')}<button class="btn small" data-act="tab" data-view="plans">Mes plans</button></div></div>
     <div class="monthwrap"><div class="month">${DOW_SHORT.map((d) => `<div class="mh"><span class="mhl">${d}</span><span class="mhs">${d.charAt(0)}</span></div>`).join('')}${cells.join('')}</div></div>
     <div class="legend" aria-label="Légende des couleurs"><span class="d-footing"><i></i>Footing</span><span class="d-vma"><i></i>VMA et côtes</span><span class="d-spe"><i></i>Spé marathon</span><span class="d-long"><i></i>Sortie longue</span><span class="d-race"><i></i>Course</span></div>`;
 }
@@ -266,6 +266,12 @@ function raceResultHTML(date, tr, entry) {
     <div class="fields"><div class="field"><label for="race-result">Chrono officiel</label><input type="text" id="race-result" value="${tr.result ? esc(fmtHMS(tr.result)) : ''}" placeholder="3h25'00" autocomplete="off"></div>
       <div class="field"><label>&nbsp;</label><label class="check"><input type="checkbox" id="race-pr"${tr.pr ? ' checked' : ''}> Record personnel</label></div></div>
     ${S.msg.result ? `<p class="errtxt" role="alert">${esc(S.msg.result)}</p>` : tr.result ? `<p class="sub">${tgt ? 'Objectif ' + esc(fmtHMS(tgt)) + ' · ' + (diff <= 0 ? esc(fmtHMS(-diff)) + ' de mieux' : esc(fmtHMS(diff)) + ' de plus') + ' · ' : ''}${esc(fmtPace(tr.result / MARATHON_KM))}/km de moyenne. Il sert aussi de référence pour les prédictions (onglet Allures).</p>` : '<p class="sub">Saisis ton chrono après la course : il s\'affiche en haut de l\'appli et sert de référence pour les prédictions.</p>'}</div>`;
+}
+
+// Bouton de retour : discret quand on regarde déjà la semaine (ou le mois) en cours, mis en avant sinon.
+function todayBtn(onToday, unit) {
+  return onToday ? `<button class="btn small" data-act="today">Aujourd'hui</button>`
+    : `<button class="btn small primary" data-act="today">${unit === 'mois' ? 'Ce mois-ci' : 'Cette semaine'}</button>`;
 }
 
 /* ----- sorties libres ----- */

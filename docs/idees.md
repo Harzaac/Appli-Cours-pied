@@ -31,6 +31,7 @@ Liste tenue à jour avec Adrien. Ce qui est fait est rayé, avec la version.
 - Météo bloquée dans Edge chez Adrien (cause locale non trouvée).
 
 ## Fait
+- 3.18.2 : bouton « Cette semaine » / « Ce mois-ci » mis en avant quand on regarde une autre période.
 - 3.18.1 : le calendrier remonte jusqu'à la première donnée (au moins 8 semaines).
 - 3.18 : import des sorties Strava (via le connecteur Strava de Claude), réalisé affiché dans les séances.
 - 3.17 : onglet VMA renommé Allures.
