@@ -75,6 +75,7 @@ document.addEventListener('click', (ev) => {
     case 'avreset': delete S.profile.photo; S.ui.avMenu = false; saveStore(); toast('Photo de profil retirée'); render(); break;
     case 'crestmenu': S.ui.crestMenu = !S.ui.crestMenu; S.msg.crest = ''; render(); break;
     case 'crestclose': S.ui.crestMenu = false; render(); break;
+    case 'picksorties': { const inp = document.getElementById('file-sorties'); if (inp) inp.click(); break; }
     case 'pickjson': { const inp = document.getElementById('file-json'); if (inp) inp.click(); break; }
     case 'useplan': usePlan(el.dataset.replace || null); break;
     case 'impcancel': S.imp = { stage: 'idle' }; render(); break;
@@ -137,6 +138,7 @@ document.addEventListener('change', (ev) => {
   }
   if (t.id === 'file-av' && t.files && t.files[0]) { const f = t.files[0]; t.value = ''; loadAvatar(f); return; }
   if (t.id === 'file-crest' && t.files && t.files[0]) { loadCrest(t.files[0]); return; }
+  if (t.id === 'file-sorties' && t.files && t.files[0]) { const f = t.files[0]; t.value = ''; f.text().then(sortiesFromText, () => { S.msg.sorties = 'Fichier illisible.'; S.msg.sortiesErr = true; render(); }); return; }
   if (t.id === 'file-json' && t.files && t.files[0]) { const f = t.files[0]; f.text().then((txt) => restoreFrom(/\.html?$/i.test(f.name) || /^\s*<(!doctype|html)/i.test(txt) ? embeddedFromHtml(txt) : txt), () => { S.msg.restore = 'Fichier illisible.'; S.msg.restoreErr = true; render(); }); t.value = ''; return; }
   if (t.id === 'race-result' && S.ui.modal) {
     const raw = t.value.trim();
@@ -229,7 +231,7 @@ document.addEventListener('dragover', (ev) => {
 });
 document.addEventListener('dragleave', (ev) => { const a = ev.target.closest && ev.target.closest('article[data-slot]'); if (a) a.classList.remove('dropok'); });
 document.addEventListener('drop', (ev) => {
-  if (draggingFile(ev)) { ev.preventDefault(); const f = ev.dataTransfer.files[0]; if (f && /\.xlsx$/i.test(f.name)) importFile(f); return; }
+  if (draggingFile(ev)) { ev.preventDefault(); const f = ev.dataTransfer.files[0]; if (f && /\.xlsx$/i.test(f.name)) importFile(f); else if (f && /\.json$/i.test(f.name)) f.text().then((txt) => { let r = null; try { r = JSON.parse(txt); } catch (x) { /* pas du JSON */ } if (isSortiesFile(r)) { S.ui.view = 'profile'; sortiesFromText(txt); } }); return; }
   const a = ev.target.closest && ev.target.closest('article[data-slot]');
   if (a && dropOk(a)) { ev.preventDefault(); const from = S.ui.drag; S.ui.drag = null; doMove(from, a.dataset.slot); }
 });

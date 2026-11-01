@@ -111,3 +111,6 @@ button.mcell { width: 100%; }
 @media (hover: none) { .addlog { opacity: 1; } }
 .dcard.free, .dcard.rest { cursor: pointer; }
 .dcard.haslog { border-style: solid; }
+
+.actmini { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: var(--mint-ink); }
+.actmini svg { width: 14px; height: 14px; flex: none; }

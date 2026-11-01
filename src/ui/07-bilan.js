@@ -8,10 +8,12 @@ function weekActivity(mon) {
     const t = track(d);
     if (ref && ref.entry && !ref.day.rest && t.done) {
       n++;
-      if (ref.day.category === 'race') { min += t.result ? t.result / 60 : 0; km += MARATHON_KM; } else min += ref.day.durationMin || 0;
+      // réalisé importé (montre) en priorité, sinon la durée prévue
+      if (ref.day.category === 'race') { min += t.result ? t.result / 60 : t.act ? t.act.sec / 60 : 0; km += t.act && t.act.km ? t.act.km : MARATHON_KM; }
+      else if (t.act) { min += t.act.sec / 60; km += t.act.km || 0; } else min += ref.day.durationMin || 0;
     }
     logsOf(d).forEach((l) => { n++; min += l.min || 0; km += l.km || 0; });
-    racesOn(d).forEach((r) => { if (r.result) { n++; min += r.result / 60; km += r.km; } });
+    racesOn(d).forEach((r) => { if (r.result && !(r.sid && t.act && t.act.sid === r.sid)) { n++; min += r.result / 60; km += r.km; } });
   }
   return { mon, min: Math.round(min), km, n };
 }

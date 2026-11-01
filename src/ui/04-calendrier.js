@@ -96,7 +96,7 @@ function dayCard(day) {
     : `<div class="cardbtns"><button class="btn small" data-act="open" data-date="${day.date}" aria-label="Ouvrir la séance du ${DOW[day.i].toLowerCase()} ${parseISO(day.date).getUTCDate()}">Détail et suivi</button>${canMove(day) ? `<button class="btn small" data-act="movestart" data-date="${day.date}" aria-label="Déplacer cette séance">Déplacer</button>` : ''}</div>`;
   return `<article class="${cls.join(' ')}"${slot}${drag} data-act="open" data-date="${day.date}">${head}${wxMini(day.date, true)}
     <div class="stack" style="gap:6px"><span class="chip c-${day.category}" style="align-self:flex-start">${esc(dayChipLabel(day))}</span>${movedTag}
-    <div class="dur num">${esc(dayDuration(day))}</div>${day.objective ? `<div class="obj">${esc(withBpm(day.objective))}</div>` : ''}</div>
+    <div class="dur num">${esc(dayDuration(day))}</div>${tr.act && tr.act.km ? `<div class="actmini num">${ICON.check}${esc(String(Math.round(tr.act.km * 10) / 10).replace('.', ',') + ' km' + (tr.act.sec ? ' · ' + fmtPace(tr.act.sec / tr.act.km) + '/km' : ''))}</div>` : ''}${day.objective ? `<div class="obj">${esc(withBpm(day.objective))}</div>` : ''}</div>
     ${stepsCompact(day)}
     ${dayRaces.length ? `<ul class="loglist">${dayRaces.map((r) => `<li>${raceChip(r)}</li>`).join('')}</ul>` : ''}
     ${logs.length ? `<div class="sub">+ ${esc(logs.map(logLine).join(', '))}</div>` : ''}
@@ -242,6 +242,7 @@ function modalHTML() {
     ${S.ui.editing === date ? sessionFormHTML(date, day) : (day.category !== 'race' ? sessionEditBar(date, day) : '')}
     ${S.ui.editing === date ? '' : wxAdviceHTML(day)}
     ${S.ui.editing === date ? '' : day.free ? '<p class="muted">Aucun plan ne couvre ce jour.</p>' : day.rest ? '<p class="muted">Pas de séance prévue ce jour-là.</p>' : `<ul class="bigsteps">${steps}</ul>
+    ${tr.act ? actHTML(tr.act) : ''}
     ${day.category === 'race' ? raceResultHTML(date, tr, ref.entry) : ''}
     <details class="raw"><summary>Texte du coach</summary><pre>${esc(rawTxt)}</pre></details>
     ${garminHTML(day)}
@@ -281,7 +282,7 @@ function logsHTML(date, day) {
       <div class="field"><label for="log-note">Note</label><textarea class="note" id="log-note" rows="2" placeholder="Parcours, allure, fatigue…">${esc(cur.note || '')}</textarea></div>
       ${S.msg.log ? `<p class="errtxt" role="alert">${esc(S.msg.log)}</p>` : ''}
       <div class="row"><button class="btn small primary" data-act="logsave">Enregistrer</button><button class="btn small" data-act="logcancel">Annuler</button></div></div>` : '';
-  const items = list.map((l) => `<li class="logitem"><div class="stack" style="gap:2px"><strong>${esc(logLine(l))}</strong>${l.feel ? `<span class="sub">${FEELS[l.feel - 1]}</span>` : ''}${l.note ? `<span class="sub">${esc(l.note)}</span>` : ''}</div>
+  const items = list.map((l) => `<li class="logitem"><div class="stack" style="gap:2px"><strong>${esc(logLine(l))}</strong>${l.title ? `<span>${esc(l.title)}</span>` : ''}${l.src ? `<span class="sub num">${esc(actLine(l))} · ${esc(l.src)}</span>` : ''}${l.feel ? `<span class="sub">${FEELS[l.feel - 1]}</span>` : ''}${l.note ? `<span class="sub">${esc(l.note)}</span>` : ''}</div>
       <div class="row"><button class="btn small" data-act="logedit" data-id="${esc(l.id)}">Modifier</button><button class="btn small" data-act="logdel" data-id="${esc(l.id)}">Supprimer</button></div></li>`).join('');
   return `<section class="stack logsec"><div style="font-weight:700">${title}</div>
     ${items ? `<ul class="logitems">${items}</ul>` : ''}
@@ -300,8 +301,9 @@ function saveLog() {
   if (kmTxt && !(km > 0 && km < 400)) { S.msg.log = 'Distance non comprise : écris par exemple 8 ou 10,5.'; return; }
   if (!min && !km) { S.msg.log = 'Indique au moins une durée ou une distance.'; return; }
   const list = S.logs[ed.date] || [];
-  const item = { id: ed.id || Date.now().toString(36), type, min: min || null, km: km || null, feel: ed.feel || 0, note };
-  const k = list.findIndex((l) => l.id === item.id);
+  const k = list.findIndex((l) => l.id === ed.id);
+  // une sortie importée garde son numéro et son réalisé (sinon un nouvel import la recréerait)
+  const item = Object.assign({}, k >= 0 ? list[k] : {}, { id: ed.id || Date.now().toString(36), type, min: min || null, km: km || null, feel: ed.feel || 0, note });
   if (k >= 0) list[k] = item; else list.push(item);
   S.logs[ed.date] = list;
   S.ui.logEdit = null; S.msg.log = '';

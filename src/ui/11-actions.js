@@ -66,6 +66,8 @@ function embeddedFromHtml(html) {
 function restoreFrom(text) {
   try {
     const raw = JSON.parse(text);
+    // un fichier de sorties s'ajoute, il ne remplace pas le profil
+    if (isSortiesFile(raw)) { S.msg.restore = ''; sortiesFromText(text); return; }
     if (!raw || raw.app !== 'appli-marathon') throw new Error('format');
     const d = normalizeData(raw);
     const hasLogs = d.logs && typeof d.logs === 'object' && Object.keys(d.logs).length;
@@ -97,7 +99,7 @@ function restoreFrom(text) {
 function setTrack(date, patch) {
   S.tracking[date] = Object.assign({}, S.tracking[date], patch);
   const t = S.tracking[date];
-  if (!t.done && !t.skipped && !t.feel && !t.note && !t.result && !t.pr) delete S.tracking[date];
+  if (!t.done && !t.skipped && !t.feel && !t.note && !t.result && !t.pr && !t.act) delete S.tracking[date];
   saveStore();
 }
 function go(delta) {

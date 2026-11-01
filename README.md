@@ -33,6 +33,7 @@ Produit `dist/appli-course-a-pied.html` (le fichier à ouvrir ou à transmettre)
   | `08-donnees.js` | onglet Paramètres, Mon profil (export / import), vue Mes plans, alerte de stockage |
   | `09-import.js` | vérification d'un Excel et choix de la date de course |
   | `09b-courses.js` | courses sans plan, plan de reprise |
+  | `09c-sorties.js` | import d'un fichier de sorties (Strava) : séances cochées avec le réalisé, courses, sorties libres |
   | `10-rendu.js` | assemblage de la page, rendu |
   | `11-actions.js` | actions métier (ajout, mise à jour, recalage, suppression de plan, restauration) |
   | `12-evenements.js` | clics, saisies, glisser-déposer, clavier |

@@ -34,3 +34,7 @@ details.raw pre { margin: 8px 0 0; white-space: pre-wrap; font-family: var(--f-b
 .resultbox { padding: 12px 14px; border-radius: 14px; background: var(--gold-bg); color: var(--gold-ink); }
 .resultbox .sub { color: inherit; opacity: .9; }
 .resultbox input[type="text"] { background: var(--surface); color: var(--ink); }
+
+/* réalisé importé (montre / Strava) */
+.actbox { padding: 12px 14px; border-radius: 14px; background: var(--mint-bg); color: var(--mint-ink); }
+.prewrap { white-space: pre-wrap; }
