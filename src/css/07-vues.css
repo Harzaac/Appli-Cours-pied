@@ -12,13 +12,15 @@ textarea.json { width: 100%; min-height: 110px; border-radius: 12px; border: 1px
 .racemode-band { padding-bottom: 50px; }
 .rm-hero { display: flex; flex-wrap: wrap; gap: 14px 40px; align-items: flex-end; justify-content: space-between; margin-top: 18px; }
 .rm-k { font-size: 18px; color: var(--on-band-soft); font-weight: 500; }
-.rm-pace { font-family: var(--f-display); font-weight: 700; font-size: clamp(88px, 22vw, 190px); line-height: .9; color: var(--on-band); }
+.rm-pace { font-family: var(--f-display); font-weight: 700; font-size: clamp(64px, 22vw, 190px); line-height: .9; color: var(--on-band); }
 .rm-pace small { font-size: .28em; margin-left: 6px; letter-spacing: 0; }
 .rm-side { display: flex; gap: 28px; color: var(--on-band); }
 .rm-side div { display: flex; flex-direction: column; }
 .rm-side span { font-family: var(--f-display); font-weight: 700; font-size: clamp(34px, 7vw, 56px); line-height: 1; }
 .rm-side small { color: var(--on-band-soft); font-size: 14px; }
-.rm-table { font-size: clamp(15px, 4vw, 26px); } .rm-table th, .rm-table td { padding-inline: 8px; }
+.rm-table { font-size: clamp(14px, 4vw, 26px); } .rm-table th, .rm-table td { padding-inline: 8px; }
+@media (max-width: 360px) { .rm-table { font-size: 13px; } }
+@media (max-width: 400px) { .rm-table th, .rm-table td { padding-inline: 5px; } .rm-table .badge { font-size: 11px; padding-inline: 5px; } }
 .rm-table td:nth-child(2), .rm-table td:nth-child(3) { font-weight: 700; font-variant-numeric: tabular-nums; }
 .wxrace { padding: 12px 14px; border-radius: 14px; background: var(--info-bg); color: var(--info-ink); display: flex; flex-direction: column; gap: 6px; }
 .wxrace .sub { color: inherit; opacity: .85; }
@@ -100,16 +102,20 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 /* Onglet Allures : la carte Prédictions prend deux colonnes quand la grille en a trois (grand écran) */
 .vmagrid { container: vmagrid / inline-size; }
 @container vmagrid (min-width: 1060px) { .predcard { grid-column: span 2; } }
-/* Tableau des prédictions : fourchette dans une seule case ; sur carte étroite (téléphone), tout tient sans défiler */
-.predcard { container: predcard / inline-size; }
-.predtable td.range span { white-space: nowrap; }
-.predtable .narrow { display: none; }
-@container predcard (max-width: 440px) {
-  .predtable { font-size: 13px; }
-  .predtable th, .predtable td { padding: 7px 6px; }
-  .predtable .real { display: block; font-size: 12px; color: var(--muted); }
-  .predtable th { white-space: normal; vertical-align: bottom; }
-  .predtable td.range span { display: block; }
-  .predtable .wide { display: none; }
-  .predtable .narrow { display: inline; }
+/* Tableaux compacts (prédictions, références du plan, plan de course, zones FC) : sur carte étroite (téléphone),
+   tout tient sans défiler — titres et première colonne sur deux lignes, fourchettes empilées, noms courts. */
+.cq { container-type: inline-size; }
+.ctable td.range span { white-space: nowrap; }
+.ctable .narrow { display: none; }
+@container (max-width: 440px) {
+  .ctable { font-size: 13px; }
+  .ctable th, .ctable td { padding: 7px 6px; }
+  .ctable th, .ctable td:first-child { white-space: normal; vertical-align: bottom; }
+  .ctable td:first-child { vertical-align: middle; }
+  .ctable .real { display: block; font-size: 12px; color: var(--muted); }
+  .ctable td.range span { display: block; }
+  .ctable .wide { display: none; }
+  .ctable .narrow { display: inline; }
 }
+/* très petits téléphones (≤ 340 px) : un peu moins de marge dans les cartes */
+@media (max-width: 340px) { .card { padding: 14px; } .rm-table th, .rm-table td { padding-inline: 4px; } }

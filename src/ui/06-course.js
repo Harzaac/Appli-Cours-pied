@@ -40,7 +40,7 @@ function raceView() {
   const { m, rows } = raceRows();
   const rv = ravSettings();
   const byMin = rv.mode === 'min';
-  const body = rows.map((r) => `<tr class="${r.end || r.semi ? 'hl' : ''}"><td>${esc(r.label)}</td><td>${fmtHMS(r.t)}</td><td>${fmtPace(r.seg)}/km</td><td>${r.rav ? '<span class="badge">Ravito</span>' : ''}</td></tr>`).join('');
+  const body = rows.map((r) => `<tr class="${r.end || r.semi ? 'hl' : ''}"><td>${esc(r.label)}${r.rav ? ' <span class="badge">Ravito</span>' : ''}</td><td>${fmtHMS(r.t)}</td><td>${fmtPace(r.seg)}/km</td></tr>`).join('');
   return `<div class="stack">
     <section class="card racecta noprint"><div class="stack" style="gap:4px"><h2>Écran de course</h2><p class="sub">Un écran simplifié pour le jour J : allure, passages, ravitaillements et météo de ${esc(raceCity(curEntry()).name.replace(/ \(\w+\)$/, ''))}, lisible d'un coup d'œil. Il s'ouvre tout seul le ${esc(S.plan.raceDate ? frDate(S.plan.raceDate) : 'jour de la course')}. Tu peux l'ouvrir dès maintenant pour le tester et en sortir quand tu veux.</p></div>
       <button class="btn primary big" data-act="racemode">Ouvrir l'écran de course</button></section>
@@ -53,11 +53,11 @@ function raceView() {
       <div class="field"><label for="race-note">Notes de course (gels, boissons, repères…)</label><textarea class="note" id="race-note" rows="3" placeholder="Ex. gel aux km 10, 20, 30 · eau à chaque ravito">${esc(S.settings.raceNote || '')}</textarea></div>
       <div class="row"><button class="btn small primary" data-act="commit">${ICON.check}Enregistrer</button><span class="sub">Stratégie, ravitaillement et notes.</span></div>
     </section>
-    <section class="card stack raceplan"><div class="row between"><div><h2>${esc(raceNameOf())}${S.plan.raceDate ? ' · ' + esc(frDate(S.plan.raceDate, true)) : ''}</h2><p class="sub">${m.cautious ? 'Départ prudent : ' + String(m.K).replace('.', ',') + ' premiers km à +' + String(m.d).replace('.', ',') + ' s/km, puis un peu plus vite.' : 'Allure régulière.'}</p></div></div>
+    <section class="card stack raceplan cq"><div class="row between"><div><h2>${esc(raceNameOf())}${S.plan.raceDate ? ' · ' + esc(frDate(S.plan.raceDate, true)) : ''}</h2><p class="sub">${m.cautious ? 'Départ prudent : ' + String(m.K).replace('.', ',') + ' premiers km à +' + String(m.d).replace('.', ',') + ' s/km, puis un peu plus vite.' : 'Allure régulière.'}</p></div></div>
       <div class="kpis"><div class="kpi"><span class="v num">${fmtHMS(S.settings.targetSec)}</span><span class="l">objectif</span></div>
         <div class="kpi"><span class="v num">${fmtPace(m.pace)}</span><span class="l">allure moyenne /km</span></div>
         <div class="kpi"><span class="v num">${(3600 / m.pace).toFixed(1).replace('.', ',')}</span><span class="l">km/h</span></div></div>
       ${raceWeatherHTML()}
-      <div class="tablewrap"><table><thead><tr><th>Repère</th><th>Passage</th><th>Allure du tronçon</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="tablewrap"><table class="ctable"><thead><tr><th>Repère</th><th>Passage</th><th>Allure du tronçon</th></tr></thead><tbody>${body}</tbody></table></div>
       ${S.settings.raceNote ? `<p class="racenote">${esc(S.settings.raceNote).replace(/\n/g, '<br>')}</p>` : ''}</section></div>`;
 }

@@ -141,7 +141,7 @@ function profileView() {
   const best = bestTimes();
   const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
   return `<div class="stack">
-    <section class="card stack profilecard"><div class="row profhead">${avatarEditHTML()}<div class="stack" style="gap:2px"><h2>${esc(S.profile.name || 'Mon profil')}</h2><span class="sub">${esc(S.profile.club || CLUB_NAME)}</span></div>
+    <section class="card stack profilecard cq"><div class="row profhead">${avatarEditHTML()}<div class="stack" style="gap:2px"><h2>${esc(S.profile.name || 'Mon profil')}</h2><span class="sub">${esc(S.profile.club || CLUB_NAME)}</span></div>
         <button class="btn small" data-act="tab" data-view="plan" style="margin-left:auto">${ICON.left}Retour</button></div>
       <div class="fields"><div class="field"><label for="pf-name">Prénom</label><input type="text" id="pf-name" value="${esc(S.profile.name || '')}" placeholder="ex. Adrien" autocomplete="off"></div>
         <div class="field"><label for="pf-club">Club</label><input type="text" id="pf-club" value="${esc(S.profile.club || CLUB_NAME)}" autocomplete="off"></div></div>
@@ -152,7 +152,7 @@ function profileView() {
       </div>
       <div class="stack" style="gap:8px"><strong>Fréquence cardiaque</strong>
         <div class="fields"><div class="field"><label for="pf-fcmax">FC max (bpm)</label><input type="text" id="pf-fcmax" inputmode="numeric" value="${S.profile.fcmax || ''}" placeholder="ex. 190" autocomplete="off"></div></div>
-        ${S.profile.fcmax ? `<div class="tablewrap"><table class="zones"><thead><tr><th>Zone</th><th>% FC max</th><th>Pulsations</th></tr></thead><tbody>${HR_ZONES.map(([z, n, a, b]) => `<tr><td>Z${z} · ${n}</td><td>${a}–${b} %</td><td>${Math.round(S.profile.fcmax * a / 100)}–${Math.round(S.profile.fcmax * b / 100)} bpm</td></tr>`).join('')}</tbody></table></div><p class="sub">Les séances notées en « % FCM » par le coach affichent aussi tes pulsations.</p>` : '<p class="sub">Indique ta FC max (mesurée lors d\'un test ou d\'une course à fond) : les séances notées en « % FCM » afficheront tes pulsations, et tes zones apparaîtront ici.</p>'}</div>
+        ${S.profile.fcmax ? `<div class="tablewrap"><table class="ctable zones"><thead><tr><th>Zone</th><th>% FC max</th><th>Pulsations (bpm)</th></tr></thead><tbody>${HR_ZONES.map(([z, n, a, b]) => `<tr><td>Z${z} · ${n}</td><td>${a}–${b} %</td><td>${Math.round(S.profile.fcmax * a / 100)}–${Math.round(S.profile.fcmax * b / 100)}</td></tr>`).join('')}</tbody></table></div><p class="sub">Les séances notées en « % FCM » par le coach affichent aussi tes pulsations.</p>` : '<p class="sub">Indique ta FC max (mesurée lors d\'un test ou d\'une course à fond) : les séances notées en « % FCM » afficheront tes pulsations, et tes zones apparaîtront ici.</p>'}</div>
       ${best.length ? `<div class="stack" style="gap:6px"><strong>Mes meilleurs chronos</strong><ul class="besttimes">${best.map((x) => `<li><span>${esc(x.label)}</span><strong class="num">${esc(fmtHMS(x.sec))}</strong><span class="sub">${esc(x.name)} · ${esc(frDate(x.date))}</span></li>`).join('')}</ul></div>` : '<p class="sub">Tes meilleurs chronos s\'afficheront ici dès que tu auras saisi un résultat de course.</p>'}
     </section>
     ${sortiesCardHTML()}

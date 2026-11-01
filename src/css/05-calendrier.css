@@ -114,3 +114,9 @@ button.mcell { width: 100%; }
 
 .actmini { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: var(--mint-ink); }
 .actmini svg { width: 14px; height: 14px; flex: none; }
+
+/* Mois sur très petit écran : rien ne déborde des cases */
+@media (max-width: 400px) {
+  .mcell { padding: 4px; }
+  .mcell .dd { font-size: 10px; overflow: hidden; text-overflow: clip; white-space: nowrap; }
+}

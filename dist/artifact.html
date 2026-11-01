@@ -420,6 +420,12 @@ button.mcell { width: 100%; }
 .actmini { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: var(--mint-ink); }
 .actmini svg { width: 14px; height: 14px; flex: none; }
 
+/* Mois sur très petit écran : rien ne déborde des cases */
+@media (max-width: 400px) {
+  .mcell { padding: 4px; }
+  .mcell .dd { font-size: 10px; overflow: hidden; text-overflow: clip; white-space: nowrap; }
+}
+
 /* Fenêtre de détail d'un jour : séance, suivi, Garmin, sorties libres, résultat */
 .overlay { position: fixed; inset: 0; background: rgba(8, 20, 29, .55); display: flex; align-items: flex-end; justify-content: center; z-index: 50; padding: 0; }
 .panel {
@@ -475,13 +481,15 @@ textarea.json { width: 100%; min-height: 110px; border-radius: 12px; border: 1px
 .racemode-band { padding-bottom: 50px; }
 .rm-hero { display: flex; flex-wrap: wrap; gap: 14px 40px; align-items: flex-end; justify-content: space-between; margin-top: 18px; }
 .rm-k { font-size: 18px; color: var(--on-band-soft); font-weight: 500; }
-.rm-pace { font-family: var(--f-display); font-weight: 700; font-size: clamp(88px, 22vw, 190px); line-height: .9; color: var(--on-band); }
+.rm-pace { font-family: var(--f-display); font-weight: 700; font-size: clamp(64px, 22vw, 190px); line-height: .9; color: var(--on-band); }
 .rm-pace small { font-size: .28em; margin-left: 6px; letter-spacing: 0; }
 .rm-side { display: flex; gap: 28px; color: var(--on-band); }
 .rm-side div { display: flex; flex-direction: column; }
 .rm-side span { font-family: var(--f-display); font-weight: 700; font-size: clamp(34px, 7vw, 56px); line-height: 1; }
 .rm-side small { color: var(--on-band-soft); font-size: 14px; }
-.rm-table { font-size: clamp(15px, 4vw, 26px); } .rm-table th, .rm-table td { padding-inline: 8px; }
+.rm-table { font-size: clamp(14px, 4vw, 26px); } .rm-table th, .rm-table td { padding-inline: 8px; }
+@media (max-width: 360px) { .rm-table { font-size: 13px; } }
+@media (max-width: 400px) { .rm-table th, .rm-table td { padding-inline: 5px; } .rm-table .badge { font-size: 11px; padding-inline: 5px; } }
 .rm-table td:nth-child(2), .rm-table td:nth-child(3) { font-weight: 700; font-variant-numeric: tabular-nums; }
 .wxrace { padding: 12px 14px; border-radius: 14px; background: var(--info-bg); color: var(--info-ink); display: flex; flex-direction: column; gap: 6px; }
 .wxrace .sub { color: inherit; opacity: .85; }
@@ -563,19 +571,23 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 /* Onglet Allures : la carte Prédictions prend deux colonnes quand la grille en a trois (grand écran) */
 .vmagrid { container: vmagrid / inline-size; }
 @container vmagrid (min-width: 1060px) { .predcard { grid-column: span 2; } }
-/* Tableau des prédictions : fourchette dans une seule case ; sur carte étroite (téléphone), tout tient sans défiler */
-.predcard { container: predcard / inline-size; }
-.predtable td.range span { white-space: nowrap; }
-.predtable .narrow { display: none; }
-@container predcard (max-width: 440px) {
-  .predtable { font-size: 13px; }
-  .predtable th, .predtable td { padding: 7px 6px; }
-  .predtable .real { display: block; font-size: 12px; color: var(--muted); }
-  .predtable th { white-space: normal; vertical-align: bottom; }
-  .predtable td.range span { display: block; }
-  .predtable .wide { display: none; }
-  .predtable .narrow { display: inline; }
+/* Tableaux compacts (prédictions, références du plan, plan de course, zones FC) : sur carte étroite (téléphone),
+   tout tient sans défiler — titres et première colonne sur deux lignes, fourchettes empilées, noms courts. */
+.cq { container-type: inline-size; }
+.ctable td.range span { white-space: nowrap; }
+.ctable .narrow { display: none; }
+@container (max-width: 440px) {
+  .ctable { font-size: 13px; }
+  .ctable th, .ctable td { padding: 7px 6px; }
+  .ctable th, .ctable td:first-child { white-space: normal; vertical-align: bottom; }
+  .ctable td:first-child { vertical-align: middle; }
+  .ctable .real { display: block; font-size: 12px; color: var(--muted); }
+  .ctable td.range span { display: block; }
+  .ctable .wide { display: none; }
+  .ctable .narrow { display: inline; }
 }
+/* très petits téléphones (≤ 340 px) : un peu moins de marge dans les cartes */
+@media (max-width: 340px) { .card { padding: 14px; } .rm-table th, .rm-table td { padding-inline: 4px; } }
 
 /* Impression (plan de course, écran de course) */
 @media print {
@@ -599,7 +611,7 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 <script type="application/json" id="embedded-data"></script>
 <script>
 const APP_NAME = "Appli course à pied";
-const APP_VERSION = "3.20.1";
+const APP_VERSION = "3.20.2";
 const APP_URL = "https://harzaac.github.io/Appli-Cours-pied/";
 const STRAVA_CLIENT_ID = "";
 const STRAVA_RELAY = "";
@@ -2483,8 +2495,8 @@ function predictionHTML(vma) {
     vmaEq = `<p class="sub">Ce chrono correspond à une VMA d'environ <strong>${fmtVma(Math.round(v * 2) / 2)} km/h</strong> (ta VMA réglée : ${fmtVma(vma)} km/h).</p>`;
   }
   const curKm = ref ? ref.km : MARATHON_KM;
-  return `<section class="card stack predcard"><div><h2>Prédictions de course</h2><p class="sub">Des estimations, pas des promesses : la forme du jour, le parcours et la météo comptent beaucoup.</p></div>
-    <div class="tablewrap"><table class="predtable"><thead><tr><th>Distance</th><th>Selon ta VMA</th><th>Selon ${ref ? 'ta course' : 'une course'}</th></tr></thead><tbody>${rows}</tbody></table></div>
+  return `<section class="card stack predcard cq"><div><h2>Prédictions de course</h2><p class="sub">Des estimations, pas des promesses : la forme du jour, le parcours et la météo comptent beaucoup.</p></div>
+    <div class="tablewrap"><table class="ctable predtable"><thead><tr><th>Distance</th><th>Selon ta VMA</th><th>Selon ${ref ? 'ta course' : 'une course'}</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="sub"><strong>Selon ta VMA</strong> : la part de VMA que tiennent en général les coureurs entraînés sur chaque distance. <strong>Selon ta course</strong> : la formule de Riegel, qui extrapole un chrono réel vers les autres distances (plus fiable quand la distance est proche).</p>
     <div class="stack" style="gap:8px"><strong>Course de référence</strong>
       <p class="sub">${ref ? esc(refName) + ' en ' + esc(fmtHMS(ref.sec)) + (ref.label ? ' · ' + esc(ref.label) : '') : 'Aucune pour l\'instant : saisis un chrono récent, ou ton résultat le jour de ta course.'}</p>
@@ -2585,8 +2597,8 @@ function vmaView() {
     const realPct = (r.km * 1000 / r.realSec) * 3.6 / vma * 100;
     const objPct = isMar ? marPct : (r.objPct != null ? r.objPct * 100 : null);
     const objSec = isMar ? targetSec : (objPct ? r.km * paceSecPerKm(vma, objPct) : null);
-    const name = isMar ? 'Marathon' : r.km === 10 ? '10 km' : 'Semi-marathon';
-    return `<tr${isMar ? ' class="hl"' : ''}><td>${name}</td><td>${fmtHMS(r.realSec)}</td><td>${Math.round(realPct)} %</td><td>${objSec ? fmtHMS(objSec) : '–'}</td><td>${objPct ? Math.round(objPct * 10) / 10 + ' %' : '–'}</td></tr>`;
+    const name = isMar ? 'Marathon' : r.km === 10 ? '10 km' : '<span class="wide">Semi-marathon</span><span class="narrow">Semi</span>';
+    return `<tr${isMar ? ' class="hl"' : ''}><td>${name}</td><td class="num">${fmtHMS(r.realSec)}<span class="cellsub">${Math.round(realPct)} % VMA</span></td><td class="num">${objSec ? fmtHMS(objSec) + '<span class="cellsub">' + Math.round(objPct * 10) / 10 + ' % VMA</span>' : '–'}</td></tr>`;
   }).join('');
   const lv = (re, fb) => levelPct(S.plan, re, fb);
   const scope = S.plan ? (S.plans.length > 1 ? `Réglages du plan « ${esc(planName(curEntry()))} ». ` : '') : 'Aucun plan affiché : ce sont tes réglages par défaut, repris quand tu ajoutes un plan. ';
@@ -2610,8 +2622,8 @@ function vmaView() {
     ${predictionHTML(vma)}
     ${splitsHTML(vma)}
     ${vmaTestsHTML()}
-    ${refs ? `<section class="card stack"><div><h2>Références du plan</h2><p class="sub">Les temps réalisés et les objectifs notés par le coach dans le fichier, recalculés avec ta VMA.</p></div>
-      <div class="tablewrap"><table><thead><tr><th>Distance</th><th>Réalisé</th><th>% VMA</th><th>Objectif</th><th>% VMA</th></tr></thead><tbody>${refs}</tbody></table></div></section>` : ''}
+    ${refs ? `<section class="card stack cq"><div><h2>Références du plan</h2><p class="sub">Les temps réalisés et les objectifs notés par le coach dans le fichier, recalculés avec ta VMA.</p></div>
+      <div class="tablewrap"><table class="ctable"><thead><tr><th>Distance</th><th>Réalisé</th><th>Objectif</th></tr></thead><tbody>${refs}</tbody></table></div></section>` : ''}
   </div>
   <section class="card stack"><div><h2>Tableau des temps selon la VMA</h2><p class="sub">Temps pour parcourir chaque distance à un pourcentage de VMA, calculé avec ${fmtVma(vma)} km/h.</p></div>${table}</section>`;
 }
@@ -2730,7 +2742,7 @@ function raceView() {
   const { m, rows } = raceRows();
   const rv = ravSettings();
   const byMin = rv.mode === 'min';
-  const body = rows.map((r) => `<tr class="${r.end || r.semi ? 'hl' : ''}"><td>${esc(r.label)}</td><td>${fmtHMS(r.t)}</td><td>${fmtPace(r.seg)}/km</td><td>${r.rav ? '<span class="badge">Ravito</span>' : ''}</td></tr>`).join('');
+  const body = rows.map((r) => `<tr class="${r.end || r.semi ? 'hl' : ''}"><td>${esc(r.label)}${r.rav ? ' <span class="badge">Ravito</span>' : ''}</td><td>${fmtHMS(r.t)}</td><td>${fmtPace(r.seg)}/km</td></tr>`).join('');
   return `<div class="stack">
     <section class="card racecta noprint"><div class="stack" style="gap:4px"><h2>Écran de course</h2><p class="sub">Un écran simplifié pour le jour J : allure, passages, ravitaillements et météo de ${esc(raceCity(curEntry()).name.replace(/ \(\w+\)$/, ''))}, lisible d'un coup d'œil. Il s'ouvre tout seul le ${esc(S.plan.raceDate ? frDate(S.plan.raceDate) : 'jour de la course')}. Tu peux l'ouvrir dès maintenant pour le tester et en sortir quand tu veux.</p></div>
       <button class="btn primary big" data-act="racemode">Ouvrir l'écran de course</button></section>
@@ -2743,12 +2755,12 @@ function raceView() {
       <div class="field"><label for="race-note">Notes de course (gels, boissons, repères…)</label><textarea class="note" id="race-note" rows="3" placeholder="Ex. gel aux km 10, 20, 30 · eau à chaque ravito">${esc(S.settings.raceNote || '')}</textarea></div>
       <div class="row"><button class="btn small primary" data-act="commit">${ICON.check}Enregistrer</button><span class="sub">Stratégie, ravitaillement et notes.</span></div>
     </section>
-    <section class="card stack raceplan"><div class="row between"><div><h2>${esc(raceNameOf())}${S.plan.raceDate ? ' · ' + esc(frDate(S.plan.raceDate, true)) : ''}</h2><p class="sub">${m.cautious ? 'Départ prudent : ' + String(m.K).replace('.', ',') + ' premiers km à +' + String(m.d).replace('.', ',') + ' s/km, puis un peu plus vite.' : 'Allure régulière.'}</p></div></div>
+    <section class="card stack raceplan cq"><div class="row between"><div><h2>${esc(raceNameOf())}${S.plan.raceDate ? ' · ' + esc(frDate(S.plan.raceDate, true)) : ''}</h2><p class="sub">${m.cautious ? 'Départ prudent : ' + String(m.K).replace('.', ',') + ' premiers km à +' + String(m.d).replace('.', ',') + ' s/km, puis un peu plus vite.' : 'Allure régulière.'}</p></div></div>
       <div class="kpis"><div class="kpi"><span class="v num">${fmtHMS(S.settings.targetSec)}</span><span class="l">objectif</span></div>
         <div class="kpi"><span class="v num">${fmtPace(m.pace)}</span><span class="l">allure moyenne /km</span></div>
         <div class="kpi"><span class="v num">${(3600 / m.pace).toFixed(1).replace('.', ',')}</span><span class="l">km/h</span></div></div>
       ${raceWeatherHTML()}
-      <div class="tablewrap"><table><thead><tr><th>Repère</th><th>Passage</th><th>Allure du tronçon</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="tablewrap"><table class="ctable"><thead><tr><th>Repère</th><th>Passage</th><th>Allure du tronçon</th></tr></thead><tbody>${body}</tbody></table></div>
       ${S.settings.raceNote ? `<p class="racenote">${esc(S.settings.raceNote).replace(/\n/g, '<br>')}</p>` : ''}</section></div>`;
 }
 
@@ -3027,7 +3039,7 @@ function profileView() {
   const best = bestTimes();
   const nTr = Object.keys(S.tracking).filter((k) => S.tracking[k].done).length + Object.keys(S.logs).reduce((a, k) => a + S.logs[k].length, 0);
   return `<div class="stack">
-    <section class="card stack profilecard"><div class="row profhead">${avatarEditHTML()}<div class="stack" style="gap:2px"><h2>${esc(S.profile.name || 'Mon profil')}</h2><span class="sub">${esc(S.profile.club || CLUB_NAME)}</span></div>
+    <section class="card stack profilecard cq"><div class="row profhead">${avatarEditHTML()}<div class="stack" style="gap:2px"><h2>${esc(S.profile.name || 'Mon profil')}</h2><span class="sub">${esc(S.profile.club || CLUB_NAME)}</span></div>
         <button class="btn small" data-act="tab" data-view="plan" style="margin-left:auto">${ICON.left}Retour</button></div>
       <div class="fields"><div class="field"><label for="pf-name">Prénom</label><input type="text" id="pf-name" value="${esc(S.profile.name || '')}" placeholder="ex. Adrien" autocomplete="off"></div>
         <div class="field"><label for="pf-club">Club</label><input type="text" id="pf-club" value="${esc(S.profile.club || CLUB_NAME)}" autocomplete="off"></div></div>
@@ -3038,7 +3050,7 @@ function profileView() {
       </div>
       <div class="stack" style="gap:8px"><strong>Fréquence cardiaque</strong>
         <div class="fields"><div class="field"><label for="pf-fcmax">FC max (bpm)</label><input type="text" id="pf-fcmax" inputmode="numeric" value="${S.profile.fcmax || ''}" placeholder="ex. 190" autocomplete="off"></div></div>
-        ${S.profile.fcmax ? `<div class="tablewrap"><table class="zones"><thead><tr><th>Zone</th><th>% FC max</th><th>Pulsations</th></tr></thead><tbody>${HR_ZONES.map(([z, n, a, b]) => `<tr><td>Z${z} · ${n}</td><td>${a}–${b} %</td><td>${Math.round(S.profile.fcmax * a / 100)}–${Math.round(S.profile.fcmax * b / 100)} bpm</td></tr>`).join('')}</tbody></table></div><p class="sub">Les séances notées en « % FCM » par le coach affichent aussi tes pulsations.</p>` : '<p class="sub">Indique ta FC max (mesurée lors d\'un test ou d\'une course à fond) : les séances notées en « % FCM » afficheront tes pulsations, et tes zones apparaîtront ici.</p>'}</div>
+        ${S.profile.fcmax ? `<div class="tablewrap"><table class="ctable zones"><thead><tr><th>Zone</th><th>% FC max</th><th>Pulsations (bpm)</th></tr></thead><tbody>${HR_ZONES.map(([z, n, a, b]) => `<tr><td>Z${z} · ${n}</td><td>${a}–${b} %</td><td>${Math.round(S.profile.fcmax * a / 100)}–${Math.round(S.profile.fcmax * b / 100)}</td></tr>`).join('')}</tbody></table></div><p class="sub">Les séances notées en « % FCM » par le coach affichent aussi tes pulsations.</p>` : '<p class="sub">Indique ta FC max (mesurée lors d\'un test ou d\'une course à fond) : les séances notées en « % FCM » afficheront tes pulsations, et tes zones apparaîtront ici.</p>'}</div>
       ${best.length ? `<div class="stack" style="gap:6px"><strong>Mes meilleurs chronos</strong><ul class="besttimes">${best.map((x) => `<li><span>${esc(x.label)}</span><strong class="num">${esc(fmtHMS(x.sec))}</strong><span class="sub">${esc(x.name)} · ${esc(frDate(x.date))}</span></li>`).join('')}</ul></div>` : '<p class="sub">Tes meilleurs chronos s\'afficheront ici dès que tu auras saisi un résultat de course.</p>'}
     </section>
     ${sortiesCardHTML()}

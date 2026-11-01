@@ -49,8 +49,8 @@ function predictionHTML(vma) {
     vmaEq = `<p class="sub">Ce chrono correspond à une VMA d'environ <strong>${fmtVma(Math.round(v * 2) / 2)} km/h</strong> (ta VMA réglée : ${fmtVma(vma)} km/h).</p>`;
   }
   const curKm = ref ? ref.km : MARATHON_KM;
-  return `<section class="card stack predcard"><div><h2>Prédictions de course</h2><p class="sub">Des estimations, pas des promesses : la forme du jour, le parcours et la météo comptent beaucoup.</p></div>
-    <div class="tablewrap"><table class="predtable"><thead><tr><th>Distance</th><th>Selon ta VMA</th><th>Selon ${ref ? 'ta course' : 'une course'}</th></tr></thead><tbody>${rows}</tbody></table></div>
+  return `<section class="card stack predcard cq"><div><h2>Prédictions de course</h2><p class="sub">Des estimations, pas des promesses : la forme du jour, le parcours et la météo comptent beaucoup.</p></div>
+    <div class="tablewrap"><table class="ctable predtable"><thead><tr><th>Distance</th><th>Selon ta VMA</th><th>Selon ${ref ? 'ta course' : 'une course'}</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="sub"><strong>Selon ta VMA</strong> : la part de VMA que tiennent en général les coureurs entraînés sur chaque distance. <strong>Selon ta course</strong> : la formule de Riegel, qui extrapole un chrono réel vers les autres distances (plus fiable quand la distance est proche).</p>
     <div class="stack" style="gap:8px"><strong>Course de référence</strong>
       <p class="sub">${ref ? esc(refName) + ' en ' + esc(fmtHMS(ref.sec)) + (ref.label ? ' · ' + esc(ref.label) : '') : 'Aucune pour l\'instant : saisis un chrono récent, ou ton résultat le jour de ta course.'}</p>
@@ -151,8 +151,8 @@ function vmaView() {
     const realPct = (r.km * 1000 / r.realSec) * 3.6 / vma * 100;
     const objPct = isMar ? marPct : (r.objPct != null ? r.objPct * 100 : null);
     const objSec = isMar ? targetSec : (objPct ? r.km * paceSecPerKm(vma, objPct) : null);
-    const name = isMar ? 'Marathon' : r.km === 10 ? '10 km' : 'Semi-marathon';
-    return `<tr${isMar ? ' class="hl"' : ''}><td>${name}</td><td>${fmtHMS(r.realSec)}</td><td>${Math.round(realPct)} %</td><td>${objSec ? fmtHMS(objSec) : '–'}</td><td>${objPct ? Math.round(objPct * 10) / 10 + ' %' : '–'}</td></tr>`;
+    const name = isMar ? 'Marathon' : r.km === 10 ? '10 km' : '<span class="wide">Semi-marathon</span><span class="narrow">Semi</span>';
+    return `<tr${isMar ? ' class="hl"' : ''}><td>${name}</td><td class="num">${fmtHMS(r.realSec)}<span class="cellsub">${Math.round(realPct)} % VMA</span></td><td class="num">${objSec ? fmtHMS(objSec) + '<span class="cellsub">' + Math.round(objPct * 10) / 10 + ' % VMA</span>' : '–'}</td></tr>`;
   }).join('');
   const lv = (re, fb) => levelPct(S.plan, re, fb);
   const scope = S.plan ? (S.plans.length > 1 ? `Réglages du plan « ${esc(planName(curEntry()))} ». ` : '') : 'Aucun plan affiché : ce sont tes réglages par défaut, repris quand tu ajoutes un plan. ';
@@ -176,8 +176,8 @@ function vmaView() {
     ${predictionHTML(vma)}
     ${splitsHTML(vma)}
     ${vmaTestsHTML()}
-    ${refs ? `<section class="card stack"><div><h2>Références du plan</h2><p class="sub">Les temps réalisés et les objectifs notés par le coach dans le fichier, recalculés avec ta VMA.</p></div>
-      <div class="tablewrap"><table><thead><tr><th>Distance</th><th>Réalisé</th><th>% VMA</th><th>Objectif</th><th>% VMA</th></tr></thead><tbody>${refs}</tbody></table></div></section>` : ''}
+    ${refs ? `<section class="card stack cq"><div><h2>Références du plan</h2><p class="sub">Les temps réalisés et les objectifs notés par le coach dans le fichier, recalculés avec ta VMA.</p></div>
+      <div class="tablewrap"><table class="ctable"><thead><tr><th>Distance</th><th>Réalisé</th><th>Objectif</th></tr></thead><tbody>${refs}</tbody></table></div></section>` : ''}
   </div>
   <section class="card stack"><div><h2>Tableau des temps selon la VMA</h2><p class="sub">Temps pour parcourir chaque distance à un pourcentage de VMA, calculé avec ${fmtVma(vma)} km/h.</p></div>${table}</section>`;
 }
