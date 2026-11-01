@@ -1,5 +1,7 @@
 # Appli course à pied
 
+> Reprise du projet : lire d'abord [`docs/reprise.md`](docs/reprise.md).
+
 Calendrier d'entraînement de course à pied (AC Haute Vilaine) livré en **un seul fichier HTML**, sans serveur ni compte :
 plans du coach importés depuis Excel, allures calculées selon la VMA, suivi des séances et des
 sorties libres, plan et écran de course, export d'une séance en `.fit` pour une montre Garmin.
@@ -25,11 +27,12 @@ Produit `dist/appli-course-a-pied.html` (le fichier à ouvrir ou à transmettre)
   | `02-meteo-theme.js` | météo Open-Meteo, thème clair/sombre, couleur d'accent |
   | `03-entete.js` | bandeau, compte à rebours ou chrono, prochaine séance, pied de page |
   | `04-calendrier.js` | semaine, mois, cartes de jour, fenêtre de détail, sorties libres, résultat |
-  | `05-vma.js` | onglet VMA, prédictions, modèle de passage (départ prudent) |
+  | `05-vma.js` | onglet VMA : niveau, prédictions, temps de passage, tests de VMA, tableau du coach |
   | `06-course.js` | plan de course, ravitaillements, écran de course |
   | `07-bilan.js` | onglet Progression : où j'en suis, suivi du plan, mes courses, sensations, l'année |
-  | `08-donnees.js` | onglet Paramètres (sauvegarde, préférences) et vue Mes plans |
+  | `08-donnees.js` | onglet Paramètres, Mon profil (export / import), vue Mes plans, alerte de stockage |
   | `09-import.js` | vérification d'un Excel et choix de la date de course |
+  | `09b-courses.js` | courses sans plan, plan de reprise |
   | `10-rendu.js` | assemblage de la page, rendu |
   | `11-actions.js` | actions métier (ajout, mise à jour, recalage, suppression de plan, restauration) |
   | `12-evenements.js` | clics, saisies, glisser-déposer, clavier |
@@ -49,7 +52,7 @@ L'ancien format (un seul plan) est converti à la lecture.
 
 ```
 npm test                 # construit puis lance test/tout.js
-npm run captures         # compare 56 captures (PC/mobile × clair/sombre) aux captures de référence
+npm run captures         # compare 64 captures (PC/mobile × clair/sombre) aux captures de référence
 ```
 
 - `test/unitaires/` — parseur, lecture `.xlsx`, encodage `.fit`.

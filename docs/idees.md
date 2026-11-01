@@ -25,10 +25,13 @@ Liste tenue à jour avec Adrien. Ce qui est fait est rayé, avec la version.
 - Semaine sur téléphone : bande des 7 jours + carte du jour sélectionné.
 
 ## À vérifier
+- Nom de l'onglet « VMA » (Allures ? Mon niveau ?), à rediscuter.
+- Accents dans les noms de séance du .fit, à trancher après le test sur la montre.
 - Export Garmin (.fit) sur la vraie Forerunner 945 : jamais testé sur la montre.
 - Météo bloquée dans Edge chez Adrien (cause locale non trouvée).
 
 ## Fait
+- 3.16 : prédictions alignées, temps de passage pour toute distance. 3.15 : relecture (textes, alerte de stockage, noyau découpé). 3.14 : pied de page.
 - 3.11 : Annuler après suppression, séances modifiables ou ajoutées, zones de fréquence cardiaque.
 - 3.10 : photo de profil. 3.9 : profil en haut à droite, image du bandeau modifiable, palettes Aurore et Lagon.
 - 3.8 : profil exportable, courses sans plan, plan de reprise. 3.7 : boutons Enregistrer et confirmations.
