@@ -41,6 +41,16 @@ Liste tenue à jour avec Adrien. Ce qui est fait est rayé, avec la version.
 - 3.10 : photo de profil. 3.9 : profil en haut à droite, image du bandeau modifiable, palettes Aurore et Lagon.
 - 3.8 : profil exportable, courses sans plan, plan de reprise. 3.7 : boutons Enregistrer et confirmations.
 
+## Plan retenu : synchro Strava par API (1er/11/2026)
+- L'échange du code OAuth et le rafraîchissement du jeton demandent le **secret client** : il ne peut pas vivre dans la page.
+  Relais retenu : un petit Cloudflare Worker (gratuit) avec deux routes, `/token` et `/refresh`, secret gardé côté Worker,
+  CORS limité à `https://harzaac.github.io`.
+- La page appelle ensuite l'API Strava directement avec le jeton d'accès (dans l'en-tête `Authorization`, obligatoire en 2027),
+  et passe les activités dans le même import que la 3.18 (`09c-sorties.js`).
+- Appli Strava à créer par Adrien (strava.com/settings/api) : domaine de rappel `harzaac.github.io`. Nouvelle appli = 1 athlète
+  (« Single Player Mode »), passable à 10 sans revue ; au-delà, revue Strava. Accès Standard : abonnement Strava requis.
+- Les conditions de l'API demandent de gérer la déconnexion (webhook) : à prévoir dans le Worker si l'appli s'ouvre au club.
+
 ## Étude : référentiel de courses (théorique, 31/10/2026)
 - FFA (athle.fr) : calendrier officiel des courses labellisées, consultable en ligne, sans API publique connue.
 - RunningMap.org : calendrier national des courses, publie un jeu de données sur data.gouv.fr (licence ouverte annoncée pour le site ; contenu, format et fraîcheur du jeu à vérifier).
