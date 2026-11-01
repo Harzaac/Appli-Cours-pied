@@ -153,11 +153,14 @@ function rebuildIndex() {
     }
   }
   real.sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0));
-  // Semaines libres : le calendrier existe même sans plan. Il couvre les plans, la semaine en cours et au moins 12 semaines devant.
+  // Semaines libres : le calendrier existe même sans plan. Il couvre les plans, les sorties, les courses et le suivi
+  // passés (on peut remonter jusqu'à la première donnée, au moins 8 semaines), la semaine en cours et au moins 12 semaines devant.
   const free = [];
   const thisMon = mondayOf(TODAY);
   const ahead = addDays(thisMon, 12 * 7);
-  const firstMon = real.length && mondayOf(real[0].start) < thisMon ? mondayOf(real[0].start) : thisMon;
+  const past = [addDays(thisMon, -8 * 7)].concat(real.length ? [real[0].start] : [], Object.keys(S.logs || {}), Object.keys(S.tracking || {}), (S.races || []).map((r) => r.date))
+    .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+  const firstMon = mondayOf(past[0]);
   const lastMon = real.length ? mondayOf(real.reduce((a, w) => (w.end > a ? w.end : a), real[0].end)) : thisMon;
   const stopMon = ahead > lastMon ? ahead : lastMon;
   for (let m = firstMon; m <= stopMon; m = addDays(m, 7)) {
