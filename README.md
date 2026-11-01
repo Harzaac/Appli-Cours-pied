@@ -36,6 +36,7 @@ service worker `src/web/sw.js`, icônes), publiée sur GitHub Pages par `.github
   | `09-import.js` | vérification d'un Excel et choix de la date de course |
   | `09b-courses.js` | courses sans plan, plan de reprise |
   | `09c-sorties.js` | import d'un fichier de sorties (Strava) : séances cochées avec le réalisé, courses, sorties libres |
+  | `09d-strava.js` | synchro Strava par l'API (version en ligne) : connexion, jetons, synchro, déconnexion |
   | `10-rendu.js` | assemblage de la page, rendu |
   | `11-actions.js` | actions métier (ajout, mise à jour, recalage, suppression de plan, restauration) |
   | `12-evenements.js` | clics, saisies, glisser-déposer, clavier |
@@ -43,6 +44,11 @@ service worker `src/web/sw.js`, icônes), publiée sur GitHub Pages par `.github
 - `src/css/*.css` — styles par ordre de nom : jetons de couleur (clair, sombre, accents), base,
   briques, en-tête, calendrier, fenêtre de détail, vues, impression. Toutes les couleurs passent par
   les jetons de `01-jetons.css`.
+
+## Relais Strava
+
+`relais-strava/` : Cloudflare Worker qui garde le secret client Strava (voir `relais-strava/LISEZMOI.md`).
+`strava.config.json` : ID client et adresse du relais, lus par `build.js`.
 
 ## Données
 

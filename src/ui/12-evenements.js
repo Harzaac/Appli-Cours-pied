@@ -89,6 +89,9 @@ document.addEventListener('click', (ev) => {
     case 'ctaoff': { const up = entryOf(el.dataset.id) || upcomingRace(); S.ctaOff = up ? up.id + ':' + up.plan.raceDate : true; saveStore(); render(); break; }
     case 'remindlater': S.remindUntil = addDays(TODAY, 7); saveStore(); render(); break;
     case 'webupdate': webUpdate(); break;
+    case 'stravaconnect': stravaConnect(); break;
+    case 'stravasync': stravaSync(false); break;
+    case 'stravaoff': stravaOff(); break;
     case 'webinstall': webInstall(); break;
     case 'webinstalloff': webInstallOff(); break;
     case 'htmlcoach': saveHtmlCopy(true); break;

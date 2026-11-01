@@ -13,9 +13,11 @@ const VERSION = PKG_VERSION.replace(/\.0$/, '');
 const OUT = 'appli-course-a-pied.html';
 // Adresse de la version en ligne (GitHub Pages du dépôt Harzaac/Appli-Cours-pied).
 const APP_URL = 'https://harzaac.github.io/Appli-Cours-pied/';
+// Synchro Strava : ID client de l'appli Strava (public) et adresse du relais (relais-strava/). Vides : la synchro n'apparaît pas.
+const STRAVA_CFG = Object.assign({ clientId: '', relay: '' }, JSON.parse(read('strava.config.json')));
 const dataUri = (p) => 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, p)).toString('base64');
 // le logo du club et l'icône sont embarqués dans le fichier
-const assetsJs = `const APP_NAME = ${JSON.stringify(TITLE)};\nconst APP_VERSION = ${JSON.stringify(VERSION)};\nconst APP_URL = ${JSON.stringify(APP_URL)};\nconst CLUB_NAME = 'AC Haute Vilaine';\nconst CLUB_LOGO = '${dataUri('assets/logo-achv.png')}';\n`;
+const assetsJs = `const APP_NAME = ${JSON.stringify(TITLE)};\nconst APP_VERSION = ${JSON.stringify(VERSION)};\nconst APP_URL = ${JSON.stringify(APP_URL)};\nconst STRAVA_CLIENT_ID = ${JSON.stringify(String(STRAVA_CFG.clientId || ''))};\nconst STRAVA_RELAY = ${JSON.stringify(String(STRAVA_CFG.relay || ''))};\nconst CLUB_NAME = 'AC Haute Vilaine';\nconst CLUB_LOGO = '${dataUri('assets/logo-achv.png')}';\n`;
 const icon = `<link rel="icon" type="image/png" href="${dataUri('assets/icone-64.png')}">`;
 
 const body = `<div id="app"></div>\n<script type="application/json" id="embedded-data"></script>\n<script>\n${assetsJs}${js.replace(/<\/script/gi, '<\\/script')}\n</script>`;

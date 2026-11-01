@@ -1,7 +1,7 @@
 # Reprise du projet : à lire en premier
 
 Note de passation pour reprendre l'appli dans une nouvelle conversation (avec Claude ou un autre outil).
-Point d'arrivée : **version 3.19**, 1er novembre 2026.
+Point d'arrivée : **version 3.20**, 1er novembre 2026.
 
 ## En deux phrases
 
@@ -78,7 +78,23 @@ Le détail fichier par fichier est dans le `README.md`. En bref, `build.js` conc
   faite en ligne retire les balises `data-web` et redevient un fichier autonome.
 - Test : `test/parcours/pwa.js` (petit serveur local, hors ligne, mise à jour simulée, copie).
 
-## Sorties Strava (depuis la 3.18)
+## Synchro Strava par l'API (depuis la 3.20, version en ligne)
+
+- `src/ui/09d-strava.js` : « Connecter Strava » (Mon profil › Sorties de la montre) envoie sur la page
+  d'autorisation de Strava (`scope=read,activity:read_all`, `state` vérifié au retour) ; le relais échange le code.
+  Jetons sous la clé à part `appli-marathon-v1-strava` (jamais dans un export). Synchro à l'ouverture et au
+  retour au premier plan (au plus toutes les 30 min) et bouton « Synchroniser » : `GET /athlete/activities`
+  depuis `sortiesUntil` − 3 jours (sinon le 1er janvier), jeton dans l'en-tête `Authorization`, conversion
+  `stravaToSortie` (mêmes règles que `outils/strava-vers-appli.py` ; `workout_type 1` = course), puis le même
+  `importSorties` que la 3.18, avec Annuler. 401 : jeton oublié, « reconnecte-toi ». « Déconnecter » retire l'accès.
+- `relais-strava/worker.js` : Cloudflare Worker qui garde le secret client (`/token`, `/refresh`,
+  `/deauthorize`, `/webhook`), CORS limité à `https://harzaac.github.io`. Mise en place : `relais-strava/LISEZMOI.md`.
+- `strava.config.json` : ID client (public) et adresse du relais, injectés par `build.js`. **Vides tant
+  qu'Adrien n'a pas créé l'appli Strava et le relais** : la synchro n'apparaît pas.
+- Tests : `test/unitaires/relais-strava.js`, `test/parcours/strava-api.js` (Strava et relais simulés).
+- À vérifier en vrai : l'API Strava appelée directement depuis la page (CORS) ; sinon, la faire passer par le relais.
+
+## Sorties Strava par fichier (depuis la 3.18)
 
 Adrien a branché le **connecteur Strava** de Claude (lecture seule, abonnement Strava requis).
 Pour mettre l'appli à jour :
@@ -97,6 +113,7 @@ Premier import : 149 activités de 2026 (135 courses à pied, ~1 585 km).
 
 ## Prochain gros chantier
 
-Synchro Strava par API depuis la version en ligne (OAuth : un petit relais garde le secret client).
+Brancher la synchro Strava : Adrien crée l'appli Strava et le relais (`relais-strava/LISEZMOI.md`), puis
+remplir `strava.config.json` et pousser.
 **À vérifier par Adrien** : installation sur son téléphone Android, passage de son profil du fichier vers la version en ligne.
 Le reste des idées est dans `docs/idees.md`.

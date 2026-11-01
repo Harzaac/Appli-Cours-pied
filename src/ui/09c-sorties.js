@@ -98,7 +98,9 @@ function actHTML(a) {
     <div class="num">${esc(actLine(a))}</div>${a.title ? `<div>${esc(a.title)}</div>` : ''}${a.note ? `<div class="sub prewrap">${esc(a.note)}</div>` : ''}</div>`;
 }
 function sortiesCardHTML() {
-  return `<section class="card stack"><div><h2>Sorties de la montre</h2><p class="sub">Ajoute tes sorties à partir d'un fichier de sorties (.json, préparé depuis Strava). Une course à pied un jour de séance coche la séance avec le réalisé ; les autres deviennent des sorties libres. Rien n'est remplacé, et un fichier déjà importé n'ajoute rien en double.</p></div>
+  return `<section class="card stack"><div><h2>Sorties de la montre</h2><p class="sub">Une course à pied un jour de séance coche la séance avec le réalisé ; les autres deviennent des sorties libres. Rien n'est remplacé, et une sortie déjà importée n'est jamais ajoutée en double.</p></div>
+    ${stravaBlockHTML()}
+    <p class="sub">${stravaBlockHTML() ? 'Ou à partir d\'un fichier' : 'Ajoute-les à partir d\'un fichier'} de sorties (.json, préparé depuis Strava) :</p>
     <div class="row"><input type="file" id="file-sorties" accept=".json,application/json" class="sr"><button class="btn" data-act="picksorties">${ICON.up}Ajouter des sorties</button>${S.profile.sortiesUntil ? `<span class="sub">Sorties importées jusqu'au ${esc(frDate(S.profile.sortiesUntil))} ${esc(S.profile.sortiesUntil.slice(0, 4))}</span>` : ''}</div>
     ${S.msg.sorties ? `<p class="${S.msg.sortiesErr ? 'errtxt' : 'sub'}" role="status">${esc(S.msg.sorties)}</p>` : ''}</section>`;
 }

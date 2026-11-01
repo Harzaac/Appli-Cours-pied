@@ -199,6 +199,12 @@ input[type="date"] { font: inherit; border: 1px solid var(--line); background: v
 #toast.act { pointer-events: auto; }
 .toastbtn { margin-left: 6px; border: 0; background: none; color: var(--mint); font: inherit; font-weight: 800; text-decoration: underline; cursor: pointer; padding: 4px 2px; }
 
+/* Synchro Strava : bouton à la couleur de Strava (charte de marque) */
+.btn.strava { background: #FC5200; color: #fff; border-color: transparent; font-weight: 700; }
+.btn.strava:hover { filter: brightness(1.06); }
+.stravabox { gap: 8px; }
+.stravacredit { font-size: 12px; }
+
 /* En-tête (bandeau, compte à rebours, prochaine séance, onglets) et pied de page */
 .band {
   background: linear-gradient(105deg, var(--band-a) 0%, var(--band-b) 100%);
@@ -586,8 +592,10 @@ details.pref .prefbody { margin-top: 10px; gap: 12px; }
 <script type="application/json" id="embedded-data"></script>
 <script>
 const APP_NAME = "Appli course à pied";
-const APP_VERSION = "3.19";
+const APP_VERSION = "3.20";
 const APP_URL = "https://harzaac.github.io/Appli-Cours-pied/";
+const STRAVA_CLIENT_ID = "";
+const STRAVA_RELAY = "";
 const CLUB_NAME = 'AC Haute Vilaine';
 const CLUB_LOGO = 'data:image/png;base64,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';
 /* ============================================================
@@ -3301,9 +3309,177 @@ function actHTML(a) {
     <div class="num">${esc(actLine(a))}</div>${a.title ? `<div>${esc(a.title)}</div>` : ''}${a.note ? `<div class="sub prewrap">${esc(a.note)}</div>` : ''}</div>`;
 }
 function sortiesCardHTML() {
-  return `<section class="card stack"><div><h2>Sorties de la montre</h2><p class="sub">Ajoute tes sorties à partir d'un fichier de sorties (.json, préparé depuis Strava). Une course à pied un jour de séance coche la séance avec le réalisé ; les autres deviennent des sorties libres. Rien n'est remplacé, et un fichier déjà importé n'ajoute rien en double.</p></div>
+  return `<section class="card stack"><div><h2>Sorties de la montre</h2><p class="sub">Une course à pied un jour de séance coche la séance avec le réalisé ; les autres deviennent des sorties libres. Rien n'est remplacé, et une sortie déjà importée n'est jamais ajoutée en double.</p></div>
+    ${stravaBlockHTML()}
+    <p class="sub">${stravaBlockHTML() ? 'Ou à partir d\'un fichier' : 'Ajoute-les à partir d\'un fichier'} de sorties (.json, préparé depuis Strava) :</p>
     <div class="row"><input type="file" id="file-sorties" accept=".json,application/json" class="sr"><button class="btn" data-act="picksorties">${ICON.up}Ajouter des sorties</button>${S.profile.sortiesUntil ? `<span class="sub">Sorties importées jusqu'au ${esc(frDate(S.profile.sortiesUntil))} ${esc(S.profile.sortiesUntil.slice(0, 4))}</span>` : ''}</div>
     ${S.msg.sorties ? `<p class="${S.msg.sortiesErr ? 'errtxt' : 'sub'}" role="status">${esc(S.msg.sorties)}</p>` : ''}</section>`;
+}
+
+/* ============================================================
+   Synchro Strava par l'API (version en ligne seulement)
+   - « Connecter Strava » envoie sur la page d'autorisation de Strava, qui revient sur l'appli avec un code ;
+     le relais (relais-strava/worker.js, qui garde le secret client) l'échange contre des jetons.
+   - Les jetons restent sur cet appareil, sous une clé à part (jamais dans un profil exporté).
+   - La synchro lit les activités depuis la dernière sortie importée et les passe dans le même import
+     que les fichiers de sorties (09c-sorties.js) : séances cochées, courses, sorties libres, sans doublon.
+   ============================================================ */
+const STRAVA_KEY = KEY + '-strava';
+const STRAVA_API = 'https://www.strava.com/api/v3';
+const STRAVA_SYNC_EVERY = 30 * 60 * 1000; // synchro automatique à l'ouverture, au plus toutes les 30 min
+
+function stravaReady() { return !!(STRAVA_CLIENT_ID && STRAVA_RELAY) && isWeb(); }
+function stravaTok() { try { return JSON.parse(localStorage.getItem(STRAVA_KEY) || 'null'); } catch (e) { return null; } }
+function stravaSaveTok(t) { try { if (t) localStorage.setItem(STRAVA_KEY, JSON.stringify(t)); else localStorage.removeItem(STRAVA_KEY); } catch (e) { /* stockage bloqué : storeBanner prévient */ } }
+function stravaRedirect() { return location.origin + location.pathname.replace(/index\.html$/, ''); }
+
+/* ----- Conversion d'une activité de l'API (SummaryActivity) au format « sorties » ----- */
+// Même règles que outils/strava-vers-appli.py (import par fichier).
+const STRAVA_GENERIC = /^(course à pied|evening run|morning run|lunch run|afternoon run|night run|entraînement aux poids|vélo elliptique|gravel|rameur|vélo|sortie à vélo|marche|randonnée|natation)\b/i;
+const STRAVA_RACE_NAME = /\b(semi|marathon|10 ?km|5 ?km|trail|corrida|foulées|course de|cross)\b/i;
+const STRAVA_WORKOUT = /(\d+\s*x\s*\d+|fraction|vma|allure|seuil|piste|côtes|cotes|tempo|\d{3,5}\s*\/\s*\d{3,5})/i;
+const STRAVA_STD = [5, 10, 21.0975, 42.195];
+const STRAVA_SPORT = { Run: 'run', VirtualRun: 'run', TrailRun: 'trail', Ride: 'velo', GravelRide: 'velo', MountainBikeRide: 'velo', VirtualRide: 'velo', EBikeRide: 'velo', Swim: 'natation', WeightTraining: 'renfo', Workout: 'renfo', Crossfit: 'renfo', Yoga: 'renfo', Pilates: 'renfo' };
+function stravaSnap(km) { const s = STRAVA_STD.find((x) => Math.abs(km - x) / x < 0.035); return s || Math.round(km * 100) / 100; }
+function stravaToSortie(a) {
+  const km = (a.distance || 0) / 1000;
+  const name = (a.name || '').trim(), desc = (a.description || '').trim();
+  const sport = a.sport_type || a.type || '';
+  const kind = STRAVA_SPORT[sport] || 'autre';
+  const std = STRAVA_STD.some((x) => km && Math.abs(km - x) / x < 0.035);
+  // workout_type 1 = « Course » cochée sur Strava (course à pied)
+  const race = (sport === 'Run' || sport === 'TrailRun') && (a.workout_type === 1 || (STRAVA_RACE_NAME.test(name) && std));
+  const type = race ? 'course' : kind === 'run' ? (km >= 18 ? 'long' : STRAVA_WORKOUT.test(name + ' ' + desc) ? 'fractionne' : 'footing') : kind;
+  let title = STRAVA_GENERIC.test(name) ? '' : name;
+  if (sport === 'VirtualRun' && !title) title = 'Tapis';
+  if (kind === 'autre' && !title) title = name;
+  const local = a.start_date_local || '';
+  return {
+    sid: String(a.id), date: local.slice(0, 10), time: local.slice(11, 16), sport, run: kind === 'run' || kind === 'trail', type, title, note: desc,
+    km: km ? Math.round(km * 100) / 100 : null, sec: a.moving_time || 0, elapsed: a.elapsed_time || 0,
+    dplus: Math.round(a.total_elevation_gain || 0) || null, race: !!race, raceKm: race ? stravaSnap(km) : null, where: a.location_city || '',
+  };
+}
+
+/* ----- Connexion ----- */
+function stravaConnect() {
+  const state = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  try { sessionStorage.setItem(STRAVA_KEY + '-state', state); } catch (e) { /* rien */ }
+  const q = new URLSearchParams({ client_id: STRAVA_CLIENT_ID, response_type: 'code', redirect_uri: stravaRedirect(), approval_prompt: 'auto', scope: 'read,activity:read_all', state });
+  location.assign('https://www.strava.com/oauth/authorize?' + q.toString());
+}
+async function stravaRelay(route, body) {
+  const r = await fetch(STRAVA_RELAY.replace(/\/$/, '') + route, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(d.error || 'relais injoignable'); e.auth = r.status === 401; throw e; }
+  return d;
+}
+// Retour de la page d'autorisation de Strava : ?code=…&scope=…&state=… (ou ?error=access_denied)
+async function stravaCallback() {
+  const q = new URLSearchParams(location.search);
+  if (!q.has('code') && !q.has('error')) return false;
+  let expected = null;
+  try { expected = sessionStorage.getItem(STRAVA_KEY + '-state'); sessionStorage.removeItem(STRAVA_KEY + '-state'); } catch (e) { /* rien */ }
+  history.replaceState(null, '', stravaRedirect()); // l'adresse redevient propre (le code ne sert qu'une fois)
+  S.ui.view = 'profile';
+  if (q.get('error')) { S.msg.strava = 'Connexion à Strava annulée.'; S.msg.stravaErr = true; render(); return true; }
+  if (!expected || q.get('state') !== expected) { S.msg.strava = 'Connexion refusée : la réponse de Strava ne correspond pas à ta demande. Réessaie.'; S.msg.stravaErr = true; render(); return true; }
+  if (!/activity:read/.test(q.get('scope') || '')) { S.msg.strava = 'Strava n\'a pas donné accès à tes activités : reconnecte-toi en laissant cochée la case « Voir les données de vos activités ».'; S.msg.stravaErr = true; render(); return true; }
+  S.strava.busy = true; S.msg.strava = 'Connexion à Strava…'; S.msg.stravaErr = false; render();
+  try {
+    const t = await stravaRelay('/token', { code: q.get('code') });
+    stravaSaveTok({ access_token: t.access_token, refresh_token: t.refresh_token, expires_at: t.expires_at, name: (t.athlete && t.athlete.firstname) || '', lastSync: 0 });
+    S.strava.busy = false;
+    await stravaSync(false);
+  } catch (e) {
+    S.strava.busy = false; S.msg.strava = 'Connexion impossible : ' + e.message + '.'; S.msg.stravaErr = true; render();
+  }
+  return true;
+}
+async function stravaAccess() {
+  const t = stravaTok();
+  if (!t) throw Object.assign(new Error('pas connecté'), { auth: true });
+  if (t.expires_at && t.expires_at - 120 > Date.now() / 1000) return t.access_token;
+  const n = await stravaRelay('/refresh', { refresh_token: t.refresh_token });
+  stravaSaveTok(Object.assign(t, { access_token: n.access_token, refresh_token: n.refresh_token || t.refresh_token, expires_at: n.expires_at }));
+  return n.access_token;
+}
+async function stravaGet(path) {
+  const r = await fetch(STRAVA_API + path, { headers: { Authorization: 'Bearer ' + (await stravaAccess()) } });
+  if (r.status === 401) throw Object.assign(new Error('accès retiré'), { auth: true });
+  if (r.status === 429) throw new Error('trop de demandes à Strava pour l\'instant, réessaie dans un quart d\'heure');
+  if (!r.ok) throw new Error('Strava ne répond pas (' + r.status + ')');
+  return r.json();
+}
+// Début de la synchro : 3 jours avant la dernière sortie importée (activités envoyées en retard), sinon le 1er janvier.
+function stravaSince() {
+  const from = S.profile.sortiesUntil ? addDays(S.profile.sortiesUntil, -3) : TODAY.slice(0, 4) + '-01-01';
+  return Math.floor(new Date(from + 'T00:00:00').getTime() / 1000);
+}
+
+/* ----- Synchro ----- */
+async function stravaSync(quiet) {
+  if (S.strava.busy || !stravaTok()) return;
+  S.strava.busy = true;
+  if (!quiet) { S.msg.strava = 'Synchro en cours…'; S.msg.stravaErr = false; render(); }
+  try {
+    const acts = [];
+    for (let page = 1; page <= 20; page++) {
+      const list = await stravaGet('/athlete/activities?after=' + stravaSince() + '&per_page=100&page=' + page);
+      acts.push.apply(acts, list);
+      if (list.length < 100) break;
+    }
+    const t = stravaTok(); if (t) { t.lastSync = Date.now(); stravaSaveTok(t); }
+    S.strava.busy = false;
+    const raw = { app: 'appli-marathon', kind: 'sorties', source: 'Strava', activities: acts.map(stravaToSortie).filter((a) => a.date) };
+    const seen = knownSids();
+    if (!raw.activities.some((a) => !seen.has(a.sid))) { if (!quiet) { S.msg.strava = 'À jour : rien de nouveau sur Strava.'; render(); } return; }
+    withUndo('Sorties Strava ajoutées', () => { const r = importSorties(raw); S.msg.strava = sortiesMsg(r); S.msg.stravaErr = false; render(); });
+  } catch (e) {
+    S.strava.busy = false;
+    if (e.auth) { stravaSaveTok(null); S.msg.strava = 'Strava a retiré l\'accès de l\'appli : reconnecte-toi.'; }
+    else S.msg.strava = 'Synchro impossible : ' + e.message + '.';
+    S.msg.stravaErr = true;
+    if (!quiet || e.auth) render();
+  }
+}
+async function stravaOff() {
+  const t = stravaTok();
+  stravaSaveTok(null);
+  S.msg.strava = 'Strava déconnecté. Les sorties déjà importées restent dans l\'appli.'; S.msg.stravaErr = false; render();
+  if (t) { try { await stravaRelay('/deauthorize', { access_token: t.access_token }); } catch (e) { /* déjà retiré côté Strava */ } }
+}
+
+/* ----- Affichage (dans la carte « Sorties de la montre ») ----- */
+function stravaBlockHTML() {
+  if (!STRAVA_CLIENT_ID || !STRAVA_RELAY) return '';
+  if (!isWeb()) return '<p class="sub">La synchro automatique avec Strava se fait dans la version en ligne de l\'appli (Paramètres › Version en ligne).</p>';
+  const t = stravaTok();
+  const last = t && t.lastSync ? new Date(t.lastSync) : null;
+  const msg = S.msg.strava ? `<p class="${S.msg.stravaErr ? 'errtxt' : 'sub'}" role="status">${esc(S.msg.strava)}</p>` : '';
+  if (!t) {
+    return `<div class="stravabox stack"><div class="row"><button class="btn strava" data-act="stravaconnect"${S.strava.busy ? ' disabled' : ''}>Connecter Strava</button></div>
+      <p class="sub">Tes nouvelles sorties arrivent toutes seules à chaque ouverture de l'appli. Strava te demande ton accord ; tu peux couper l'accès à tout moment.</p>${msg}</div>`;
+  }
+  return `<div class="stravabox stack"><p class="sub"><strong>Connecté à Strava${t.name ? ' (' + esc(t.name) + ')' : ''}</strong>${last ? ' · dernière synchro le ' + esc(frDate(last.toISOString().slice(0, 10))) + ' à ' + esc(last.toTimeString().slice(0, 5)) : ''}</p>
+    <div class="row"><button class="btn small primary" data-act="stravasync"${S.strava.busy ? ' disabled' : ''}>${S.strava.busy ? 'Synchro…' : 'Synchroniser'}</button><button class="btn small" data-act="stravaoff"${S.strava.busy ? ' disabled' : ''}>Déconnecter</button></div>${msg}
+    <p class="sub stravacredit">Données fournies par Strava</p></div>`;
+}
+
+/* ----- Au démarrage ----- */
+S.strava = { busy: false };
+if (stravaReady()) {
+  setTimeout(() => {
+    stravaCallback().then((handled) => {
+      const t = stravaTok();
+      if (!handled && t && Date.now() - (t.lastSync || 0) > STRAVA_SYNC_EVERY) stravaSync(true);
+    });
+  }, 0);
+  // l'appli installée reste ouverte en arrière-plan : on resynchronise quand elle revient au premier plan
+  document.addEventListener('visibilitychange', () => {
+    const t = stravaTok();
+    if (document.visibilityState === 'visible' && t && Date.now() - (t.lastSync || 0) > STRAVA_SYNC_EVERY) stravaSync(true);
+  });
 }
 
 /* ============================================================
@@ -3715,6 +3891,9 @@ document.addEventListener('click', (ev) => {
     case 'ctaoff': { const up = entryOf(el.dataset.id) || upcomingRace(); S.ctaOff = up ? up.id + ':' + up.plan.raceDate : true; saveStore(); render(); break; }
     case 'remindlater': S.remindUntil = addDays(TODAY, 7); saveStore(); render(); break;
     case 'webupdate': webUpdate(); break;
+    case 'stravaconnect': stravaConnect(); break;
+    case 'stravasync': stravaSync(false); break;
+    case 'stravaoff': stravaOff(); break;
     case 'webinstall': webInstall(); break;
     case 'webinstalloff': webInstallOff(); break;
     case 'htmlcoach': saveHtmlCopy(true); break;

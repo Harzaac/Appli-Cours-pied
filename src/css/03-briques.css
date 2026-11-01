@@ -89,3 +89,9 @@ input[type="date"] { font: inherit; border: 1px solid var(--line); background: v
 @media print { #toast { display: none; } }
 #toast.act { pointer-events: auto; }
 .toastbtn { margin-left: 6px; border: 0; background: none; color: var(--mint); font: inherit; font-weight: 800; text-decoration: underline; cursor: pointer; padding: 4px 2px; }
+
+/* Synchro Strava : bouton à la couleur de Strava (charte de marque) */
+.btn.strava { background: #FC5200; color: #fff; border-color: transparent; font-weight: 700; }
+.btn.strava:hover { filter: brightness(1.06); }
+.stravabox { gap: 8px; }
+.stravacredit { font-size: 12px; }

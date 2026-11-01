@@ -1,0 +1,9 @@
+# Déploiement en ligne de commande (facultatif) : npx wrangler deploy  (depuis ce dossier)
+# Le secret se règle à part : npx wrangler secret put STRAVA_CLIENT_SECRET
+name = "relais-strava-achv"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+ALLOWED_ORIGINS = "https://harzaac.github.io"
+# STRAVA_CLIENT_ID = "123456"   <- à remplir avec l'ID client de l'appli Strava
