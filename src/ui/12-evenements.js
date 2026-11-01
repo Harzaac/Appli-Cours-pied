@@ -114,6 +114,13 @@ document.addEventListener('change', (ev) => {
   const t = ev.target;
   if (t.id === 'plan-select') { showPlan(t.value); render(); return; }
   if (t.id === 'imp-race') { if (/^\d{4}-\d{2}-\d{2}$/.test(t.value)) S.imp.raceDate = t.value; render(); return; }
+  if (t.id === 'split-km') { S.ui.split = { km: Number(t.value) }; S.msg.split = ''; render(); return; }
+  if (t.id === 'split-time') {
+    const km = Number((document.getElementById('split-km') || {}).value), sec = parseChrono(t.value);
+    if (sec == null || sec < km * 120 || sec > km * 900) S.msg.split = "Le chrono doit ressembler à 3h25'00, 1h35 ou 45'30.";
+    else { S.msg.split = ''; S.ui.split = { km, sec }; }
+    render(); return;
+  }
   if (t.id === 'imp-keep') { S.imp.keep = t.checked; render(); return; }
   if (t.id === 'file-xlsx' && t.files && t.files[0]) { const f = t.files[0]; t.value = ''; importFile(f); return; }
   if (/^wx-(wind|rain|hot|cold)$/.test(t.id)) {
@@ -231,7 +238,7 @@ document.addEventListener('keydown', (ev) => {
   if (ev.key === 'Escape' && (S.ui.crestMenu || S.ui.avMenu)) { S.ui.crestMenu = false; S.ui.avMenu = false; render(); return; }
   if (ev.key === 'Escape' && S.ui.moving) { S.ui.moving = null; render(); return; }
   if (ev.key === 'Escape' && S.ui.modal) { S.ui.modal = null; S.ui.logEdit = null; renderModal(); }
-  if (ev.key === 'Enter' && (ev.target.id === 'vma-input' || ev.target.id === 'target-input' || ev.target.id === 'caut-km' || ev.target.id === 'caut-d' || ev.target.id === 'caut-pace')) ev.target.blur();
+  if (ev.key === 'Enter' && (ev.target.id === 'vma-input' || ev.target.id === 'split-time' || ev.target.id === 'target-input' || ev.target.id === 'caut-km' || ev.target.id === 'caut-d' || ev.target.id === 'caut-pace')) ev.target.blur();
 });
 
 rebuildIndex();

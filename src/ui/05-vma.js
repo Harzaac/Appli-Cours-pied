@@ -40,7 +40,7 @@ function predictionHTML(vma) {
     const fast = d.km / (vma * d.hi / 100) * 3600, slow = d.km / (vma * d.lo / 100) * 3600;
     const rg = ref ? riegel(ref.sec, ref.km, d.km) : null;
     const same = ref && Math.abs(ref.km - d.km) < 0.01;
-    return `<tr${d.km === MARATHON_KM ? ' class="hl"' : ''}><td>${d.name}</td><td class="num">${fmtHMS(fast)} – ${fmtHMS(slow)}</td><td class="num">${rg ? (same ? '<strong>' + fmtHMS(ref.sec) + '</strong> réalisé' : fmtHMS(rg)) + '<span class="cellsub">' + fmtPace(rg / d.km) + '/km</span>' : '–'}</td></tr>`;
+    return `<tr${d.km === MARATHON_KM ? ' class="hl"' : ''}><td>${d.name}</td><td class="num rlo">${fmtHMS(fast)} –</td><td class="num rhi">${fmtHMS(slow)}</td><td class="num">${rg ? (same ? '<strong>' + fmtHMS(ref.sec) + '</strong> réalisé' : fmtHMS(rg)) + '<span class="cellsub">' + fmtPace(rg / d.km) + '/km</span>' : '–'}</td></tr>`;
   }).join('');
   let vmaEq = '';
   if (ref) {
@@ -50,7 +50,7 @@ function predictionHTML(vma) {
   }
   const curKm = ref ? ref.km : MARATHON_KM;
   return `<section class="card stack"><div><h2>Prédictions de course</h2><p class="sub">Des estimations, pas des promesses : la forme du jour, le parcours et la météo comptent beaucoup.</p></div>
-    <div class="tablewrap"><table><thead><tr><th>Distance</th><th>Selon ta VMA</th><th>Selon ${ref ? 'ta course' : 'une course'}</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="tablewrap"><table><thead><tr><th>Distance</th><th colspan="2">Selon ta VMA</th><th>Selon ${ref ? 'ta course' : 'une course'}</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="sub"><strong>Selon ta VMA</strong> : la part de VMA que tiennent en général les coureurs entraînés sur chaque distance. <strong>Selon ta course</strong> : la formule de Riegel, qui extrapole un chrono réel vers les autres distances (plus fiable quand la distance est proche).</p>
     <div class="stack" style="gap:8px"><strong>Course de référence</strong>
       <p class="sub">${ref ? esc(refName) + ' en ' + esc(fmtHMS(ref.sec)) + (ref.label ? ' · ' + esc(ref.label) : '') : 'Aucune pour l\'instant : saisis un chrono récent, ou ton résultat le jour de ta course.'}</p>
@@ -59,6 +59,37 @@ function predictionHTML(vma) {
         <div class="field"><label for="ref-time">Chrono</label><input type="text" id="ref-time" placeholder="ex. 3h25'00 ou 45'30" autocomplete="off"></div></div>
       <div class="row"><button class="btn small" data-act="refset">Utiliser ce chrono</button>${ref && ref.manual ? '<button class="btn small" data-act="refclear">Revenir à mon dernier résultat de course</button>' : ''}</div>
       ${S.msg.ref ? `<p class="errtxt" role="alert">${esc(S.msg.ref)}</p>` : ''}</div></section>`;
+}
+/* ----- Temps de passage pour n'importe quelle distance (allure régulière) ----- */
+// Chrono proposé : l'objectif du plan pour le marathon, sinon la course de référence (Riegel), sinon le milieu de la fourchette VMA.
+function splitDefault(km, vma) {
+  if (Math.abs(km - MARATHON_KM) < 0.01 && S.plan && S.settings && S.settings.targetSec) return S.settings.targetSec;
+  const ref = predRef();
+  if (ref) return Math.round(riegel(ref.sec, ref.km, km));
+  const d = PRED_DISTS.find((x) => Math.abs(x.km - km) < 0.01);
+  return Math.round(km / (vma * (d.lo + d.hi) / 200) * 3600);
+}
+function splitMarks(km) {
+  if (km <= 10.01) return Array.from({ length: Math.round(km) }, (_, i) => i + 1);
+  const out = [];
+  for (let k = 5; k < km; k += 5) out.push(k);
+  if (km > 30) out.splice(out.findIndex((k) => k > 21.0975), 0, 21.0975);
+  out.push(km);
+  return out;
+}
+function splitsHTML(vma) {
+  const sp = S.ui.split || {};
+  const km = PRED_DISTS.some((d) => Math.abs(d.km - sp.km) < 0.01) ? sp.km : (predRef() ? PRED_DISTS.reduce((a, d) => (Math.abs(d.km - predRef().km) < Math.abs(a.km - predRef().km) ? d : a)).km : MARATHON_KM);
+  const sec = sp.sec && sp.km === km ? sp.sec : splitDefault(km, vma);
+  const pace = sec / km;
+  const lab = (k) => Math.abs(k - 21.0975) < 0.01 && km > 30 ? 'Semi' : Math.abs(k - km) < 0.01 ? 'Arrivée' : String(k).replace('.', ',') + ' km';
+  const rows = splitMarks(km).map((k) => `<tr${Math.abs(k - km) < 0.01 ? ' class="hl"' : ''}><td>${lab(k)}</td><td class="num">${fmtHMS(k * pace)}</td></tr>`).join('');
+  return `<section class="card stack"><div><h2>Temps de passage</h2><p class="sub">Pour n'importe quelle distance, à allure régulière. Le plan de course complet (départ prudent, ravitaillements) est dans l'onglet Course quand un plan a une date de course.</p></div>
+    <div class="fields"><div class="field"><label for="split-km">Distance</label><select id="split-km">${PRED_DISTS.map((d) => `<option value="${d.km}"${Math.abs(d.km - km) < 0.01 ? ' selected' : ''}>${d.name}</option>`).join('')}</select></div>
+      <div class="field"><label for="split-time">Chrono visé</label><input type="text" id="split-time" value="${esc(fmtHMS(sec))}" autocomplete="off" placeholder="ex. 3h25'00 ou 45'30"></div></div>
+    ${S.msg.split ? `<p class="errtxt" role="alert">${esc(S.msg.split)}</p>` : ''}
+    <p class="sub">Allure : <strong class="num">${fmtPace(pace)}/km</strong> · ${fmtVma(Math.round(km / sec * 3600 * 10) / 10)} km/h · ${Math.round(km / sec * 3600 / vma * 100)} % de ta VMA</p>
+    <div class="tablewrap"><table><thead><tr><th>Repère</th><th>Passage</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
 }
 /* ----- cases mises en avant dans le tableau VMA ----- */
 const VC_NAMES = { 'vc-green': 'vert', 'vc-yellow': 'jaune', 'vc-orange': 'orange', 'vc-red': 'rouge', 'vc-blue': 'bleu', 'vc-violet': 'violet', 'vc-dark': 'gris foncé' };
@@ -143,6 +174,7 @@ function vmaView() {
       </div>
       ${S.plan ? '<div><button class="btn small" data-act="resetvals">Revenir aux valeurs du fichier du coach</button></div>' : ''}</section>
     ${predictionHTML(vma)}
+    ${splitsHTML(vma)}
     ${vmaTestsHTML()}
     ${refs ? `<section class="card stack"><div><h2>Références du plan</h2><p class="sub">Les temps réalisés et les objectifs notés par le coach dans le fichier, recalculés avec ta VMA.</p></div>
       <div class="tablewrap"><table><thead><tr><th>Distance</th><th>Réalisé</th><th>% VMA</th><th>Objectif</th><th>% VMA</th></tr></thead><tbody>${refs}</tbody></table></div></section>` : ''}
